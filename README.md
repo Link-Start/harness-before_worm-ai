@@ -16,13 +16,13 @@
 
 当前项目提供一个名为 `abh` 的命令行工具，支持以下能力：
 
-- `plan`：创建、查看和迁移计划状态（6 状态状态机）
+- `plan`：创建、查看、列出和迁移计划状态（6 状态状态机）
 - `verify`：记录验证命令及其结果
-- `audit`：发起和记录独立审计
+- `audit`：发起、记录和列出独立审计
 - `close`：在满足条件后关闭计划
-- `memory`：记录和检索外部化记忆
-- `route`：根据问题输出建议阅读顺序
-- `drift`：识别基础漂移并生成漂移报告
+- `memory`：记录、检索和列出外部化记忆
+- `route`：根据问题输出建议阅读顺序（含活跃计划和相关记忆）
+- `drift`：识别基础漂移并生成漂移报告（支持以计划为基准）
 
 所有命令把结构化数据写入 `.abh/` 目录（JSON），同时同步生成 `docs/` 下的 Markdown 文档，便于回放、审查和复用。
 
@@ -102,6 +102,14 @@ abh plan create \
 abh plan status plan-001
 ```
 
+### 2.1 查看计划列表
+
+列出所有计划及其当前状态：
+
+```bash
+abh plan list
+```
+
 ### 3. 推进计划状态
 
 计划状态机：`draft → ready → running → closing → closed`（`blocked` 为侧岔路）
@@ -147,7 +155,15 @@ abh audit record audit-001 \
 
 `--finding` 格式为 `Severity|Finding|Evidence|Recommendation`，支持多次传入。审计结论可以重复记录（后一次覆盖前一次）。
 
-### 7. 关闭计划
+### 7. 查看审计列表
+
+列出所有审计及其结果：
+
+```bash
+abh audit list
+```
+
+### 8. 关闭计划
 
 关闭条件：计划必须有至少一条通过（`pass`）的审计记录，并且 `closure_evidence` 非空。
 
@@ -155,7 +171,7 @@ abh audit record audit-001 \
 abh close plan-001
 ```
 
-### 8. 记录和检索记忆
+### 9. 记录和检索记忆
 
 记忆用于记录被证伪的假设、被拒绝的路径、发散模式和被推翻的完成判断。
 
@@ -173,13 +189,23 @@ abh memory search --query "漂移"
 
 记忆搜索使用子字符串匹配（不区分大小写）。如需更精确的范围，可以用 `--type` 按类型过滤。
 
-### 9. 路由和漂移分析
+### 10. 列出记忆记录
+
+列出所有记忆记录：
+
+```bash
+abh memory list
+```
+
+### 11. 路由和漂移分析
 
 根据问题输出建议阅读顺序：
 
 ```bash
 abh route --question "Can we close this plan?"
 ```
+
+`route` 现在会自动注入当前正在运行或阻塞中的计划，以及关键词相关的记忆记录，帮助更快定位上下文。
 
 对文本证据做基础漂移分析。先准备一份漂移源文件：
 
@@ -200,6 +226,12 @@ abh memory search --type divergent_pattern --query dependency
 ```
 
 漂移分析基于关键词规则识别四类漂移：边界漂移、依赖漂移、测试漂移和术语漂移。
+
+从 v0.2.0 开始，`drift analyze` 支持 `--plan` 参数，以计划的 non-goals 为基线检测范围违规：
+
+```bash
+abh drift analyze --id drift-002 --source drift-source.txt --plan plan-007
+```
 
 ## 项目结构
 
