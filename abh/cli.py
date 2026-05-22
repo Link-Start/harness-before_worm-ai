@@ -6,12 +6,14 @@ import sys
 from .core import (
     AbhError,
     add_memory,
+    analyze_drift,
     close_plan,
     create_plan,
     plan_status_line,
     record_audit,
     record_verification,
     request_audit,
+    route_question,
     search_memory,
     transition_plan,
     validate_identifier,
@@ -100,6 +102,20 @@ def build_parser() -> argparse.ArgumentParser:
     memory_search.add_argument("--type", choices=["false_assumption", "rejected_path", "divergent_pattern", "overturned_completion"])
     memory_search.add_argument("--query")
     memory_search.set_defaults(handler=handle_memory_search)
+
+    route = subparsers.add_parser("route", help="recommend reading order for a question")
+    route.add_argument("--question", required=True)
+    route.set_defaults(handler=handle_route)
+
+    drift_parser = subparsers.add_parser("drift", help="analyze drift")
+    drift_sub = drift_parser.add_subparsers(dest="drift_command", required=True)
+
+    drift_analyze = drift_sub.add_parser("analyze", help="analyze drift from a text source")
+    drift_analyze.add_argument("--id", required=True)
+    drift_analyze.add_argument("--source", required=True)
+    drift_analyze.add_argument("--evidence", action="append", default=[])
+    drift_analyze.add_argument("--memory-id")
+    drift_analyze.set_defaults(handler=handle_drift_analyze)
 
     return parser
 
@@ -198,6 +214,29 @@ def handle_memory_search(args: argparse.Namespace) -> int:
     results = search_memory(memory_type=args.type, query=args.query)
     for memory in results:
         print(f"{memory.id} [{memory.memory_type}] {memory.summary}")
+    return 0
+
+
+def handle_route(args: argparse.Namespace) -> int:
+    result = route_question(args.question)
+    print(f"Route: {result['route']}")
+    print("Reading order:")
+    for item in result["reading_order"]:
+        print(f"- {item}")
+    print(f"Rationale: {result['rationale']}")
+    return 0
+
+
+def handle_drift_analyze(args: argparse.Namespace) -> int:
+    report = analyze_drift(
+        drift_id=args.id,
+        source=args.source,
+        evidence=args.evidence,
+        memory_id=args.memory_id,
+    )
+    print(f"drift report {report.id}")
+    for finding in report.findings:
+        print(f"- {finding.drift_type}: {finding.evidence}")
     return 0
 
 

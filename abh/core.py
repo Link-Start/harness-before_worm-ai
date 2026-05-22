@@ -6,11 +6,14 @@ from pathlib import Path
 
 from .models import (
     AUDIT_RESULTS,
+    DRIFT_TYPES,
     MEMORY_TYPES,
     PLAN_STATUSES,
     VERIFICATION_RESULTS,
     AuditFinding,
     AuditRecord,
+    DriftFinding,
+    DriftReport,
     MemoryRecord,
     PlanRecord,
     VerificationRun,
@@ -20,6 +23,8 @@ from .storage import (
     audit_doc_path,
     audit_json_path,
     audits_dir,
+    drift_doc_path,
+    drift_json_path,
     ensure_workspace,
     memory_doc_path,
     memory_json_path,
@@ -502,4 +507,183 @@ def render_memory_markdown(memory: MemoryRecord) -> str:
         f"{memory.implication}\n\n"
         "## Deprecation Policy\n\n"
         f"{memory.deprecation_policy}\n"
+    )
+
+
+ROUTES: dict[str, dict[str, object]] = {
+    "completion_audit": {
+        "keywords": ("close", "closed", "completion", "完成", "关闭", "验收", "审计", "audit"),
+        "reading_order": [
+            "docs/plans/",
+            "docs/audits/",
+            "docs/memory/",
+            "tests/",
+            "abh/",
+        ],
+        "rationale": "Completion questions are decided by plan criteria, independent audit, memory, tests, and code evidence.",
+    },
+    "implementation": {
+        "keywords": ("implement", "code", "cli", "命令", "实现", "开发"),
+        "reading_order": [
+            "docs/architecture/attractors/",
+            "docs/plans/",
+            "abh/",
+            "tests/",
+        ],
+        "rationale": "Implementation questions should start from attractor and plan intent, then inspect code and tests.",
+    },
+    "drift": {
+        "keywords": ("drift", "偏离", "漂移", "scope", "boundary", "dependency", "术语"),
+        "reading_order": [
+            "docs/architecture/attractors/",
+            "docs/plans/",
+            "docs/memory/",
+            "docs/drift/",
+            "abh/",
+        ],
+        "rationale": "Drift questions compare the attractor and plan against observed changes and prior memory.",
+    },
+}
+
+
+def route_question(question: str) -> dict[str, object]:
+    text = question.lower()
+    for route_name, route in ROUTES.items():
+        if any(keyword.lower() in text for keyword in route["keywords"]):
+            return {
+                "route": route_name,
+                "reading_order": list(route["reading_order"]),
+                "rationale": route["rationale"],
+            }
+    return {
+        "route": "general",
+        "reading_order": [
+            "docs/architecture/attractors/",
+            "docs/plans/",
+            "docs/audits/",
+            "docs/memory/",
+            "abh/",
+            "tests/",
+        ],
+        "rationale": "General questions should be grounded in attractor, plan, audit, memory, code, and tests.",
+    }
+
+
+DRIFT_RULES: dict[str, dict[str, object]] = {
+    "boundary_drift": {
+        "keywords": ("boundary", "module boundary", "moved", "mixed", "plan manager", "audit logic", "边界", "混入"),
+        "recommendation": "Create a follow-up to restore ownership boundaries or update the attractor if the boundary changed intentionally.",
+    },
+    "dependency_drift": {
+        "keywords": ("dependency", "database", "remote", "external", "service", "package", "依赖", "数据库", "外部"),
+        "recommendation": "Review plan non-goals and dependency rules before accepting the new dependency.",
+    },
+    "test_drift": {
+        "keywords": ("skip test", "skipped tests", "without tests", "no test", "测试跳过", "未测试"),
+        "recommendation": "Add or restore verification coverage before closing the plan.",
+    },
+    "terminology_drift": {
+        "keywords": ("renamed", "terminology", "term", "prepared", "ready", "术语", "重命名"),
+        "recommendation": "Align terminology with canonical docs or record an explicit migration.",
+    },
+}
+
+
+def analyze_drift_text(text: str) -> list[DriftFinding]:
+    lowered = text.lower()
+    findings: list[DriftFinding] = []
+    for drift_type, rule in DRIFT_RULES.items():
+        matched = [keyword for keyword in rule["keywords"] if keyword.lower() in lowered]
+        if matched:
+            findings.append(
+                DriftFinding(
+                    drift_type=drift_type,
+                    evidence=f"matched keywords: {', '.join(matched)}",
+                    recommendation=str(rule["recommendation"]),
+                )
+            )
+    return findings
+
+
+def save_drift_report(report: DriftReport, cwd: Path | None = None, write_doc: bool = True) -> DriftReport:
+    ensure_workspace(cwd)
+    report.updated_at = utc_now()
+    if write_doc:
+        doc_path = report.doc_path or str(drift_doc_path(report.id, cwd))
+        report.doc_path = doc_path
+        doc_file = Path(doc_path)
+        doc_file.parent.mkdir(parents=True, exist_ok=True)
+        doc_file.write_text(render_drift_markdown(report), encoding="utf-8")
+    write_json(drift_json_path(report.id, cwd), report.to_dict())
+    return report
+
+
+def analyze_drift(
+    *,
+    drift_id: str,
+    source: str,
+    evidence: list[str] | None = None,
+    memory_id: str | None = None,
+    cwd: Path | None = None,
+) -> DriftReport:
+    validate_identifier(drift_id, "drift id")
+    source_path = Path(source)
+    if not source_path.exists():
+        raise AbhError(f"drift source not found: {source}")
+    source_text = source_path.read_text(encoding="utf-8")
+    findings = analyze_drift_text(source_text)
+    follow_ups = [finding.recommendation for finding in findings]
+    report = DriftReport(
+        id=drift_id,
+        source=source,
+        findings=findings,
+        evidence=list(evidence or [source]),
+        follow_ups=follow_ups,
+        doc_path=str(drift_doc_path(drift_id, cwd)),
+    )
+    save_drift_report(report, cwd)
+    if memory_id:
+        if not findings:
+            raise AbhError("cannot write drift memory without drift findings")
+        add_memory(
+            memory_id=memory_id,
+            memory_type="divergent_pattern",
+            summary=f"Drift report {drift_id}: {', '.join(finding.drift_type for finding in findings)}",
+            context=f"Drift source: {source}",
+            implication="Use these drift patterns to route follow-up plans before closure.",
+            evidence=[str(drift_doc_path(drift_id, cwd))],
+            related=[drift_id],
+            cwd=cwd,
+        )
+    return report
+
+
+def render_drift_markdown(report: DriftReport) -> str:
+    def bullet_lines(values: list[str]) -> str:
+        if not values:
+            return "- "
+        return "\n".join(f"- {value}" for value in values)
+
+    if report.findings:
+        finding_lines = "\n".join(
+            f"| {finding.drift_type} | {finding.evidence} | {finding.recommendation} |"
+            for finding in report.findings
+        )
+    else:
+        finding_lines = "|  |  |  |"
+    return (
+        f"# Drift: {report.id}\n\n"
+        "## Metadata\n\n"
+        f"- ID: {report.id}\n"
+        f"- Source: {report.source}\n"
+        f"- Created: {report.created_at}\n"
+        f"- Updated: {report.updated_at}\n\n"
+        "## Evidence\n\n"
+        f"{bullet_lines(report.evidence)}\n\n"
+        "## Findings\n\n"
+        "| Type | Evidence | Recommendation |\n"
+        "| --- | --- | --- |\n"
+        f"{finding_lines}\n\n"
+        "## Follow-Ups\n\n"
+        f"{bullet_lines(report.follow_ups)}\n"
     )

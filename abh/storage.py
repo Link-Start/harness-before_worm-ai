@@ -29,6 +29,10 @@ def memory_dir(cwd: Path | None = None) -> Path:
     return abh_dir(cwd) / "memory"
 
 
+def drift_dir(cwd: Path | None = None) -> Path:
+    return abh_dir(cwd) / "drift"
+
+
 def docs_dir(cwd: Path | None = None) -> Path:
     return root_dir(cwd) / "docs"
 
@@ -43,6 +47,10 @@ def docs_audits_dir(cwd: Path | None = None) -> Path:
 
 def docs_memory_dir(cwd: Path | None = None) -> Path:
     return docs_dir(cwd) / "memory"
+
+
+def docs_drift_dir(cwd: Path | None = None) -> Path:
+    return docs_dir(cwd) / "drift"
 
 
 def plan_json_path(plan_id: str, cwd: Path | None = None) -> Path:
@@ -73,6 +81,14 @@ def memory_doc_path(memory_id: str, cwd: Path | None = None) -> Path:
     return docs_memory_dir(cwd) / f"{memory_id}.md"
 
 
+def drift_json_path(drift_id: str, cwd: Path | None = None) -> Path:
+    return drift_dir(cwd) / f"{drift_id}.json"
+
+
+def drift_doc_path(drift_id: str, cwd: Path | None = None) -> Path:
+    return docs_drift_dir(cwd) / f"{drift_id}.md"
+
+
 def ensure_workspace(cwd: Path | None = None) -> None:
     for directory in (
         abh_dir(cwd),
@@ -80,9 +96,11 @@ def ensure_workspace(cwd: Path | None = None) -> None:
         verifications_dir(cwd),
         audits_dir(cwd),
         memory_dir(cwd),
+        drift_dir(cwd),
         docs_plans_dir(cwd),
         docs_audits_dir(cwd),
         docs_memory_dir(cwd),
+        docs_drift_dir(cwd),
     ):
         directory.mkdir(parents=True, exist_ok=True)
 

@@ -55,8 +55,10 @@
 
 | ID | 任务 | 状态 | 产出 |
 | --- | --- | --- | --- |
-| S4-001 | 路由规则设计 | Todo | route rules |
-| S4-002 | Route 命令 | Todo | `abh route` |
-| S4-003 | 漂移分类规则 | Todo | drift taxonomy |
-| S4-004 | Drift 分析命令 | Todo | `abh drift analyze` |
-| S4-005 | 漂移转 follow-up | Todo | follow-up generator |
+| S4-001 | 路由规则设计 | Done | `ROUTES` |
+| S4-002 | Route 命令 | Done | `abh route` |
+| S4-003 | 漂移分类规则 | Done | `DRIFT_RULES` |
+| S4-004 | Drift 分析命令 | Done | `abh drift analyze` |
+| S4-005 | 漂移转 follow-up | Done | drift report follow-ups |
+| S4-006 | Sprint 4 启动计划 | Done | `docs/plans/plan-004-sprint-4-route-drift.md` |
+| S4-007 | Sprint 4 独立审计 | Done | `docs/audits/audit-004-sprint-4-route-drift.md` |

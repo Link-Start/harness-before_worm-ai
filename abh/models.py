@@ -8,6 +8,7 @@ PLAN_STATUSES = ("draft", "ready", "running", "blocked", "closing", "closed")
 VERIFICATION_RESULTS = ("pass", "fail", "partial")
 AUDIT_RESULTS = ("pass", "fail", "partial", "need_info")
 MEMORY_TYPES = ("false_assumption", "rejected_path", "divergent_pattern", "overturned_completion")
+DRIFT_TYPES = ("boundary_drift", "dependency_drift", "test_drift", "terminology_drift")
 
 
 def utc_now() -> str:
@@ -168,6 +169,65 @@ class MemoryRecord:
             related=list(data.get("related", [])),
             evidence=list(data.get("evidence", [])),
             deprecation_policy=data.get("deprecation_policy", "Mark deprecated when evidence no longer applies."),
+            created_at=data.get("created_at", utc_now()),
+            updated_at=data.get("updated_at", utc_now()),
+            doc_path=data.get("doc_path", ""),
+        )
+
+
+@dataclass(slots=True)
+class DriftFinding:
+    drift_type: str
+    evidence: str
+    recommendation: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.drift_type,
+            "evidence": self.evidence,
+            "recommendation": self.recommendation,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "DriftFinding":
+        return cls(
+            drift_type=data["type"],
+            evidence=data["evidence"],
+            recommendation=data["recommendation"],
+        )
+
+
+@dataclass(slots=True)
+class DriftReport:
+    id: str
+    source: str
+    findings: list[DriftFinding] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
+    follow_ups: list[str] = field(default_factory=list)
+    created_at: str = field(default_factory=utc_now)
+    updated_at: str = field(default_factory=utc_now)
+    doc_path: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "source": self.source,
+            "findings": [finding.to_dict() for finding in self.findings],
+            "evidence": list(self.evidence),
+            "follow_ups": list(self.follow_ups),
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+            "doc_path": self.doc_path,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "DriftReport":
+        return cls(
+            id=data["id"],
+            source=data["source"],
+            findings=[DriftFinding.from_dict(item) for item in data.get("findings", [])],
+            evidence=list(data.get("evidence", [])),
+            follow_ups=list(data.get("follow_ups", [])),
             created_at=data.get("created_at", utc_now()),
             updated_at=data.get("updated_at", utc_now()),
             doc_path=data.get("doc_path", ""),

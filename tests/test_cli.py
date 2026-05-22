@@ -288,3 +288,61 @@ class CliTests(TestCase):
         self.assertEqual(code, 0, err)
         self.assertIn("mem-001 [overturned_completion]", out)
         self.assertIn("Audit overturned a premature close", out)
+
+    def test_route_recommends_reading_order_for_close_question(self) -> None:
+        code, out, err = self.run_cli(
+            "route",
+            "--question",
+            "Can we close this plan after the implementation claims completion?",
+        )
+        self.assertEqual(code, 0, err)
+        self.assertIn("Route: completion_audit", out)
+        self.assertIn("docs/plans/", out)
+        self.assertIn("docs/audits/", out)
+        self.assertIn("docs/memory/", out)
+
+    def test_drift_analyze_detects_patterns_and_can_write_memory(self) -> None:
+        drift_source = self.root / "drift-source.txt"
+        drift_source.write_text(
+            "\n".join(
+                [
+                    "Imported a remote database dependency even though the plan said no external database.",
+                    "Moved audit logic into the plan manager boundary.",
+                    "Skipped tests and renamed ready to prepared in documentation.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        code, out, err = self.run_cli(
+            "drift",
+            "analyze",
+            "--id",
+            "drift-001",
+            "--source",
+            str(drift_source),
+            "--evidence",
+            "drift-source.txt",
+            "--memory-id",
+            "mem-drift-001",
+        )
+        self.assertEqual(code, 0, err)
+        self.assertIn("drift-001", out)
+        self.assertIn("boundary_drift", out)
+        self.assertIn("dependency_drift", out)
+        self.assertIn("test_drift", out)
+        self.assertIn("terminology_drift", out)
+        self.assertTrue((self.root / ".abh" / "drift" / "drift-001.json").exists())
+        self.assertTrue((self.root / "docs" / "drift" / "drift-001.md").exists())
+        self.assertTrue((self.root / ".abh" / "memory" / "mem-drift-001.json").exists())
+
+        code, out, err = self.run_cli(
+            "memory",
+            "search",
+            "--type",
+            "divergent_pattern",
+            "--query",
+            "dependency_drift",
+        )
+        self.assertEqual(code, 0, err)
+        self.assertIn("mem-drift-001 [divergent_pattern]", out)
