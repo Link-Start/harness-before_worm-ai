@@ -107,6 +107,25 @@ PYTHONPATH=/path/to/harness-before python3 -m abh --help
 python3 -m unittest tests/test_cli.py
 ```
 
+## 版本策略
+
+项目版本以 `pyproject.toml` 的 `[project].version` 和 `abh.__version__` 为准，两者必须保持一致。README 中声明的新 CLI 能力、安装方式或运行要求发生变化时，必须同步检查版本是否需要提升，并在对应 plan 的 closure evidence 中说明。
+
+当前版本仍为 `0.1.0`，表示本项目处于本地优先的早期治理工具阶段；新增能力可以先通过 Git 安装路径 dogfood，进入稳定发布节奏后再提升到新的公开版本。
+
+## CI 与关闭门禁
+
+仓库 CI 执行以下基础检查：
+
+```bash
+python3 -m unittest tests/test_cli.py -v
+python3 -m abh doctor
+python3 -m abh --help
+python3 -m abh plan list
+```
+
+关闭 plan 前也应运行这些命令，并检查 roadmap、task-board、README 等当前状态文档是否需要同步更新。该要求来自 `mem-post-close-doc-sync-001`，用于避免计划关闭后文档仍停留在旧阶段。
+
 ## 使用教程
 
 ### 1. 创建计划

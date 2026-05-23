@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-Sprint 8：路线同步与工作区一致性检查
+Sprint 10：内核治理硬化
 
 ## 状态说明
 
@@ -108,3 +108,24 @@ Sprint 8：路线同步与工作区一致性检查
 | S8-003 | 为 doctor 补测试 | Done | `tests/test_cli.py` |
 | S8-004 | 同步 README、roadmap、task-board | Done | `README.md`, `docs/development-roadmap.md`, `docs/task-board.md` |
 | S8-005 | 记录验证与独立审计 | Done | `docs/audits/audit-008-roadmap-sync-and-doctor.md` |
+
+## Sprint 9
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S9-001 | 创建 Sprint 9 路线对齐计划 | Done | `docs/plans/plan-009-roadmap-phase-alignment.md` |
+| S9-002 | 将 roadmap 改为历史线 + 长期阶段线 | Done | `docs/development-roadmap.md` |
+| S9-003 | 对齐阶段规划 1-6 | Done | `docs/development-roadmap.md`, `docs/阶段规划.md` |
+| S9-004 | 记录关闭后文档同步 memory | Done | `docs/memory/mem-post-close-doc-sync-001.md` |
+| S9-005 | Sprint 9 独立审计 | Done | `docs/audits/audit-009-roadmap-phase-alignment.md` |
+
+## Sprint 10
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S10-001 | 创建 Sprint 10 内核治理计划 | Done | `docs/plans/plan-010-core-governance-hardening.md` |
+| S10-002 | 清理 plan-200-demo 状态噪音 | Done | `.abh/plans/`, `docs/plans/` |
+| S10-003 | 为新对象加入 schema version | Done | `abh/models.py`, `tests/test_cli.py` |
+| S10-004 | 增加 CI 基础门禁 | Done | `.github/workflows/ci.yml` |
+| S10-005 | 补充版本策略和关闭后文档同步门禁 | Done | `README.md`, `docs/development-roadmap.md` |
+| S10-006 | Sprint 10 独立审计 | Done | `docs/audits/audit-010-core-governance-hardening.md` |

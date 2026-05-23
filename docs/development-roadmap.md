@@ -113,11 +113,11 @@
 
 ## 4. 当前执行焦点
 
-当前准备进入 Sprint 10。
+当前准备进入 Sprint 11。
 
-下一轮建议只追求一个结果：完成阶段 1 剩余的内核治理事项，让项目从“路线对齐完成”进入“治理门禁稳定”。
+下一轮建议只追求一个结果：把验证从人工记录升级为本地执行器，让 plan 的 validation checklist 能被 `abh` 直接运行和记录。
 
-建议计划：`plan-010-core-governance-hardening`。
+建议计划：`plan-011-verify-runner`。
 
 ## 5. 长期阶段线
 
@@ -138,12 +138,12 @@
 
 当前状态：
 
-- 已完成：Sprint 6/7/8 纳入路线、`abh doctor` 第一版、路线图和看板同步。
-- 未完成：清理 `plan-200-demo`、schema/version、CI、版本号发布节奏。
+- 已完成：Sprint 6/7/8 纳入路线、`abh doctor` 第一版、路线图和看板同步、清理 `plan-200-demo`、新对象 schema version、CI 基础门禁、版本策略说明。
+- 未完成：更深的 schema 迁移工具、内容级 doctor 校验、正式发布节奏自动化。
 
 建议后续计划：
 
-- `plan-010-core-governance-hardening`：清理 demo 计划、加入 schema/version、建立 CI 和版本策略。
+- `plan-011-verify-runner`：把验证从人工记录升级为本地执行器。
 
 ### 阶段 2：从“记录验证”升级到“执行验证”
 
@@ -257,7 +257,7 @@
 
 | 长期阶段 | 已完成历史计划 | 已完成内容 | 剩余内容 |
 | --- | --- | --- | --- |
-| 阶段 1：恢复权威基线，稳住内核 | `plan-006-stabilize`, `plan-007-zero-dep-install`, `plan-008-roadmap-sync-and-doctor`, `plan-009-roadmap-phase-alignment` | 历史计划迁移、安装门槛降低、`abh doctor`、路线图对齐 | 清理 demo draft、schema/version、CI、版本号策略 |
+| 阶段 1：恢复权威基线，稳住内核 | `plan-006-stabilize`, `plan-007-zero-dep-install`, `plan-008-roadmap-sync-and-doctor`, `plan-009-roadmap-phase-alignment`, `plan-010-core-governance-hardening` | 历史计划迁移、安装门槛降低、`abh doctor`、路线图对齐、demo 清理、schema version、CI、版本策略 | 内容级 doctor、schema 迁移工具、发布自动化 |
 | 阶段 2：验证执行器 | `plan-002-sprint-2-local-plan-loop` | `verify record` 可记录验证结果 | `verify run`、失败自动证据、plan update、模块拆分 |
 | 阶段 3：Attractor Registry | `plan-001-sprint-1-foundation` | active attractor 文档和模板 | attractor CLI、版本迁移、active 校验 |
 | 阶段 4：真正独立审计 | `plan-003-sprint-3-audit-memory-close`, `plan-007-zero-dep-install`, `plan-008-roadmap-sync-and-doctor` | audit request/record/close 闭环，人工独立审计流程已 dogfood | audit prompt/bundle、独立上下文字段、关闭门禁 |
