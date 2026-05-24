@@ -210,3 +210,14 @@ Sprint 16：阶段 3 Functional Plan（已完成）
 | S16-003 | 同步 README 和 task-board 当前阶段 | Done | `README.md`, `docs/task-board.md` |
 | S16-004 | 校正后续阶段建议 plan 编号 | Done | `docs/development-roadmap.md` |
 | S16-005 | plan-020 验证与独立审计 | Done | `docs/audits/audit-020-stage-3-functional-plan.md` |
+
+## Sprint 17
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S17-001 | 启动 Verification Trust and Stale Detection 计划 | Done | `docs/plans/plan-021-verification-trust-and-stale-detection.md` |
+| S17-002 | 为 verification 记录补充 `trust_level` | Done | `abh/models.py`, `abh/verifications.py` |
+| S17-003 | 在 `plan status --json` 暴露 latest verification freshness 摘要 | Done | `abh/plans.py`, `abh/cli.py` |
+| S17-004 | 补充 trust/stale 回归测试 | Done | `tests/test_cli.py` |
+| S17-005 | 同步阶段 3 文档 | Done | `README.md`, `docs/development-roadmap.md`, `docs/阶段规划.md` |
+| S17-006 | plan-021 验证与独立审计 | Done | `.abh/verifications/ver-4b7d7719a801.json`, `docs/audits/audit-021-verification-trust-and-stale-detection.md` |

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import subprocess
 import tempfile
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
@@ -22,6 +23,7 @@ from abh.core import (
 )
 from abh.models import AuditRecord, DriftReport, MemoryRecord, PlanRecord, VerificationRun
 from abh.storage import drift_json_path, write_json
+from abh.verifications import normalized_git_status
 
 
 class Chdir:
@@ -311,6 +313,55 @@ class CliTests(TestCase):
         self.assertEqual(code, 0, err)
         self.assertIn("plan-102-ready [blocked]", out)
 
+    def test_verify_record_persists_manual_trust_level(self) -> None:
+        code, out, err = self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-111-manual-trust",
+            "--title",
+            "Manual Trust",
+            "--attractor",
+            "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "record manual verification trust",
+            "--non-goal",
+            "execute validation",
+            "--exit-criterion",
+            "manual trust is persisted",
+            "--validation",
+            "python3 -m abh doctor",
+            "--closure-evidence",
+            "docs/plans/plan-111-manual-trust.md",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli(
+            "verify",
+            "record",
+            "plan-111-manual-trust",
+            "--command",
+            "python3 -m abh doctor",
+            "--result",
+            "pass",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli("plan", "status", "plan-111-manual-trust", "--json")
+        self.assertEqual(code, 0, err)
+        plan = json.loads(out)["data"]["plan"]
+        run_path = self.root / ".abh" / "verifications" / f"{plan['verification_runs'][0]}.json"
+        run = json.loads(run_path.read_text(encoding="utf-8"))
+        self.assertEqual(run["trust_level"], "manual_record")
+        summary = json.loads(out)["data"]["verification_summary"]
+        self.assertEqual(summary["trust_level"], "manual_record")
+        self.assertFalse(summary["stale"])
+        self.assertEqual(summary["reasons"], [])
+
     def test_verify_run_executes_validation_checklist_and_records_pass(self) -> None:
         code, out, err = self.run_cli(
             "plan",
@@ -353,6 +404,7 @@ class CliTests(TestCase):
         self.assertEqual(run["failed_checks"], [])
         self.assertIn("python3 -c", run["command"])
         self.assertTrue(any("exit_code=0" in artifact for artifact in run["artifacts"]))
+        self.assertEqual(run["trust_level"], "local_shell")
 
     def test_verify_run_records_failed_check_and_blocks_running_plan(self) -> None:
         code, out, err = self.run_cli(
@@ -480,6 +532,126 @@ class CliTests(TestCase):
         self.assertEqual(environment["commands"][0]["argv"], ["python3", "-c", "print(\"env-ok\")"])
         self.assertIn("environment_variables", environment)
 
+    def test_plan_status_json_reports_latest_verification_trust_and_stale_state(self) -> None:
+        code, out, err = self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-112-stale-summary",
+            "--title",
+            "Stale Summary",
+            "--attractor",
+            "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "report stale summary",
+            "--non-goal",
+            "block stale close",
+            "--exit-criterion",
+            "summary is current after run",
+            "--validation",
+            "python3 -c 'print(\"fresh\")'",
+            "--closure-evidence",
+            "docs/plans/plan-112-stale-summary.md",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli("verify", "run", "plan-112-stale-summary", "--json")
+        self.assertEqual(code, 0, err)
+        run = json.loads(out)["data"]["verification"]
+
+        code, out, err = self.run_cli("plan", "status", "plan-112-stale-summary", "--json")
+        self.assertEqual(code, 0, err)
+        summary = json.loads(out)["data"]["verification_summary"]
+        self.assertEqual(summary["latest_id"], run["id"])
+        self.assertEqual(summary["trust_level"], "local_shell")
+        self.assertFalse(summary["stale"])
+        self.assertEqual(summary["reasons"], [])
+
+        code, out, err = self.run_cli(
+            "plan",
+            "update",
+            "plan-112-stale-summary",
+            "--validation",
+            "python3 -c 'print(\"new-check\")'",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli("plan", "status", "plan-112-stale-summary", "--json")
+        self.assertEqual(code, 0, err)
+        summary = json.loads(out)["data"]["verification_summary"]
+        self.assertEqual(summary["latest_id"], run["id"])
+        self.assertTrue(summary["stale"])
+        self.assertIn("plan_updated_after_verification", summary["reasons"])
+        self.assertIn("validation_checklist_changed", summary["reasons"])
+
+    def test_plan_status_json_marks_latest_verification_stale_when_git_status_changes(self) -> None:
+        subprocess.run(["git", "init"], cwd=self.root, check=True, capture_output=True, text=True)
+        subprocess.run(
+            ["git", "config", "user.email", "abh@example.test"],
+            cwd=self.root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "ABH Test"],
+            cwd=self.root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        tracked = self.root / "tracked.txt"
+        tracked.write_text("before\n", encoding="utf-8")
+        subprocess.run(["git", "add", "tracked.txt"], cwd=self.root, check=True, capture_output=True, text=True)
+        subprocess.run(["git", "commit", "-m", "seed"], cwd=self.root, check=True, capture_output=True, text=True)
+
+        code, out, err = self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-113-git-stale",
+            "--title",
+            "Git Stale",
+            "--attractor",
+            "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "detect git status changes",
+            "--non-goal",
+            "tamper proof evidence",
+            "--exit-criterion",
+            "git status change is stale",
+            "--validation",
+            "python3 -c 'print(\"git-stale\")'",
+            "--closure-evidence",
+            "docs/plans/plan-113-git-stale.md",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli("verify", "run", "plan-113-git-stale", "--json")
+        self.assertEqual(code, 0, err)
+        verification = json.loads(out)["data"]["verification"]
+        self.assertIn("status_hash", verification["environment"]["git"])
+
+        code, out, err = self.run_cli("plan", "status", "plan-113-git-stale", "--json")
+        self.assertEqual(code, 0, err)
+        summary = json.loads(out)["data"]["verification_summary"]
+        self.assertFalse(summary["stale"])
+
+        tracked.write_text("after\n", encoding="utf-8")
+        code, out, err = self.run_cli("plan", "status", "plan-113-git-stale", "--json")
+        self.assertEqual(code, 0, err)
+        summary = json.loads(out)["data"]["verification_summary"]
+        self.assertTrue(summary["stale"])
+        self.assertIn("git_status_changed", summary["reasons"])
+
     def test_verify_run_detects_recursive_self_invocation_command(self) -> None:
         self.assertTrue(
             is_recursive_verify_command(
@@ -539,6 +711,27 @@ class CliTests(TestCase):
             ["python3", "-m", "abh", "verify", "run", "plan-110-recursive-environment"],
         )
         self.assertTrue(any("recursive_verify_guard" in artifact for artifact in verification["artifacts"]))
+
+    def test_git_status_hash_ignores_abh_runtime_evidence_paths(self) -> None:
+        status = "\n".join(
+            [
+                " M .abh/plans/plan-021-verification-trust-and-stale-detection.json",
+                "?? .abh/verifications/ver-runtime.json",
+                "?? docs/plans/plan-021-verification-trust-and-stale-detection.md",
+            ]
+        )
+
+        self.assertEqual(normalized_git_status(status), "")
+
+    def test_git_status_hash_keeps_product_file_changes(self) -> None:
+        status = "\n".join(
+            [
+                " M abh/verifications.py",
+                "?? .abh/verifications/ver-runtime.json",
+            ]
+        )
+
+        self.assertEqual(normalized_git_status(status), " M abh/verifications.py")
 
     def test_invalid_ready_transition_is_rejected(self) -> None:
         code, out, err = self.run_cli(
@@ -996,6 +1189,7 @@ class CliTests(TestCase):
             }
         )
         self.assertEqual(verification.environment, {})
+        self.assertEqual(verification.trust_level, "unknown")
 
         plan = PlanRecord.from_dict(
             {

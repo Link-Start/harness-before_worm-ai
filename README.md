@@ -209,7 +209,9 @@ abh verify run plan-016-verify-runner --json
 
 `verify run` 会按顺序执行计划中的 validation checklist 命令，并把 stdout/stderr 摘要、退出码和耗时写入 verification artifacts。全部命令成功时记录 `pass`；任一命令失败或超时时记录 `fail`，并沿用现有规则阻断 `ready` 或 `running` 计划。
 
-从 `plan-019-verification-environment-metadata` 开始，`verify run` 还会在 verification JSON 中写入结构化 `environment` 元数据，包括 cwd、git commit、dirty status、ABH 版本、Python 版本、timeout、命令 argv 和 allowlisted 环境变量。旧 verification 记录缺少该字段时仍可读取，默认视为空环境快照。`argv` 是从命令字符串派生出的描述性元数据；当前命令仍通过 shell 执行，不应把它理解为真实的 OS exec argv。
+从 `plan-019-verification-environment-metadata` 开始，`verify run` 还会在 verification JSON 中写入结构化 `environment` 元数据，包括 cwd、git commit、dirty status、git status hash、ABH 版本、Python 版本、timeout、命令 argv 和 allowlisted 环境变量。旧 verification 记录缺少该字段时仍可读取，默认视为空环境快照。`argv` 是从命令字符串派生出的描述性元数据；当前命令仍通过 shell 执行，不应把它理解为真实的 OS exec argv。
+
+从 `plan-021-verification-trust-and-stale-detection` 开始，verification JSON 会保存 `trust_level`。人工 `verify record` 默认为 `manual_record`，本地 `verify run` 默认为 `local_shell`，旧记录缺少该字段时读取为 `unknown`。`abh plan status <plan> --json` 会额外返回 `verification_summary`，展示 latest verification 的 `trust_level`、`stale` 和 `reasons`。当前 stale 是风险提示，不会自动阻断 close。
 
 这些 checklist 条目按本地 shell 命令解释执行，适合仓库内受信任的验证命令。当前 MVP 不提供隔离环境、CI runner 或额外确认提示。
 
@@ -394,8 +396,8 @@ python3 -m abh.mcp_server
 
 当前仓库已经覆盖计划、验证、审计、关闭、记忆、路由和基础漂移分析。后续计划：
 
-- 继续推进阶段 3：`plan-016-verify-runner`、`plan-017-plan-update`、`plan-018-core-module-split`、`plan-019-verification-environment-metadata` 和 `plan-020-stage-3-functional-plan` 已完成，下一步进入 `plan-021-verification-trust-and-stale-detection`
-- 阶段 3 剩余队列：`plan-021-verification-trust-and-stale-detection`、`plan-022-verification-failure-classification`、`plan-023-atomic-abh-writes`、`plan-024-memory-drift-routing-module-split`、`plan-025-stage-3-finalization`
+- 继续推进阶段 3：`plan-016-verify-runner`、`plan-017-plan-update`、`plan-018-core-module-split`、`plan-019-verification-environment-metadata`、`plan-020-stage-3-functional-plan` 和 `plan-021-verification-trust-and-stale-detection` 已完成，下一步进入 `plan-022-verification-failure-classification`
+- 阶段 3 剩余队列：`plan-022-verification-failure-classification`、`plan-023-atomic-abh-writes`、`plan-024-memory-drift-routing-module-split`、`plan-025-stage-3-finalization`
 - 提升漂移分析精度：从关键词匹配升级到更高质量的证据提取
 - 增加 `abh report`，展示计划关闭率、审计驳回率和重复漂移情况
 - 支持 Git hook 集成，在提交前自动验证状态一致性

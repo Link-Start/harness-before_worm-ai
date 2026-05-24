@@ -249,11 +249,19 @@ def handle_plan_create(args: argparse.Namespace) -> int:
 
 def handle_plan_status(args: argparse.Namespace) -> int:
     from .core import load_plan
+    from .plans import verification_freshness_summary
 
     validate_identifier(args.plan_id, "plan id")
     plan = load_plan(args.plan_id)
     if args.json:
-        print_json_envelope(ok=True, command=command_name(args), data={"plan": plan.to_dict()})
+        print_json_envelope(
+            ok=True,
+            command=command_name(args),
+            data={
+                "plan": plan.to_dict(),
+                "verification_summary": verification_freshness_summary(plan),
+            },
+        )
         return 0
     print(plan_status_line(plan))
     return 0

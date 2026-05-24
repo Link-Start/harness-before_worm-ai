@@ -6,6 +6,7 @@ from typing import Any
 
 PLAN_STATUSES = ("draft", "ready", "running", "blocked", "closing", "closed")
 VERIFICATION_RESULTS = ("pass", "fail", "partial")
+VERIFICATION_TRUST_LEVELS = ("unknown", "manual_record", "local_shell", "isolated_shell", "ci")
 AUDIT_RESULTS = ("pass", "fail", "partial", "need_info")
 MEMORY_TYPES = ("false_assumption", "rejected_path", "divergent_pattern", "overturned_completion")
 DRIFT_TYPES = ("boundary_drift", "dependency_drift", "test_drift", "terminology_drift")
@@ -25,6 +26,7 @@ class VerificationRun:
     artifacts: list[str] = field(default_factory=list)
     failed_checks: list[str] = field(default_factory=list)
     environment: dict[str, Any] = field(default_factory=dict)
+    trust_level: str = "unknown"
     created_at: str = field(default_factory=utc_now)
 
     def to_dict(self) -> dict[str, Any]:
@@ -37,6 +39,7 @@ class VerificationRun:
             "artifacts": list(self.artifacts),
             "failed_checks": list(self.failed_checks),
             "environment": dict(self.environment),
+            "trust_level": self.trust_level,
             "created_at": self.created_at,
         }
 
@@ -50,6 +53,7 @@ class VerificationRun:
             artifacts=list(data.get("artifacts", [])),
             failed_checks=list(data.get("failed_checks", [])),
             environment=dict(data.get("environment", {})),
+            trust_level=data.get("trust_level", "unknown"),
             created_at=data.get("created_at", utc_now()),
         )
 

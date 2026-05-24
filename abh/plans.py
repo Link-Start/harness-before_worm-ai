@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
+from datetime import datetime
 
 from .errors import AbhError, require_existing_path, validate_identifier
 from .models import PLAN_STATUSES, PlanRecord, utc_now
@@ -21,6 +24,17 @@ ALLOWED_TRANSITIONS: dict[str, set[str]] = {
     "closing": {"closed"},
     "closed": set(),
 }
+
+PLAN_VERIFICATION_FIELDS = (
+    "title",
+    "attractor",
+    "baseline",
+    "goals",
+    "non_goals",
+    "exit_criteria",
+    "validation_checklist",
+    "closure_evidence",
+)
 
 
 def list_plans(cwd: Path | None = None) -> list[PlanRecord]:
@@ -235,3 +249,98 @@ def plan_status_line(plan: PlanRecord) -> str:
         f"latest_verification: {latest}\n"
         f"audits: {len(plan.audit_ids)}"
     )
+
+
+def plan_verification_payload(plan: PlanRecord) -> dict[str, object]:
+    data = plan.to_dict()
+    return {field: data[field] for field in PLAN_VERIFICATION_FIELDS}
+
+
+def plan_verification_hash(plan: PlanRecord) -> str:
+    payload = json.dumps(plan_verification_payload(plan), sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def plan_verification_snapshot(plan: PlanRecord) -> dict[str, object]:
+    return {
+        "updated_at": plan.updated_at,
+        "content_hash": plan_verification_hash(plan),
+        "validation_checklist": list(plan.validation_checklist),
+    }
+
+
+def parse_timestamp(value: str) -> datetime | None:
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def verification_commands(run) -> list[str]:
+    commands = run.environment.get("commands", [])
+    if isinstance(commands, list):
+        values: list[str] = []
+        for item in commands:
+            if isinstance(item, dict) and isinstance(item.get("command"), str):
+                values.append(item["command"])
+        if values:
+            return values
+    return [part.strip() for part in run.command.split(" && ") if part.strip()]
+
+
+def verification_plan_snapshot(run) -> dict[str, object]:
+    plan_snapshot = run.environment.get("plan")
+    return plan_snapshot if isinstance(plan_snapshot, dict) else {}
+
+
+def append_git_stale_reasons(reasons: list[str], run, cwd: Path | None = None) -> None:
+    recorded_git = run.environment.get("git")
+    if not isinstance(recorded_git, dict) or not recorded_git.get("available"):
+        return
+
+    from .verifications import git_metadata
+
+    root = Path.cwd() if cwd is None else Path(cwd)
+    current_git = git_metadata(root)
+    if not current_git.get("available"):
+        return
+    if recorded_git.get("commit") != current_git.get("commit"):
+        reasons.append("git_commit_changed")
+    if recorded_git.get("status_hash") != current_git.get("status_hash"):
+        reasons.append("git_status_changed")
+
+
+def verification_freshness_summary(plan: PlanRecord, cwd: Path | None = None) -> dict[str, object]:
+    if not plan.verification_runs:
+        return {
+            "latest_id": None,
+            "result": None,
+            "trust_level": "unknown",
+            "stale": True,
+            "reasons": ["no_verification_runs"],
+        }
+
+    from .verifications import load_verification
+
+    latest = load_verification(plan.verification_runs[-1], cwd)
+    reasons: list[str] = []
+    snapshot = verification_plan_snapshot(latest)
+    snapshot_hash = snapshot.get("content_hash")
+    if isinstance(snapshot_hash, str) and snapshot_hash != plan_verification_hash(plan):
+        reasons.append("plan_updated_after_verification")
+    elif not snapshot_hash:
+        plan_updated = parse_timestamp(plan.updated_at)
+        verification_created = parse_timestamp(latest.created_at)
+        if plan_updated and verification_created and plan_updated > verification_created:
+            reasons.append("plan_updated_after_verification")
+    if verification_commands(latest) != list(plan.validation_checklist):
+        reasons.append("validation_checklist_changed")
+    append_git_stale_reasons(reasons, latest, cwd)
+
+    return {
+        "latest_id": latest.id,
+        "result": latest.result,
+        "trust_level": latest.trust_level,
+        "stale": bool(reasons),
+        "reasons": reasons,
+    }

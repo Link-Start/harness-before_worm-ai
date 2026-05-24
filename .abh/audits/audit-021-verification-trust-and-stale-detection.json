@@ -1,0 +1,42 @@
+{
+  "schema_version": "1",
+  "id": "audit-021-verification-trust-and-stale-detection",
+  "plan_id": "plan-021-verification-trust-and-stale-detection",
+  "auditor": "independent-review",
+  "scope": "Independent audit of plan-021 verification trust levels and stale detection: verify trust_level persistence, plan status JSON freshness summary, legacy compatibility, docs sync, non-goals, and regression evidence.",
+  "status": "complete",
+  "result": "pass",
+  "rationale": "Independent audit passed: plan-021 satisfies trust_level persistence, legacy compatibility, plan status verification_summary, stale detection for checklist/plan/git changes, self-dogfood non-stale behavior, non-goals, documentation sync, and regression validation. Fresh audit verification produced ver-4b7d7719a801 with trust_level=local_shell and stale=false.",
+  "evidence": [
+    "docs/plans/plan-021-verification-trust-and-stale-detection.md",
+    ".abh/plans/plan-021-verification-trust-and-stale-detection.json",
+    ".abh/verifications/ver-77a326a3ed82.json",
+    "abh/models.py",
+    "abh/verifications.py",
+    "abh/plans.py",
+    "abh/cli.py",
+    "tests/test_cli.py",
+    "README.md",
+    "docs/development-roadmap.md",
+    "docs/task-board.md",
+    "docs/阶段规划.md"
+  ],
+  "findings": [
+    {
+      "severity": "Info",
+      "finding": "Future trust enum values include isolated_shell and ci but no runner or policy enforcement is implemented",
+      "evidence": "abh/models.py VERIFICATION_TRUST_LEVELS; no CLI runner paths beyond local shell",
+      "recommendation": "Acceptable extensible metadata; keep CI and isolated execution in later plans"
+    },
+    {
+      "severity": "Info",
+      "finding": "Audit request evidence points at an earlier verification while independent audit produced fresher ver-4b7d7719a801",
+      "evidence": ".abh/audits/audit-021-verification-trust-and-stale-detection.json; .abh/verifications/ver-4b7d7719a801.json",
+      "recommendation": "Mention the fresh run in audit rationale and keep latest plan verification fresh before close"
+    }
+  ],
+  "follow_ups": [],
+  "created_at": "2026-05-24T12:15:50.513249+00:00",
+  "updated_at": "2026-05-24T12:24:33.308929+00:00",
+  "doc_path": "/Users/cc/ai/harness-before/docs/audits/audit-021-verification-trust-and-stale-detection.md"
+}
