@@ -4,7 +4,7 @@
 
 本文档是项目的主排期基线，负责同时承载两条线：
 
-- 历史执行线：记录 Sprint 1-8 已经交付的版本和计划。
+- 历史执行线：记录已经交付并审计关闭的 Sprint 和 plan。
 - 长期阶段线：按照 `docs/阶段规划.md` 的七阶段路线，规划后续 12 个月演进。
 
 当两条线发生冲突时，已关闭 plan 和 audit 是历史事实来源；长期阶段线是未来排期来源。新的 plan 应优先从长期阶段线中切出最小可关闭范围。
@@ -147,13 +147,46 @@
 
 状态：已完成，对应 `plan-011-stage-1-finalization`。
 
+### v0.10：Agent Protocol 基线
+
+周期：Sprint 12
+
+目标：
+
+- 将 Agent Protocol 插入阶段 1 和原验证执行器阶段之间，明确它是 CLI 走向 Agent 工具协议的必经中间层。
+- 定义 JSON CLI Contract、Structured Error、Agent Tool Schema、Read-only MCP 和 Controlled Write MCP 五层协议基线。
+- 同步阶段规划、roadmap 和 task-board，把阶段 2 改为 Agent Protocol Foundation。
+- 明确 MCP 写操作、verify runner 和 Attractor Registry 不属于当前计划范围。
+
+状态：已完成，对应 `plan-012-agent-protocol-foundation`。
+
+### v0.11：JSON 输出与结构化错误
+
+周期：Sprint 12
+
+目标：
+
+- 为核心只读命令增加显式 `--json` 输出模式。
+- 统一成功响应的 JSON envelope，包含 `schema_version`、`ok`、`command`、`data`、`errors` 和 `warnings`。
+- 在 `--json` 模式下为 ABH 业务错误输出结构化 error，同时保留既有返回码。
+- 保留默认人类可读输出，不把 JSON 变成默认体验。
+
+状态：已完成，对应 `plan-013-json-output-and-errors`。
+
 ## 4. 当前执行焦点
 
-当前处于 Sprint 12。
+当前处于 Sprint 12 后半段。
 
-`plan-012-agent-protocol-foundation` 已关闭，阶段 2 的协议基线已经建立。当前焦点进入 Agent Protocol 的第一个实现计划：把核心只读命令从自然文本输出扩展为稳定的机器可解析 JSON 输出，并定义结构化错误格式。
+`plan-013-json-output-and-errors` 已关闭，核心只读命令已经具备显式 JSON 输出和结构化错误格式。当前焦点进入阶段 2 的下一步：把这些 JSON/internal object contracts 封装为只读 MCP Server，让 Agent 能通过工具协议读取 ABH 状态。
 
-建议计划：`plan-013-json-output-and-errors`。
+当前建议启动计划：`plan-014-readonly-mcp-server`。
+
+当前阶段状态：
+
+- 已完成：`plan-012-agent-protocol-foundation`、`plan-013-json-output-and-errors`。
+- 进行中：尚未启动新的 running plan。
+- 下一步：创建并执行 `plan-014-readonly-mcp-server`。
+- 不进入：Agent 写操作、verify runner、Attractor Registry；这些分别属于阶段 2 后半或后续阶段。
 
 ## 5. 长期阶段线
 
@@ -178,11 +211,6 @@
 - 阶段 1 判定：完成。阶段 1 的必需治理门禁已经具备，可以进入阶段 2。
 - 延期项：更深的内容级 doctor 校验和正式发布自动化，推迟到后续质量/发布计划，不阻塞阶段 2 启动。
 
-建议后续计划：
-
-- `plan-012-agent-protocol-foundation`：已完成，建立 Agent Protocol 基线、阶段路线和只读 MCP 分阶段策略。
-- `plan-013-json-output-and-errors`：实现核心读命令 JSON 输出和结构化错误。
-
 ### 阶段 2：Agent Protocol 基础
 
 周期：1-2 个月
@@ -199,13 +227,23 @@
 
 协议基线：`docs/architecture/agent-protocol.md`。
 
+当前状态：
+
+- 已完成：`plan-012-agent-protocol-foundation` 建立 Agent Protocol 基线、阶段路线和只读 MCP 分阶段策略。
+- 已完成：`plan-013-json-output-and-errors` 实现核心只读命令显式 `--json` 输出、统一 JSON envelope 和结构化 ABH 错误输出。
+- 当前最小闭环：Agent 已经可以通过 CLI 获取可解析的只读 JSON，并能用结构化错误区分业务错误、not found、consistency failure 和系统错误。
+- 剩余核心缺口：尚无 MCP Server，也没有 MCP tool schema 的实际工具入口；Agent 仍需直接执行 CLI，而不是通过 Claude、Cursor 等工具协议调用。
+- 下一步：`plan-014-readonly-mcp-server`，在 JSON/internal object contract 之上封装只读 MCP 工具入口。
+- 阶段 2 判定：进行中。读协议基线已经具备，MCP 工具入口尚未实现。
+- 后置项：Agent 写操作继续后置，必须等只读 MCP 稳定后再切计划。
+
 建议版本：v0.2。
 
-建议后续计划：
+计划切分：
 
 - `plan-012-agent-protocol-foundation`（已完成）
-- `plan-013-json-output-and-errors`
-- `plan-014-readonly-mcp-server`
+- `plan-013-json-output-and-errors`（已完成）
+- `plan-014-readonly-mcp-server`（下一步）
 
 ### 阶段 3：从“记录验证”升级到“执行验证”
 
@@ -318,7 +356,7 @@
 | 长期阶段 | 已完成历史计划 | 已完成内容 | 剩余内容 |
 | --- | --- | --- | --- |
 | 阶段 1：恢复权威基线，稳住内核 | `plan-006-stabilize`, `plan-007-zero-dep-install`, `plan-008-roadmap-sync-and-doctor`, `plan-009-roadmap-phase-alignment`, `plan-010-core-governance-hardening`, `plan-011-stage-1-finalization` | 历史计划迁移、安装门槛降低、`abh doctor`、路线图对齐、demo 清理、schema version、历史 schema 迁移、CI、版本策略 | 已完成；内容级 doctor、发布自动化转入后续质量/发布计划 |
-| 阶段 2：Agent Protocol 基础 | 无 | CLI 已可参数化调用，但输出仍以自然文本为主 | JSON 输出模式、结构化错误、Agent tool schema、只读 MCP Server |
+| 阶段 2：Agent Protocol 基础 | `plan-012-agent-protocol-foundation`, `plan-013-json-output-and-errors` | Agent Protocol 五层基线、阶段路线、核心只读命令 `--json`、统一 JSON envelope、结构化 ABH 错误 | 只读 MCP Server、MCP tool schema 工具入口；Agent 写操作继续后置 |
 | 阶段 3：验证执行器 | `plan-002-sprint-2-local-plan-loop` | `verify record` 可记录验证结果 | `verify run`、失败自动证据、plan update、模块拆分 |
 | 阶段 4：Attractor Registry | `plan-001-sprint-1-foundation` | active attractor 文档和模板 | attractor CLI、版本迁移、active 校验 |
 | 阶段 5：真正独立审计 | `plan-003-sprint-3-audit-memory-close`, `plan-007-zero-dep-install`, `plan-008-roadmap-sync-and-doctor` | audit request/record/close 闭环，人工独立审计流程已 dogfood | audit prompt/bundle、独立上下文字段、关闭门禁 |
@@ -327,33 +365,7 @@
 
 ## 7. 下一批推荐计划
 
-### plan-012-agent-protocol-foundation
-
-范围：
-
-- 定义 Agent Protocol 的最小对象和错误协议。
-- 为核心只读命令规划 JSON 输出形态。
-- 明确 MCP Server 第一版只读范围。
-- 规定 Agent 写操作的门禁原则。
-
-不做：
-
-- 不实现 `verify run`。
-- 不开放 MCP 写操作。
-- 不引入 Web UI。
-
-### plan-013-json-output-and-errors
-
-范围：
-
-- 为核心读命令增加 `--json` 或等价 JSON mode。
-- 统一成功、校验失败、业务阻断和系统错误的结构化输出。
-- 补充 Agent 可用的 CLI contract 测试。
-
-不做：
-
-- 不实现 MCP Server。
-- 不改变现有自然文本输出默认体验。
+本节只列尚未启动的推荐计划。已关闭的 `plan-012-agent-protocol-foundation` 和 `plan-013-json-output-and-errors` 归入第 3 章历史执行线与第 6 章阶段映射，不再作为下一批计划展示。
 
 ### plan-014-readonly-mcp-server
 
@@ -362,6 +374,7 @@
 - 封装只读 MCP Server。
 - 暴露 plan、audit、memory、drift、route、doctor 的安全读取工具。
 - 基于 JSON 输出和内部对象模型返回稳定结构。
+- 补充 MCP tool schema 和契约测试，证明 Agent 可通过工具协议读取 ABH 状态。
 
 不做：
 

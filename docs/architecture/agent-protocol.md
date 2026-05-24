@@ -148,8 +148,8 @@ Write tools must:
 
 ## Near-term Plans
 
-- `plan-012-agent-protocol-foundation`: define this protocol baseline and align roadmap/task-board.
-- `plan-013-json-output-and-errors`: implement JSON output and structured errors for read commands.
+- `plan-012-agent-protocol-foundation`: completed; defined this protocol baseline and aligned roadmap/task-board.
+- `plan-013-json-output-and-errors`: completed; implemented JSON output and structured errors for read commands.
 - `plan-014-readonly-mcp-server`: expose read-only MCP tools over the JSON/internal object contract.
 
 ## Non-goals

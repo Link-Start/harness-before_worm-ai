@@ -150,4 +150,8 @@ Sprint 12：阶段 2 Agent Protocol Foundation
 | S12-003 | 定义 Agent Protocol 基线 | Done | `docs/architecture/agent-protocol.md` |
 | S12-004 | 同步 task-board 当前阶段 | Done | `docs/task-board.md` |
 | S12-005 | plan-012 验证与独立审计 | Done | `docs/audits/audit-012-agent-protocol-foundation.md` |
-| S12-006 | 启动 JSON 输出与结构化错误计划 | Todo | `plan-013-json-output-and-errors` |
+| S12-006 | 启动 JSON 输出与结构化错误计划 | Done | `docs/plans/plan-013-json-output-and-errors.md` |
+| S12-007 | 为核心读命令实现 `--json` 输出 | Done | `abh/cli.py`, `tests/test_cli.py` |
+| S12-008 | 补充 JSON 输出使用说明 | Done | `README.md` |
+| S12-009 | plan-013 验证与独立审计 | Done | `docs/audits/audit-013-json-output-and-errors.md` |
+| S12-010 | 启动只读 MCP Server 计划 | Todo | `plan-014-readonly-mcp-server` |

@@ -294,6 +294,22 @@ abh doctor
 
 输出 `doctor: ok` 表示 `.abh/plans`、`.abh/audits`、`.abh/memory`、`.abh/drift` 与对应 `docs/` 目录一致。若发现缺失文档或孤儿文档，命令会列出问题并返回非零状态码，适合放入 CI 或 plan 关闭前检查。
 
+### 13. JSON 输出模式
+
+面向 Agent Protocol 的只读命令支持显式 `--json` 输出。默认输出仍保持人类可读文本；只有传入 `--json` 时才输出机器可解析 envelope。
+
+```bash
+abh plan list --json
+abh plan status plan-013-json-output-and-errors --json
+abh audit list --json
+abh memory list --json
+abh memory search --query audit --json
+abh route --question "Can we close this plan?" --json
+abh doctor --json
+```
+
+JSON envelope 包含 `schema_version`、`ok`、`command`、`data`、`errors` 和 `warnings`。当 ABH 业务错误发生时，`--json` 模式会把错误写入 `errors`，并保留现有返回码语义。
+
 ## 项目结构
 
 - `abh/`：CLI 和核心逻辑
@@ -316,8 +332,8 @@ abh doctor
 
 当前仓库已经覆盖计划、验证、审计、关闭、记忆、路由和基础漂移分析。后续计划：
 
-- 将 `abh doctor` 纳入 CI 和 plan 关闭门禁，防止 JSON/Markdown 再次分裂
-- 提升漂移分析精度：从关键词匹配升级到语义匹配
-- 增加 `abh status` 全局概览命令，聚合所有计划、审计和记忆状态
+- 推进 `plan-014-readonly-mcp-server`，把 JSON contract 封装为只读 MCP 工具
+- 提升漂移分析精度：从关键词匹配升级到更高质量的证据提取
+- 增加 `abh report`，展示计划关闭率、审计驳回率和重复漂移情况
 - 支持 Git hook 集成，在提交前自动验证状态一致性
-- 为验证记录增加 Markdown 文档输出，与计划的 closure evidence 形成完整可追溯链路
+- 为验证记录增加更细粒度执行证据，与计划的 closure evidence 形成完整可追溯链路
