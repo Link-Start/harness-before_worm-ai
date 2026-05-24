@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-Sprint 13：阶段 3 Verify Runner + Plan Update MVP（已完成）
+Sprint 14：阶段 3 Core Module Split（已完成）
 
 ## 状态说明
 
@@ -181,3 +181,12 @@ Sprint 13：阶段 3 Verify Runner + Plan Update MVP（已完成）
 | S13-010 | 补充 plan update TDD 覆盖 | Done | `tests/test_cli.py` |
 | S13-011 | Dogfood `plan update` 更新 plan-017 自身 | Done | `docs/plans/plan-017-plan-update.md` |
 | S13-012 | plan-017 验证与独立审计 | Done | `docs/audits/audit-017-plan-update.md` |
+
+## Sprint 14
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S14-001 | 启动 Core Module Split 计划 | Done | `docs/plans/plan-018-core-module-split.md` |
+| S14-002 | 拆出 plan/audit/verification 领域模块 | Done | `abh/plans.py`, `abh/audits.py`, `abh/verifications.py`, `abh/errors.py`, `abh/core.py` |
+| S14-003 | 补充 core 兼容 re-export 边界测试 | Done | `tests/test_cli.py` |
+| S14-004 | plan-018 验证与独立审计 | Done | `docs/audits/audit-018-core-module-split.md` |

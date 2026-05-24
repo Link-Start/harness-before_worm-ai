@@ -1,0 +1,69 @@
+{
+  "schema_version": "1",
+  "id": "audit-018-core-module-split",
+  "plan_id": "plan-018-core-module-split",
+  "auditor": "independent-user-session",
+  "scope": "独立审计 plan-018-core-module-split：验证 core.py 到 plans/audits/verifications/errors 的领域模块拆分，确认 CLI/MCP 行为、状态机、审计门禁、verification 语义和 schema/Markdown 输出无回归",
+  "status": "complete",
+  "result": "pass",
+  "rationale": "独立审计验证：所有 5 项退出条件均满足，所有 3 项非目标均得到尊重，无循环导入，39/39 回归测试通过，doctor 正常，公共导入表面兼容。模块拆分是干净、可验证且无回归的。",
+  "evidence": [
+    "docs/plans/plan-018-core-module-split.md",
+    ".abh/plans/plan-018-core-module-split.json",
+    ".abh/verifications/ver-24273b6df810.json",
+    "abh/core.py",
+    "abh/plans.py",
+    "abh/audits.py",
+    "abh/verifications.py",
+    "abh/errors.py",
+    "abh/cli.py",
+    "abh/mcp_server.py",
+    "tests/test_cli.py",
+    "docs/development-roadmap.md",
+    "docs/task-board.md",
+    "README.md",
+    "docs/阶段规划.md"
+  ],
+  "findings": [
+    {
+      "severity": "Pass",
+      "finding": "core.py delegates plan/audit/verification behavior to domain modules",
+      "evidence": "abh/core.py; abh/plans.py; abh/audits.py; abh/verifications.py; abh/errors.py",
+      "recommendation": "Close plan after passing audit"
+    },
+    {
+      "severity": "Pass",
+      "finding": "CLI and MCP public import surface remains compatible",
+      "evidence": "abh/cli.py; abh/mcp_server.py; tests/test_cli.py",
+      "recommendation": "Keep compatibility re-export test in regression suite"
+    },
+    {
+      "severity": "Pass",
+      "finding": "Validation evidence passes",
+      "evidence": ".abh/verifications/ver-24273b6df810.json",
+      "recommendation": "Retain verification as closure evidence"
+    },
+    {
+      "severity": "Info",
+      "finding": "No module-level unit tests for domain modules",
+      "evidence": "tests/test_cli.py",
+      "recommendation": "Consider direct unit tests for module boundaries in a follow-up plan"
+    },
+    {
+      "severity": "Info",
+      "finding": "task-board tracks Sprint 14 split and audit work",
+      "evidence": "docs/task-board.md",
+      "recommendation": "Move S14-002/S14-004 to Done during close sync"
+    },
+    {
+      "severity": "Info",
+      "finding": "Test count increased from 38 to 39",
+      "evidence": "tests/test_cli.py",
+      "recommendation": "New test covers core re-export module split boundaries"
+    }
+  ],
+  "follow_ups": [],
+  "created_at": "2026-05-24T10:16:36.325872+00:00",
+  "updated_at": "2026-05-24T10:16:53.743181+00:00",
+  "doc_path": "/Users/cc/ai/harness-before/docs/audits/audit-018-core-module-split.md"
+}

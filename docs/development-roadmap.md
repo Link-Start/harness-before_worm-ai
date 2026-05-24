@@ -229,13 +229,26 @@
 
 状态：已完成，对应 `plan-017-plan-update`。
 
+### v0.16：Core Module Split
+
+周期：Sprint 14
+
+目标：
+
+- 在不改变 CLI、MCP、JSON schema 或 Markdown 输出行为的前提下，将 `core.py` 中稳定的 plan、audit 和 verification 逻辑拆分到更小的领域模块。
+- 新增 `abh/plans.py`、`abh/audits.py`、`abh/verifications.py` 和 `abh/errors.py`，降低核心模块继续膨胀的维护风险。
+- 保持 `abh.core` 兼容导出，确保既有 CLI、MCP 和外部导入路径不回归。
+- 补充 core re-export 边界测试，并通过 verification 与独立审计关闭。
+
+状态：已完成，对应 `plan-018-core-module-split`。
+
 ## 4. 当前执行焦点
 
-Sprint 13 已完成，当前没有 running plan。下一轮建议进入 Sprint 14，以 `plan-018-core-module-split` 作为阶段 3 的下一条最小切片。
+Sprint 14 已完成。`plan-018-core-module-split` 已关闭，是阶段 3 中降低核心模块维护风险的一条结构性切片。
 
 `plan-015-controlled-mcp-write-tools` 已关闭。阶段 2 Agent Protocol Foundation 已完整完成：核心只读命令具备显式 JSON 输出和结构化错误格式，MCP stdio Server 同时提供只读工具和受控写工具，写工具必须显式 `confirm=true` 并复用现有 ABH 门禁。
 
-最近关闭计划：`plan-017-plan-update`。ABH 现在可以通过 CLI 双写更新计划内容和 validation checklist，并提供精确移除错误 validation checklist 的修复路径。
+当前执行计划：暂无。下一条阶段 3 切片应优先从 verification 环境元信息、可信等级、stale 检测或失败分类中选择最小可关闭范围。
 
 当前阶段状态：
 
@@ -243,10 +256,10 @@ Sprint 13 已完成，当前没有 running plan。下一轮建议进入 Sprint 1
 - 已完成：`plan-014-readonly-mcp-server`。
 - 已完成：`plan-015-controlled-mcp-write-tools`。
 - 阶段 2 判定：完成。JSON contract、结构化错误、只读 MCP 和受控 MCP 写工具均已通过 verification 与独立审计。
-- 当前里程碑：v0.3 Verify Runner 阶段已启动；已完成 `plan-016-verify-runner` 和 `plan-017-plan-update`。
-- 当前阶段：阶段 3 验证执行器已启动，Verify Runner MVP 与 Plan Update MVP 已交付。
-- 下一阶段 3 焦点：切分 `plan-018-core-module-split`，先降低 `core.py` 持续膨胀风险。
-- 不进入下一切片：Attractor Registry、Web UI、外部数据库。
+- 当前里程碑：v0.3 Verify Runner 阶段已启动；已完成 `plan-016-verify-runner`、`plan-017-plan-update` 和 `plan-018-core-module-split`。
+- 当前阶段：阶段 3 验证执行器已启动，Verify Runner MVP、Plan Update MVP 与 Core Module Split 已交付。
+- 当前阶段 3 焦点：下一步补齐 verification 执行证据的环境元信息、可信等级、stale 检测和失败分类。
+- 不进入当前切片：Attractor Registry、Web UI、外部数据库。
 
 ## 5. 长期阶段线
 
@@ -333,8 +346,9 @@ Sprint 13 已完成，当前没有 running plan。下一轮建议进入 Sprint 1
 
 - 已完成：`plan-016-verify-runner` 交付 `abh verify run <plan>` MVP，能够执行 validation checklist、记录 stdout/stderr 摘要、退出码、耗时和 artifact，并在失败时阻断 ready/running plan。
 - 已完成：`plan-017-plan-update` 交付 `abh plan update <plan>`，支持追加计划字段、去重、JSON/Markdown 双写，以及通过 `--remove-validation` 精确修复错误 validation checklist。
+- 已完成：`plan-018-core-module-split` 将 plan、audit、verification 和 shared errors 逻辑拆分到领域模块，并通过 `abh.core` 保持现有导入兼容。
 - 已记录：plan-017 dogfood 中的递归验证风暴已压缩保留 7 条代表性 verification 作为证据，重复超时记录未继续保留。
-- 未完成：git commit/dirty status、ABH/Python 环境元信息、可信等级、stale 检测、环境失败分类和 `core.py` 模块拆分。
+- 未完成：git commit/dirty status、ABH/Python 环境元信息、可信等级、stale 检测、环境失败分类，以及 memory、drift、routing 等后续模块拆分。
 
 建议版本：v0.3。
 
@@ -342,7 +356,9 @@ Sprint 13 已完成，当前没有 running plan。下一轮建议进入 Sprint 1
 
 - `plan-016-verify-runner`（已完成）
 - `plan-017-plan-update`（已完成）
-- `plan-018-core-module-split`
+- `plan-018-core-module-split`（已完成）
+- `plan-019-verification-environment-metadata`
+- `plan-020-verification-trust-and-stale-detection`
 
 ### 阶段 4：补齐 Attractor Registry
 
@@ -434,7 +450,7 @@ Sprint 13 已完成，当前没有 running plan。下一轮建议进入 Sprint 1
 | --- | --- | --- | --- |
 | 阶段 1：恢复权威基线，稳住内核 | `plan-006-stabilize`, `plan-007-zero-dep-install`, `plan-008-roadmap-sync-and-doctor`, `plan-009-roadmap-phase-alignment`, `plan-010-core-governance-hardening`, `plan-011-stage-1-finalization` | 历史计划迁移、安装门槛降低、`abh doctor`、路线图对齐、demo 清理、schema version、历史 schema 迁移、CI、版本策略 | 已完成；内容级 doctor、发布自动化转入后续质量/发布计划 |
 | 阶段 2：Agent Protocol 基础 | `plan-012-agent-protocol-foundation`, `plan-013-json-output-and-errors`, `plan-014-readonly-mcp-server`, `plan-015-controlled-mcp-write-tools` | Agent Protocol 五层基线、阶段路线、核心只读命令 `--json`、统一 JSON envelope、结构化 ABH 错误、只读 MCP stdio Server、受控 MCP 写工具 | 已完成；verify runner 和 Attractor Registry 转入后续阶段 |
-| 阶段 3：验证执行器 | `plan-002-sprint-2-local-plan-loop`, `plan-016-verify-runner`, `plan-017-plan-update` | `verify record` 可记录验证结果；`verify run` 可执行 validation checklist、记录机器证据、失败阻断计划并支持 JSON 输出；`plan update` 可通过 CLI 双写追加计划字段并精确修复 validation checklist | 可信等级/环境信息、stale 检测、模块拆分 |
+| 阶段 3：验证执行器 | `plan-002-sprint-2-local-plan-loop`, `plan-016-verify-runner`, `plan-017-plan-update`, `plan-018-core-module-split` | `verify record` 可记录验证结果；`verify run` 可执行 validation checklist、记录机器证据、失败阻断计划并支持 JSON 输出；`plan update` 可通过 CLI 双写追加计划字段并精确修复 validation checklist；`core.py` 已拆出 plan/audit/verification/errors 领域模块并保持兼容导出 | 可信等级/环境信息、stale 检测、环境失败分类、memory/drift/routing 后续模块拆分 |
 | 阶段 4：Attractor Registry | `plan-001-sprint-1-foundation` | active attractor 文档和模板 | attractor CLI、版本迁移、active 校验 |
 | 阶段 5：真正独立审计 | `plan-003-sprint-3-audit-memory-close`, `plan-007-zero-dep-install`, `plan-008-roadmap-sync-and-doctor` | audit request/record/close 闭环，人工独立审计流程已 dogfood | audit prompt/bundle、独立上下文字段、关闭门禁 |
 | 阶段 6：漂移与记忆质量提升 | `plan-004-sprint-4-route-drift`, `plan-007-sprint-7-dogfood` | 关键词 drift、route 注入活跃计划和记忆 | severity/confidence、memory 索引、对象图路由、report |
@@ -442,27 +458,29 @@ Sprint 13 已完成，当前没有 running plan。下一轮建议进入 Sprint 1
 
 ## 7. 下一批推荐计划
 
-本节只列下一批仍可切分执行的计划。已关闭的 `plan-012-agent-protocol-foundation`、`plan-013-json-output-and-errors`、`plan-014-readonly-mcp-server`、`plan-015-controlled-mcp-write-tools`、`plan-016-verify-runner` 和 `plan-017-plan-update` 已归入第 3 章历史执行线与第 6 章阶段映射。
+本节只列下一批仍可切分执行的计划。已关闭的 `plan-012-agent-protocol-foundation`、`plan-013-json-output-and-errors`、`plan-014-readonly-mcp-server`、`plan-015-controlled-mcp-write-tools`、`plan-016-verify-runner`、`plan-017-plan-update` 和 `plan-018-core-module-split` 已归入第 3 章历史执行线与第 6 章阶段映射。
 
 已完成参考：
 
 - `plan-016-verify-runner`：交付 `abh verify run <plan>` MVP，执行 validation checklist 并记录机器验证证据。
 - `plan-017-plan-update`：交付 `abh plan update <plan>` MVP，支持计划字段追加、去重、双写同步和 validation checklist 精确修复。
+- `plan-018-core-module-split`：拆出 plan/audit/verification/errors 领域模块，并保持 `abh.core` 公共导入兼容。
 
-### plan-018-core-module-split
+### plan-019-verification-environment-metadata
 
-状态：建议下一步。
+状态：建议。
 
 范围：
 
-- 在不改变 CLI 行为和数据格式的前提下，把 `core.py` 中已经稳定的领域逻辑拆分为更小模块。
-- 优先拆出 plan、audit、verification、memory、route/drift 等边界清晰的函数组。
-- 保持现有测试全量通过，并用 `abh doctor` 防止双写文档漂移。
+- 在 `verify run` 记录中补齐 git commit、dirty status、cwd、ABH 版本、Python 版本、命令 argv 和 timeout 等环境元信息。
+- 保持现有 verification schema 可迁移，旧记录仍可被读取。
+- 为后续 stale 检测和可信等级提供证据基础。
 
 不做：
 
-- 不改变 plan 状态机、audit 关闭门禁或 MCP 工具 contract。
-- 不引入新功能，只做结构性减压。
+- 不实现隔离执行环境或 CI runner。
+- 不改变 pass/fail/partial 语义。
+- 不把本地执行结果声明为防篡改证明。
 
 ## 8. 风险控制
 

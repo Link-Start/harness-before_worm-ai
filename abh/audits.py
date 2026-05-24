@@ -1,0 +1,141 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from .errors import AbhError, validate_identifier
+from .models import AUDIT_RESULTS, AuditFinding, AuditRecord, utc_now
+from .plans import load_plan, save_plan
+from .storage import audit_doc_path, audit_json_path, audits_dir, ensure_workspace, read_json, write_json
+
+
+def parse_finding(value: str) -> AuditFinding:
+    parts = value.split("|", 3)
+    if len(parts) != 4 or not all(part.strip() for part in parts):
+        raise AbhError("finding must use Severity|Finding|Evidence|Recommendation")
+    return AuditFinding(
+        severity=parts[0].strip(),
+        finding=parts[1].strip(),
+        evidence=parts[2].strip(),
+        recommendation=parts[3].strip(),
+    )
+
+
+def load_audit(audit_id: str, cwd: Path | None = None) -> AuditRecord:
+    validate_identifier(audit_id, "audit id")
+    path = audit_json_path(audit_id, cwd)
+    if not path.exists():
+        raise AbhError(f"audit not found: {audit_id}")
+    return AuditRecord.from_dict(read_json(path))
+
+
+def list_audits(cwd: Path | None = None) -> list[AuditRecord]:
+    directory = audits_dir(cwd)
+    if not directory.exists():
+        return []
+    audits: list[AuditRecord] = []
+    for path in sorted(directory.glob("*.json")):
+        audits.append(AuditRecord.from_dict(read_json(path)))
+    return audits
+
+
+def save_audit(audit: AuditRecord, cwd: Path | None = None, write_doc: bool = True) -> AuditRecord:
+    ensure_workspace(cwd)
+    audit.updated_at = utc_now()
+    if write_doc:
+        doc_path = audit.doc_path or str(audit_doc_path(audit.id, cwd))
+        audit.doc_path = doc_path
+        doc_file = Path(doc_path)
+        doc_file.parent.mkdir(parents=True, exist_ok=True)
+        doc_file.write_text(render_audit_markdown(audit), encoding="utf-8")
+    write_json(audit_json_path(audit.id, cwd), audit.to_dict())
+    return audit
+
+
+def request_audit(
+    *,
+    audit_id: str,
+    plan_id: str,
+    auditor: str,
+    scope: str,
+    evidence: list[str] | None = None,
+    cwd: Path | None = None,
+) -> AuditRecord:
+    ensure_workspace(cwd)
+    validate_identifier(audit_id, "audit id")
+    plan = load_plan(plan_id, cwd)
+    if audit_json_path(audit_id, cwd).exists():
+        raise AbhError(f"audit already exists: {audit_id}")
+    reviewed = list(evidence or [])
+    if not reviewed:
+        raise AbhError("audit request requires at least one evidence item")
+    audit = AuditRecord(
+        id=audit_id,
+        plan_id=plan_id,
+        auditor=auditor,
+        scope=scope,
+        evidence=reviewed,
+        doc_path=str(audit_doc_path(audit_id, cwd)),
+    )
+    save_audit(audit, cwd)
+    if audit_id not in plan.audit_ids:
+        plan.audit_ids.append(audit_id)
+        save_plan(plan, cwd)
+    return audit
+
+
+def record_audit(
+    *,
+    audit_id: str,
+    result: str,
+    rationale: str,
+    findings: list[str] | None = None,
+    follow_ups: list[str] | None = None,
+    cwd: Path | None = None,
+) -> AuditRecord:
+    if result not in AUDIT_RESULTS:
+        raise AbhError(f"invalid audit result: {result}")
+    audit = load_audit(audit_id, cwd)
+    audit.result = result
+    audit.rationale = rationale
+    audit.status = "complete"
+    audit.findings = [parse_finding(value) for value in (findings or [])]
+    audit.follow_ups = list(follow_ups or [])
+    return save_audit(audit, cwd)
+
+
+def render_audit_markdown(audit: AuditRecord) -> str:
+    def bullet_lines(values: list[str]) -> str:
+        if not values:
+            return "- "
+        return "\n".join(f"- {value}" for value in values)
+
+    if audit.findings:
+        finding_lines = "\n".join(
+            f"| {finding.severity} | {finding.finding} | {finding.evidence} | {finding.recommendation} |"
+            for finding in audit.findings
+        )
+    else:
+        finding_lines = "|  |  |  |  |"
+    return (
+        f"# Audit: {audit.plan_id}\n\n"
+        "## Metadata\n\n"
+        f"- Audit ID: {audit.id}\n"
+        f"- Plan: {audit.plan_id}\n"
+        f"- Auditor: {audit.auditor}\n"
+        f"- Status: {audit.status}\n"
+        f"- Created: {audit.created_at}\n"
+        f"- Updated: {audit.updated_at}\n\n"
+        "## Scope\n\n"
+        f"{audit.scope}\n\n"
+        "## Evidence Reviewed\n\n"
+        f"{bullet_lines(audit.evidence)}\n\n"
+        "## Findings\n\n"
+        "| Severity | Finding | Evidence | Recommendation |\n"
+        "| --- | --- | --- | --- |\n"
+        f"{finding_lines}\n\n"
+        "## Verdict\n\n"
+        f"- Result: {audit.result}\n"
+        f"- Rationale: {audit.rationale}\n\n"
+        "## Follow-Ups\n\n"
+        f"{bullet_lines(audit.follow_ups)}\n"
+    )

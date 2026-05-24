@@ -9,7 +9,17 @@ from unittest import TestCase
 import os
 
 from abh.cli import main
-from abh.core import is_recursive_verify_command
+from abh import audits, plans, verifications
+from abh.core import (
+    close_plan,
+    create_plan,
+    is_recursive_verify_command,
+    record_audit,
+    request_audit,
+    run_verification,
+    transition_plan,
+    update_plan_record,
+)
 from abh.models import AuditRecord, DriftReport, MemoryRecord, PlanRecord, VerificationRun
 from abh.storage import drift_json_path, write_json
 
@@ -45,6 +55,15 @@ class CliTests(TestCase):
         with Chdir(self.root), redirect_stdout(stdout), redirect_stderr(stderr):
             code = main(list(args))
         return code, stdout.getvalue(), stderr.getvalue()
+
+    def test_core_reexports_plan_audit_and_verification_module_functions(self) -> None:
+        self.assertIs(create_plan, plans.create_plan)
+        self.assertIs(update_plan_record, plans.update_plan_record)
+        self.assertIs(transition_plan, plans.transition_plan)
+        self.assertIs(close_plan, plans.close_plan)
+        self.assertIs(run_verification, verifications.run_verification)
+        self.assertIs(request_audit, audits.request_audit)
+        self.assertIs(record_audit, audits.record_audit)
 
     def test_plan_create_status_transition_and_verify(self) -> None:
         code, out, err = self.run_cli(
