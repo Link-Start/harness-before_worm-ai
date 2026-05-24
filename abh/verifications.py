@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import os
+import sys
 import shlex
 import subprocess
 import time
 import uuid
 from pathlib import Path
 
+from . import __version__
 from .errors import AbhError
 from .models import VERIFICATION_RESULTS, VerificationRun
 from .plans import load_plan, save_plan
@@ -26,6 +29,7 @@ def record_verification(
     result: str,
     artifacts: list[str] | None = None,
     failed_checks: list[str] | None = None,
+    environment: dict | None = None,
     cwd: Path | None = None,
 ) -> VerificationRun:
     if result not in VERIFICATION_RESULTS:
@@ -41,6 +45,7 @@ def record_verification(
         result=result,
         artifacts=list(artifacts or []),
         failed_checks=list(failed_checks or []),
+        environment=dict(environment or {}),
     )
     write_json(verification_path(run.id, cwd), run.to_dict())
     plan.verification_runs.append(run.id)
@@ -65,6 +70,64 @@ def is_recursive_verify_command(command: str, plan_id: str) -> bool:
     return False
 
 
+def git_metadata(root: Path) -> dict[str, object]:
+    metadata: dict[str, object] = {
+        "commit": None,
+        "dirty": None,
+        "available": False,
+    }
+    try:
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            timeout=5,
+            check=False,
+        )
+        if commit.returncode != 0:
+            return metadata
+        status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            timeout=5,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return metadata
+
+    metadata["commit"] = commit.stdout.strip()
+    metadata["dirty"] = bool(status.stdout.strip()) if status.returncode == 0 else None
+    metadata["available"] = True
+    return metadata
+
+
+def split_command(command: str) -> list[str]:
+    try:
+        return shlex.split(command)
+    except ValueError:
+        return []
+
+
+def environment_snapshot(*, root: Path, commands: list[str], timeout_seconds: int) -> dict[str, object]:
+    env_allowlist = {name: os.environ[name] for name in ("CI", "VIRTUAL_ENV") if name in os.environ}
+    return {
+        "cwd": str(root.resolve()),
+        "git": git_metadata(root),
+        "abh": {"version": __version__},
+        "python": {"version": sys.version, "executable": sys.executable},
+        "runner": {
+            "timeout_seconds": timeout_seconds,
+            "shell": True,
+            "check_count": len(commands),
+        },
+        "commands": [{"command": command, "argv": split_command(command)} for command in commands],
+        "environment_variables": env_allowlist,
+    }
+
+
 def run_verification(
     *,
     plan_id: str,
@@ -81,6 +144,7 @@ def run_verification(
     artifacts: list[str] = []
     failed_checks: list[str] = []
     commands = list(plan.validation_checklist)
+    environment = environment_snapshot(root=root, commands=commands, timeout_seconds=timeout_seconds)
 
     for command in commands:
         if is_recursive_verify_command(command, plan_id):
@@ -124,5 +188,6 @@ def run_verification(
         result=result,
         artifacts=artifacts,
         failed_checks=failed_checks,
+        environment=environment,
         cwd=cwd,
     )

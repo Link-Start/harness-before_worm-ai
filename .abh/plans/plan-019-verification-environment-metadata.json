@@ -1,0 +1,43 @@
+{
+  "schema_version": "1",
+  "id": "plan-019-verification-environment-metadata",
+  "title": "Verification Environment Metadata",
+  "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+  "baseline": "Stage 3 roadmap: verify run needs git/Python/ABH environment metadata before trust levels and stale detection",
+  "owner": "platform",
+  "status": "closed",
+  "goals": [
+    "Capture environment metadata for abh verify run records, including cwd, git commit, git dirty status, Python version, ABH version, argv, timeout, and an allowlisted environment snapshot.",
+    "Persist metadata in verification JSON and expose it through --json output without breaking old verification records.",
+    "Keep existing pass/fail/partial semantics and plan blocking behavior unchanged."
+  ],
+  "non_goals": [
+    "Do not implement isolated execution, CI runner, stale detection, or trust levels in this slice.",
+    "Do not change validation checklist execution semantics or make local results tamper-proof."
+  ],
+  "exit_criteria": [
+    "abh verify run records environment metadata for successful, failing, and recursive-guarded checklist entries.",
+    "Existing verification JSON without environment metadata can still be loaded.",
+    "python3 -m unittest tests/test_cli.py -v passes.",
+    "python3 -m abh doctor passes."
+  ],
+  "validation_checklist": [
+    "python3 -m unittest tests/test_cli.py -v",
+    "python3 -m abh doctor"
+  ],
+  "closure_evidence": [
+    "Verification record showing plan-019 checklist pass.",
+    "Independent audit confirms schema compatibility and no behavior regression.",
+    "audit-019-verification-environment-metadata"
+  ],
+  "verification_runs": [
+    "ver-b0a327916a91",
+    "ver-030a26171c61"
+  ],
+  "audit_ids": [
+    "audit-019-verification-environment-metadata"
+  ],
+  "created_at": "2026-05-24T11:03:32.326929+00:00",
+  "updated_at": "2026-05-24T11:23:42.774837+00:00",
+  "doc_path": "/Users/cc/ai/harness-before/docs/plans/plan-019-verification-environment-metadata.md"
+}

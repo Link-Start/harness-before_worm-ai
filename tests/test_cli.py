@@ -398,6 +398,8 @@ class CliTests(TestCase):
         self.assertEqual(run["result"], "fail")
         self.assertEqual(run["failed_checks"], ["python3 -c 'import sys; sys.exit(7)'"])
         self.assertTrue(any("exit_code=7" in artifact for artifact in run["artifacts"]))
+        self.assertEqual(run["environment"]["runner"]["check_count"], 1)
+        self.assertEqual(run["environment"]["commands"][0]["argv"], ["python3", "-c", "import sys; sys.exit(7)"])
 
     def test_verify_run_json_returns_machine_readable_result(self) -> None:
         code, out, err = self.run_cli(
@@ -434,6 +436,50 @@ class CliTests(TestCase):
         self.assertEqual(payload["data"]["verification"]["result"], "pass")
         self.assertEqual(payload["data"]["verification"]["failed_checks"], [])
 
+    def test_verify_run_records_environment_metadata(self) -> None:
+        code, out, err = self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-109-runner-environment",
+            "--title",
+            "Runner Environment",
+            "--attractor",
+            "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "record runner environment",
+            "--non-goal",
+            "isolated execution",
+            "--exit-criterion",
+            "environment metadata is persisted",
+            "--validation",
+            "python3 -c 'print(\"env-ok\")'",
+            "--closure-evidence",
+            "docs/plans/plan-109-runner-environment.md",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli("verify", "run", "plan-109-runner-environment", "--json", "--timeout", "17")
+        self.assertEqual(code, 0, err)
+        verification = json.loads(out)["data"]["verification"]
+        environment = verification["environment"]
+        self.assertEqual(environment["cwd"], str(self.root.resolve()))
+        self.assertEqual(environment["runner"]["timeout_seconds"], 17)
+        self.assertTrue(environment["runner"]["shell"])
+        self.assertEqual(environment["runner"]["check_count"], 1)
+        self.assertTrue(environment["python"]["executable"])
+        self.assertIn("version", environment["python"])
+        self.assertIn("version", environment["abh"])
+        self.assertIn("commit", environment["git"])
+        self.assertIn("dirty", environment["git"])
+        self.assertEqual(environment["commands"][0]["command"], "python3 -c 'print(\"env-ok\")'")
+        self.assertEqual(environment["commands"][0]["argv"], ["python3", "-c", "print(\"env-ok\")"])
+        self.assertIn("environment_variables", environment)
+
     def test_verify_run_detects_recursive_self_invocation_command(self) -> None:
         self.assertTrue(
             is_recursive_verify_command(
@@ -454,6 +500,45 @@ class CliTests(TestCase):
             )
         )
         self.assertFalse(is_recursive_verify_command("python3 -m abh doctor", "plan-recursive-guard"))
+
+    def test_verify_run_recursive_guard_records_environment_metadata(self) -> None:
+        code, out, err = self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-110-recursive-environment",
+            "--title",
+            "Recursive Environment",
+            "--attractor",
+            "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "guard recursive verification",
+            "--non-goal",
+            "execute recursion",
+            "--exit-criterion",
+            "recursive guard leaves evidence",
+            "--validation",
+            "python3 -m abh verify run plan-110-recursive-environment",
+            "--closure-evidence",
+            "docs/plans/plan-110-recursive-environment.md",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli("verify", "run", "plan-110-recursive-environment", "--json")
+        self.assertEqual(code, 1, err)
+        verification = json.loads(out)["data"]["verification"]
+        environment = verification["environment"]
+        self.assertEqual(environment["runner"]["check_count"], 1)
+        self.assertEqual(environment["commands"][0]["command"], "python3 -m abh verify run plan-110-recursive-environment")
+        self.assertEqual(
+            environment["commands"][0]["argv"],
+            ["python3", "-m", "abh", "verify", "run", "plan-110-recursive-environment"],
+        )
+        self.assertTrue(any("recursive_verify_guard" in artifact for artifact in verification["artifacts"]))
 
     def test_invalid_ready_transition_is_rejected(self) -> None:
         code, out, err = self.run_cli(
@@ -902,6 +987,16 @@ class CliTests(TestCase):
             self.assertEqual(record.to_dict()["schema_version"], "1")
 
     def test_model_deserialization_allows_missing_schema_version(self) -> None:
+        verification = VerificationRun.from_dict(
+            {
+                "id": "ver-legacy",
+                "plan_id": "plan-legacy",
+                "command": "cmd",
+                "result": "pass",
+            }
+        )
+        self.assertEqual(verification.environment, {})
+
         plan = PlanRecord.from_dict(
             {
                 "id": "plan-legacy",

@@ -24,6 +24,7 @@ class VerificationRun:
     result: str
     artifacts: list[str] = field(default_factory=list)
     failed_checks: list[str] = field(default_factory=list)
+    environment: dict[str, Any] = field(default_factory=dict)
     created_at: str = field(default_factory=utc_now)
 
     def to_dict(self) -> dict[str, Any]:
@@ -35,6 +36,7 @@ class VerificationRun:
             "result": self.result,
             "artifacts": list(self.artifacts),
             "failed_checks": list(self.failed_checks),
+            "environment": dict(self.environment),
             "created_at": self.created_at,
         }
 
@@ -47,6 +49,7 @@ class VerificationRun:
             result=data["result"],
             artifacts=list(data.get("artifacts", [])),
             failed_checks=list(data.get("failed_checks", [])),
+            environment=dict(data.get("environment", {})),
             created_at=data.get("created_at", utc_now()),
         )
 

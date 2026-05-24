@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-Sprint 14：阶段 3 Core Module Split（已完成）
+Sprint 15：阶段 3 Verification Environment Metadata（已完成）
 
 ## 状态说明
 
@@ -190,3 +190,13 @@ Sprint 14：阶段 3 Core Module Split（已完成）
 | S14-002 | 拆出 plan/audit/verification 领域模块 | Done | `abh/plans.py`, `abh/audits.py`, `abh/verifications.py`, `abh/errors.py`, `abh/core.py` |
 | S14-003 | 补充 core 兼容 re-export 边界测试 | Done | `tests/test_cli.py` |
 | S14-004 | plan-018 验证与独立审计 | Done | `docs/audits/audit-018-core-module-split.md` |
+
+## Sprint 15
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S15-001 | 启动 Verification Environment Metadata 计划 | Done | `docs/plans/plan-019-verification-environment-metadata.md` |
+| S15-002 | 为 `verify run` 记录结构化环境元数据 | Done | `abh/models.py`, `abh/verifications.py` |
+| S15-003 | 补充环境元数据兼容性和路径覆盖测试 | Done | `tests/test_cli.py` |
+| S15-004 | 记录 ABH 并行写入 dogfood memory | Done | `docs/memory/mem-abh-write-concurrency-001.md` |
+| S15-005 | plan-019 验证与独立审计 | Done | `docs/audits/audit-019-verification-environment-metadata.md` |
