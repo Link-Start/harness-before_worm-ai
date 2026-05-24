@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-Sprint 15：阶段 3 Verification Environment Metadata（已完成）
+Sprint 16：阶段 3 Functional Plan（已完成）
 
 ## 状态说明
 
@@ -200,3 +200,13 @@ Sprint 15：阶段 3 Verification Environment Metadata（已完成）
 | S15-003 | 补充环境元数据兼容性和路径覆盖测试 | Done | `tests/test_cli.py` |
 | S15-004 | 记录 ABH 并行写入 dogfood memory | Done | `docs/memory/mem-abh-write-concurrency-001.md` |
 | S15-005 | plan-019 验证与独立审计 | Done | `docs/audits/audit-019-verification-environment-metadata.md` |
+
+## Sprint 16
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S16-001 | 启动 Stage 3 Functional Plan | Done | `docs/plans/plan-020-stage-3-functional-plan.md` |
+| S16-002 | 将阶段 3 剩余功能拆成 plan 队列 | Done | `docs/development-roadmap.md`, `docs/阶段规划.md` |
+| S16-003 | 同步 README 和 task-board 当前阶段 | Done | `README.md`, `docs/task-board.md` |
+| S16-004 | 校正后续阶段建议 plan 编号 | Done | `docs/development-roadmap.md` |
+| S16-005 | plan-020 验证与独立审计 | Done | `docs/audits/audit-020-stage-3-functional-plan.md` |

@@ -1,0 +1,41 @@
+# Audit: plan-020-stage-3-functional-plan
+
+## Metadata
+
+- Audit ID: audit-020-stage-3-functional-plan
+- Plan: plan-020-stage-3-functional-plan
+- Auditor: independent-review
+- Status: complete
+- Created: 2026-05-24T11:42:27.098320+00:00
+- Updated: 2026-05-24T11:45:39.433706+00:00
+
+## Scope
+
+独立审计 plan-020-stage-3-functional-plan：验证阶段 3 剩余功能规划是否完整、plan 队列编号是否一致、是否保持 docs-only 非目标、README/roadmap/task-board/阶段规划是否同步、验证证据是否通过
+
+## Evidence Reviewed
+
+- docs/plans/plan-020-stage-3-functional-plan.md
+- .abh/plans/plan-020-stage-3-functional-plan.json
+- .abh/verifications/ver-272e4c2eca04.json
+- docs/development-roadmap.md
+- docs/task-board.md
+- docs/阶段规划.md
+- README.md
+
+## Findings
+
+| Severity | Finding | Evidence | Recommendation |
+| --- | --- | --- | --- |
+| Medium | Existing audit-020 record was in need_info/requested state before this audit result | docs/audits/audit-020-stage-3-functional-plan.md | Filled with this independent audit verdict |
+| Low | Verification ver-272e4c2eca04 ran with dirty working tree | .abh/verifications/ver-272e4c2eca04.json | Expected for docs-only slice before commit; non-blocking |
+| Info | 41/41 tests pass | tests/test_cli.py | No regression |
+
+## Verdict
+
+- Result: pass
+- Rationale: 独立审计验证：所有 5 项退出条件均满足，所有 2 项非目标均得到尊重。纯文档切片——仅文档和 ABH 运行态变更，无 abh/ 或 tests/ 行为变更。Plan 编号已确认：阶段 3（plan-020 至 plan-025），阶段 4+（从 plan-026 开始）。Roadmap、task-board、阶段规划、README 全部对齐。Doctor 通过，41/41 测试通过。
+
+## Follow-Ups
+
+- 

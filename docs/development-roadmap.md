@@ -244,11 +244,11 @@
 
 ## 4. 当前执行焦点
 
-Sprint 15 已完成。`plan-019-verification-environment-metadata` 已关闭，`verify run` 记录现在包含 cwd、git、ABH/Python 版本、命令 argv、timeout 和 allowlisted 环境变量等执行环境证据。
+Sprint 16 已完成。`plan-020-stage-3-functional-plan` 已关闭，阶段 3 剩余功能已经拆成明确、可审计、可关闭的计划队列。
 
 `plan-015-controlled-mcp-write-tools` 已关闭。阶段 2 Agent Protocol Foundation 已完整完成：核心只读命令具备显式 JSON 输出和结构化错误格式，MCP stdio Server 同时提供只读工具和受控写工具，写工具必须显式 `confirm=true` 并复用现有 ABH 门禁。
 
-当前执行计划：暂无。下一条阶段 3 切片应优先推进 `plan-020-verification-trust-and-stale-detection`，在 plan-019 的环境元信息基础上补齐可信等级和 stale 检测。
+当前执行计划：暂无。下一条阶段 3 实现切片是 `plan-021-verification-trust-and-stale-detection`。
 
 当前阶段状态：
 
@@ -256,9 +256,9 @@ Sprint 15 已完成。`plan-019-verification-environment-metadata` 已关闭，`
 - 已完成：`plan-014-readonly-mcp-server`。
 - 已完成：`plan-015-controlled-mcp-write-tools`。
 - 阶段 2 判定：完成。JSON contract、结构化错误、只读 MCP 和受控 MCP 写工具均已通过 verification 与独立审计。
-- 当前里程碑：v0.3 Verify Runner 阶段已启动；已完成 `plan-016-verify-runner`、`plan-017-plan-update`、`plan-018-core-module-split` 和 `plan-019-verification-environment-metadata`。
-- 当前阶段：阶段 3 验证执行器已启动，Verify Runner MVP、Plan Update MVP、Core Module Split 与环境元信息切片已交付。
-- 当前阶段 3 焦点：在已有环境元信息基础上推进可信等级、stale 检测和失败分类。
+- 当前里程碑：v0.3 Verify Runner 阶段已启动；已完成 `plan-016-verify-runner`、`plan-017-plan-update`、`plan-018-core-module-split`、`plan-019-verification-environment-metadata` 和 `plan-020-stage-3-functional-plan`。
+- 当前阶段：阶段 3 验证执行器已启动，Verify Runner MVP、Plan Update MVP、Core Module Split、环境元信息切片与剩余功能规划已交付。
+- 当前阶段 3 焦点：按 `plan-021` 至 `plan-025` 队列推进可信等级、stale 检测、失败分类、写入安全和后续模块拆分。
 - 不进入当前切片：Attractor Registry、Web UI、外部数据库。
 
 ## 5. 长期阶段线
@@ -348,9 +348,10 @@ Sprint 15 已完成。`plan-019-verification-environment-metadata` 已关闭，`
 - 已完成：`plan-017-plan-update` 交付 `abh plan update <plan>`，支持追加计划字段、去重、JSON/Markdown 双写，以及通过 `--remove-validation` 精确修复错误 validation checklist。
 - 已完成：`plan-018-core-module-split` 将 plan、audit、verification 和 shared errors 逻辑拆分到领域模块，并通过 `abh.core` 保持现有导入兼容。
 - 已完成：`plan-019-verification-environment-metadata` 为 `verify run` 记录补充结构化 environment 元数据，并保持旧 verification 记录可读取。
+- 已完成：`plan-020-stage-3-functional-plan` 将阶段 3 剩余功能规划成可执行 plan 队列。
 - 已记录：plan-017 dogfood 中的递归验证风暴已压缩保留 7 条代表性 verification 作为证据，重复超时记录未继续保留。
 - 已记录：plan-019 dogfood 中发现 ABH 对同一对象并行写入会损坏 JSON/Markdown，后续应补原子写或文件锁保护。
-- 未完成：可信等级、stale 检测、环境失败分类，以及 memory、drift、routing 等后续模块拆分。
+- 未完成：可信等级、stale 检测、环境失败分类、写入安全，以及 memory、drift、routing 等后续模块拆分。
 
 建议版本：v0.3。
 
@@ -360,7 +361,12 @@ Sprint 15 已完成。`plan-019-verification-environment-metadata` 已关闭，`
 - `plan-017-plan-update`（已完成）
 - `plan-018-core-module-split`（已完成）
 - `plan-019-verification-environment-metadata`（已完成）
-- `plan-020-verification-trust-and-stale-detection`
+- `plan-020-stage-3-functional-plan`（已完成）
+- `plan-021-verification-trust-and-stale-detection`
+- `plan-022-verification-failure-classification`
+- `plan-023-atomic-abh-writes`
+- `plan-024-memory-drift-routing-module-split`
+- `plan-025-stage-3-finalization`
 
 ### 阶段 4：补齐 Attractor Registry
 
@@ -379,8 +385,8 @@ Sprint 15 已完成。`plan-019-verification-environment-metadata` 已关闭，`
 
 建议后续计划：
 
-- `plan-019-attractor-registry`
-- `plan-020-attractor-aware-route-drift`
+- `plan-026-attractor-registry`
+- `plan-027-attractor-aware-route-drift`
 
 ### 阶段 5：真正独立审计
 
@@ -400,8 +406,8 @@ Sprint 15 已完成。`plan-019-verification-environment-metadata` 已关闭，`
 
 建议后续计划：
 
-- `plan-021-audit-prompt-bundle`
-- `plan-022-independent-audit-gate`
+- `plan-028-audit-prompt-bundle`
+- `plan-029-independent-audit-gate`
 
 ### 阶段 6：漂移与记忆质量提升
 
@@ -420,9 +426,9 @@ Sprint 15 已完成。`plan-019-verification-environment-metadata` 已关闭，`
 
 建议后续计划：
 
-- `plan-023-drift-quality`
-- `plan-024-memory-index`
-- `plan-025-reporting`
+- `plan-030-drift-quality`
+- `plan-031-memory-index`
+- `plan-032-reporting`
 
 ### 阶段 7：团队可用与生态集成
 
@@ -442,9 +448,9 @@ Sprint 15 已完成。`plan-019-verification-environment-metadata` 已关闭，`
 
 建议后续计划：
 
-- `plan-026-init-and-ci-templates`
-- `plan-027-multi-repo-sharing`
-- `plan-028-pypi-release`
+- `plan-033-init-and-ci-templates`
+- `plan-034-multi-repo-sharing`
+- `plan-035-pypi-release`
 
 ## 6. 历史执行线与长期阶段映射
 
@@ -452,7 +458,7 @@ Sprint 15 已完成。`plan-019-verification-environment-metadata` 已关闭，`
 | --- | --- | --- | --- |
 | 阶段 1：恢复权威基线，稳住内核 | `plan-006-stabilize`, `plan-007-zero-dep-install`, `plan-008-roadmap-sync-and-doctor`, `plan-009-roadmap-phase-alignment`, `plan-010-core-governance-hardening`, `plan-011-stage-1-finalization` | 历史计划迁移、安装门槛降低、`abh doctor`、路线图对齐、demo 清理、schema version、历史 schema 迁移、CI、版本策略 | 已完成；内容级 doctor、发布自动化转入后续质量/发布计划 |
 | 阶段 2：Agent Protocol 基础 | `plan-012-agent-protocol-foundation`, `plan-013-json-output-and-errors`, `plan-014-readonly-mcp-server`, `plan-015-controlled-mcp-write-tools` | Agent Protocol 五层基线、阶段路线、核心只读命令 `--json`、统一 JSON envelope、结构化 ABH 错误、只读 MCP stdio Server、受控 MCP 写工具 | 已完成；verify runner 和 Attractor Registry 转入后续阶段 |
-| 阶段 3：验证执行器 | `plan-002-sprint-2-local-plan-loop`, `plan-016-verify-runner`, `plan-017-plan-update`, `plan-018-core-module-split`, `plan-019-verification-environment-metadata` | `verify record` 可记录验证结果；`verify run` 可执行 validation checklist、记录机器证据、失败阻断计划并支持 JSON 输出；`plan update` 可通过 CLI 双写追加计划字段并精确修复 validation checklist；`core.py` 已拆出 plan/audit/verification/errors 领域模块并保持兼容导出；environment 元数据已补充 cwd、git、版本、timeout、argv 和 allowlisted env 证据 | 可信等级、stale 检测、环境失败分类、memory/drift/routing 后续模块拆分 |
+| 阶段 3：验证执行器 | `plan-002-sprint-2-local-plan-loop`, `plan-016-verify-runner`, `plan-017-plan-update`, `plan-018-core-module-split`, `plan-019-verification-environment-metadata`, `plan-020-stage-3-functional-plan` | `verify record` 可记录验证结果；`verify run` 可执行 validation checklist、记录机器证据、失败阻断计划并支持 JSON 输出；`plan update` 可通过 CLI 双写追加计划字段并精确修复 validation checklist；`core.py` 已拆出 plan/audit/verification/errors 领域模块并保持兼容导出；environment 元数据已补充 cwd、git、版本、timeout、argv 和 allowlisted env 证据；阶段 3 剩余功能已规划成可执行队列 | 可信等级、stale 检测、环境失败分类、写入安全、memory/drift/routing 后续模块拆分 |
 | 阶段 4：Attractor Registry | `plan-001-sprint-1-foundation` | active attractor 文档和模板 | attractor CLI、版本迁移、active 校验 |
 | 阶段 5：真正独立审计 | `plan-003-sprint-3-audit-memory-close`, `plan-007-zero-dep-install`, `plan-008-roadmap-sync-and-doctor` | audit request/record/close 闭环，人工独立审计流程已 dogfood | audit prompt/bundle、独立上下文字段、关闭门禁 |
 | 阶段 6：漂移与记忆质量提升 | `plan-004-sprint-4-route-drift`, `plan-007-sprint-7-dogfood` | 关键词 drift、route 注入活跃计划和记忆 | severity/confidence、memory 索引、对象图路由、report |
@@ -460,13 +466,14 @@ Sprint 15 已完成。`plan-019-verification-environment-metadata` 已关闭，`
 
 ## 7. 下一批推荐计划
 
-本节只列下一批仍可切分执行的计划。已关闭的 `plan-012-agent-protocol-foundation`、`plan-013-json-output-and-errors`、`plan-014-readonly-mcp-server`、`plan-015-controlled-mcp-write-tools`、`plan-016-verify-runner`、`plan-017-plan-update` 和 `plan-018-core-module-split` 已归入第 3 章历史执行线与第 6 章阶段映射。
+本节只列下一批仍可切分执行的计划。已关闭的 `plan-012-agent-protocol-foundation`、`plan-013-json-output-and-errors`、`plan-014-readonly-mcp-server`、`plan-015-controlled-mcp-write-tools`、`plan-016-verify-runner`、`plan-017-plan-update`、`plan-018-core-module-split` 和 `plan-019-verification-environment-metadata` 已归入第 3 章历史执行线与第 6 章阶段映射。
 
 已完成参考：
 
 - `plan-016-verify-runner`：交付 `abh verify run <plan>` MVP，执行 validation checklist 并记录机器验证证据。
 - `plan-017-plan-update`：交付 `abh plan update <plan>` MVP，支持计划字段追加、去重、双写同步和 validation checklist 精确修复。
 - `plan-018-core-module-split`：拆出 plan/audit/verification/errors 领域模块，并保持 `abh.core` 公共导入兼容。
+- `plan-019-verification-environment-metadata`：为 `verify run` 记录补齐环境元信息，为 stale 检测和可信等级提供基础证据。
 
 ### plan-019-verification-environment-metadata
 
@@ -483,6 +490,97 @@ Sprint 15 已完成。`plan-019-verification-environment-metadata` 已关闭，`
 - 不实现隔离执行环境或 CI runner。
 - 不改变 pass/fail/partial 语义。
 - 不把本地执行结果声明为防篡改证明。
+
+### plan-020-stage-3-functional-plan
+
+状态：已完成，对应 Sprint 16。
+
+范围：
+
+- 将阶段 3 剩余能力拆成具体 plan 队列，明确顺序、边界、非目标和验收重点。
+- 同步 roadmap、task-board、README 和阶段规划，避免后续计划 ID 与阶段 4-7 规划冲突。
+- 保持 docs-only，不修改 CLI、MCP、schema、verification 语义或模块边界。
+
+不做：
+
+- 不实现可信等级、stale 检测、失败分类、原子写、隔离执行或模块拆分。
+- 不改写已关闭计划、审计或验证事实。
+
+### plan-021-verification-trust-and-stale-detection
+
+状态：建议。
+
+范围：
+
+- 为 verification 记录标注可信等级，例如 `manual_record`、`local_shell`、`ci` 等可扩展枚举。
+- 基于 plan validation checklist、plan 更新时间和 git/environment 元数据识别旧 verification 是否可能 stale。
+- 在 `plan status --json` 中暴露 latest verification 的 trust/stale 摘要，供 Agent 判断关闭风险。
+
+不做：
+
+- 不实现 CI runner 或隔离执行。
+- 不改变现有 pass/fail/partial 结果语义。
+- 不让 stale 自动阻断 close；关闭门禁是否升级留给后续独立计划。
+
+### plan-022-verification-failure-classification
+
+状态：建议。
+
+范围：
+
+- 为 `verify run` 失败增加分类，例如 validation failure、environment failure、timeout、recursive guard、unknown。
+- 让 failed checks 的 artifact 更容易审计，区分代码验证失败和执行环境失败。
+- 保持 ready/running 失败阻断规则兼容，先只增强证据表达。
+
+不做：
+
+- 不实现 flaky 重试、网络诊断或自动修复。
+- 不绕过现有 `record_verification` 状态规则。
+
+### plan-023-atomic-abh-writes
+
+状态：建议。
+
+范围：
+
+- 针对 dogfood memory `mem-abh-write-concurrency-001`，为 `.abh` JSON 与对应 Markdown 写入增加原子写或文件锁保护。
+- 覆盖 plan update、transition、verify run、audit record/close 等同对象连续写入路径。
+- 补充并发写入回归测试，避免 JSON/Markdown 尾部重复或截断。
+
+不做：
+
+- 不引入外部数据库或长期后台服务。
+- 不改变 ABH 文件格式。
+
+### plan-024-memory-drift-routing-module-split
+
+状态：建议。
+
+范围：
+
+- 继续 `plan-018` 的模块边界收敛，将 memory、drift 和 routing 行为从 `core.py` 拆到领域模块。
+- 保持 `abh.core` 兼容导出和 CLI/MCP 行为不变。
+- 补充 re-export 和主要 CLI/MCP 回归测试。
+
+不做：
+
+- 不提升 drift 算法质量。
+- 不新增 memory 索引或 route 排序算法。
+
+### plan-025-stage-3-finalization
+
+状态：建议。
+
+范围：
+
+- 审核阶段 3 已完成能力是否足以标记 v0.3 里程碑。
+- 同步 README、roadmap、task-board、阶段规划，明确阶段 3 完成与阶段 4 启动条件。
+- 运行完整验证、doctor 和独立审计，关闭阶段 3。
+
+不做：
+
+- 不新增功能。
+- 不替代阶段 4 Attractor Registry 计划。
 
 ## 8. 风险控制
 
