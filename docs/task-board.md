@@ -231,3 +231,14 @@ Sprint 16：阶段 3 Functional Plan（已完成）
 | S18-003 | 覆盖 validation failure、timeout、recursive guard 和 environment failure | Done | `tests/test_cli.py` |
 | S18-004 | 同步阶段 3 文档 | Done | `README.md`, `docs/development-roadmap.md`, `docs/阶段规划.md` |
 | S18-005 | plan-022 验证与独立审计 | Done | `.abh/verifications/ver-0b0b5694cf4f.json`, `docs/audits/audit-022-verification-failure-classification.md` |
+
+## Sprint 19
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S19-001 | 启动 Atomic ABH Writes 计划 | Done | `docs/plans/plan-023-atomic-abh-writes.md` |
+| S19-002 | 为 ABH 存储层补充原子写与本地文件锁 | Done | `abh/storage.py` |
+| S19-003 | 统一 plan/audit/memory/drift Markdown 保存路径 | Done | `abh/plans.py`, `abh/audits.py`, `abh/core.py` |
+| S19-004 | 补充原子写与并发写入回归测试 | Done | `tests/test_cli.py` |
+| S19-005 | 同步阶段 3 文档 | Done | `README.md`, `docs/development-roadmap.md`, `docs/阶段规划.md` |
+| S19-006 | plan-023 验证与独立审计 | Done | `.abh/verifications/ver-889f8cddf60c.json`, `docs/audits/audit-023-atomic-abh-writes.md` |

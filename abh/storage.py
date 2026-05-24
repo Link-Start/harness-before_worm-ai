@@ -1,8 +1,16 @@
 from __future__ import annotations
 
 import json
+import os
+import time
+import uuid
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
+
+
+LOCK_TIMEOUT_SECONDS = 30.0
+LOCK_POLL_SECONDS = 0.05
 
 
 def root_dir(cwd: Path | None = None) -> Path:
@@ -105,9 +113,64 @@ def ensure_workspace(cwd: Path | None = None) -> None:
         directory.mkdir(parents=True, exist_ok=True)
 
 
-def write_json(path: Path, data: dict[str, Any]) -> None:
+@contextmanager
+def file_lock(path: Path):
+    lock_path = path.with_suffix(path.suffix + ".lock")
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    deadline = time.monotonic() + LOCK_TIMEOUT_SECONDS
+    fd: int | None = None
+    acquired = False
+    try:
+        while True:
+            try:
+                fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.write(fd, f"{os.getpid()}\n".encode("utf-8"))
+                acquired = True
+                break
+            except FileExistsError:
+                if time.monotonic() >= deadline:
+                    raise TimeoutError(f"timed out waiting for write lock: {lock_path}")
+                time.sleep(LOCK_POLL_SECONDS)
+        yield
+    finally:
+        if fd is not None:
+            os.close(fd)
+        if acquired:
+            try:
+                lock_path.unlink()
+            except FileNotFoundError:
+                pass
+
+
+def _cleanup_temp(path: Path, exc_type: type[BaseException] | None) -> None:
+    if exc_type is not None:
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def write_text(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.with_name(f"{path.name}.{uuid.uuid4().hex}.tmp")
+    with file_lock(path):
+        temp_file = temp_path.open("w", encoding="utf-8")
+        exc_type: type[BaseException] | None = None
+        try:
+            with temp_file:
+                temp_file.write(content)
+                temp_file.flush()
+                os.fsync(temp_file.fileno())
+            os.replace(temp_path, path)
+        except BaseException as exc:
+            exc_type = type(exc)
+            raise
+        finally:
+            _cleanup_temp(temp_path, exc_type)
+
+
+def write_json(path: Path, data: dict[str, Any]) -> None:
+    write_text(path, json.dumps(data, indent=2, ensure_ascii=False) + "\n")
 
 
 def read_json(path: Path) -> dict[str, Any]:

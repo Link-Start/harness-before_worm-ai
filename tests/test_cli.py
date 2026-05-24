@@ -4,12 +4,14 @@ import io
 import json
 import subprocess
 import tempfile
+import threading
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 import os
 
+from abh import storage
 from abh.cli import main
 from abh import audits, plans, verifications
 from abh.core import (
@@ -1211,6 +1213,60 @@ class CliTests(TestCase):
         self.assertEqual(payload["data"]["issues"], ["missing markdown for plan plan-doctor-json"])
         self.assertEqual(payload["errors"][0]["category"], "consistency")
         self.assertEqual(payload["errors"][0]["code"], "doctor_issues")
+
+    def test_write_json_keeps_existing_file_when_atomic_replace_fails(self) -> None:
+        path = self.root / ".abh" / "plans" / "plan-atomic.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text('{"old": true}\n', encoding="utf-8")
+
+        with patch("abh.storage.os.replace", side_effect=OSError("replace failed")):
+            with self.assertRaises(OSError):
+                write_json(path, {"new": True})
+
+        self.assertEqual(path.read_text(encoding="utf-8"), '{"old": true}\n')
+        self.assertEqual(list(path.parent.glob("*.tmp")), [])
+        self.assertFalse(path.with_suffix(path.suffix + ".lock").exists())
+
+    def test_save_plan_markdown_uses_shared_atomic_text_writer(self) -> None:
+        with patch("abh.plans.write_text", wraps=storage.write_text) as text_writer:
+            self.run_cli(
+                "plan",
+                "create",
+                "--id",
+                "plan-atomic-doc",
+                "--title",
+                "Atomic Doc",
+                "--attractor",
+                "docs/architecture/attractors/abh-core-attractor.md",
+                "--baseline",
+                "baseline",
+            )
+
+        written_paths = [call.args[0].resolve() for call in text_writer.call_args_list]
+        self.assertIn((self.root / "docs" / "plans" / "plan-atomic-doc.md").resolve(), written_paths)
+
+    def test_write_json_serializes_concurrent_same_file_writes_and_cleans_locks(self) -> None:
+        path = self.root / ".abh" / "plans" / "plan-concurrent.json"
+        errors: list[BaseException] = []
+
+        def writer(index: int) -> None:
+            try:
+                write_json(path, {"schema_version": "1", "index": index})
+            except BaseException as exc:
+                errors.append(exc)
+
+        threads = [threading.Thread(target=writer, args=(index,)) for index in range(8)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        self.assertEqual(errors, [])
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(payload["schema_version"], "1")
+        self.assertIn(payload["index"], range(8))
+        self.assertEqual(list(path.parent.glob("*.tmp")), [])
+        self.assertFalse(path.with_suffix(path.suffix + ".lock").exists())
 
     def test_core_read_commands_support_json_output(self) -> None:
         self.create_ready_plan("plan-json-contract")

@@ -51,6 +51,7 @@ from .storage import (
     plans_dir,
     read_json,
     write_json,
+    write_text,
 )
 from .verifications import is_recursive_verify_command, load_verification, record_verification, run_verification
 
@@ -105,8 +106,7 @@ def save_memory(memory: MemoryRecord, cwd: Path | None = None, write_doc: bool =
         doc_path = memory.doc_path or str(memory_doc_path(memory.id, cwd))
         memory.doc_path = doc_path
         doc_file = Path(doc_path)
-        doc_file.parent.mkdir(parents=True, exist_ok=True)
-        doc_file.write_text(render_memory_markdown(memory), encoding="utf-8")
+        write_text(doc_file, render_memory_markdown(memory))
     write_json(memory_json_path(memory.id, cwd), memory.to_dict())
     return memory
 
@@ -342,8 +342,7 @@ def save_drift_report(report: DriftReport, cwd: Path | None = None, write_doc: b
         doc_path = report.doc_path or str(drift_doc_path(report.id, cwd))
         report.doc_path = doc_path
         doc_file = Path(doc_path)
-        doc_file.parent.mkdir(parents=True, exist_ok=True)
-        doc_file.write_text(render_drift_markdown(report), encoding="utf-8")
+        write_text(doc_file, render_drift_markdown(report))
     write_json(drift_json_path(report.id, cwd), report.to_dict())
     return report
 

@@ -1,0 +1,54 @@
+{
+  "schema_version": "1",
+  "id": "plan-023-atomic-abh-writes",
+  "title": "Atomic ABH Writes",
+  "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+  "baseline": "Stage 3 dogfood found ABH can corrupt JSON/Markdown when multiple write commands target related records concurrently; storage currently writes files directly with Path.write_text.",
+  "owner": "platform",
+  "status": "closed",
+  "goals": [
+    "Make ABH JSON and Markdown writes atomic at the single-file level so interrupted writes do not leave partial files.",
+    "Add per-file lock protection around ABH writes to reduce same-file concurrent writer corruption across local processes.",
+    "Route plan, audit, memory, drift, and verification persistence through the shared safe write helpers.",
+    "Keep existing CLI output, JSON schema, plan state machine, verification semantics, and doctor behavior compatible."
+  ],
+  "non_goals": [
+    "Do not implement CI execution, isolated verification, distributed locking, stale gate enforcement, or close gate changes in this slice.",
+    "Do not redesign storage layout or introduce external runtime dependencies.",
+    "Do not make multi-file JSON/Markdown object saves transactional across files."
+  ],
+  "exit_criteria": [
+    "write_json writes via an atomic temp-file replace and leaves the previous file intact if replacement fails before commit.",
+    "ABH text/Markdown writes use the same atomic write helper instead of direct Path.write_text in save paths.",
+    "Concurrent same-file write attempts are serialized by a local lock file and no .tmp/.lock files remain after successful writes.",
+    "plan/audit/memory/drift/verification save paths continue to produce JSON and Markdown accepted by abh doctor.",
+    "python3 -m unittest tests/test_cli.py -v passes.",
+    "python3 -m abh doctor passes."
+  ],
+  "validation_checklist": [
+    "python3 -m unittest tests/test_cli.py -v",
+    "python3 -m abh doctor"
+  ],
+  "closure_evidence": [
+    "tests/test_cli.py atomic write coverage",
+    "abh/storage.py",
+    "docs synchronized for plan-023",
+    ".abh/verifications/ver-3d44705cc11c.json",
+    "docs/plans/plan-023-atomic-abh-writes.md",
+    ".abh/verifications/ver-eca84c85ac93.json",
+    "audit-023-atomic-abh-writes"
+  ],
+  "verification_runs": [
+    "ver-3d44705cc11c",
+    "ver-eca84c85ac93",
+    "ver-a0fa5d1ef738",
+    "ver-889f8cddf60c",
+    "ver-a67d48470745"
+  ],
+  "audit_ids": [
+    "audit-023-atomic-abh-writes"
+  ],
+  "created_at": "2026-05-24T12:57:16.393294+00:00",
+  "updated_at": "2026-05-24T13:27:55.603925+00:00",
+  "doc_path": "/Users/cc/ai/harness-before/docs/plans/plan-023-atomic-abh-writes.md"
+}

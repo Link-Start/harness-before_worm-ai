@@ -1,0 +1,66 @@
+{
+  "schema_version": "1",
+  "id": "ver-3d44705cc11c",
+  "plan_id": "plan-023-atomic-abh-writes",
+  "command": "python3 -m unittest tests/test_cli.py -v && python3 -m abh doctor",
+  "result": "pass",
+  "artifacts": [
+    "command='python3 -m unittest tests/test_cli.py -v'; exit_code=0; duration_seconds=1.939; stdout=''; stderr='test_abh_error_json_returns_structured_error (tests.test_cli.CliTests.test_abh_error_json_returns_structured_error) ... ok\\\\ntest_audit_list_returns_all_audits (tests.test_cli.CliTests.test_audit_list_returns_all_audits) ... ok\\\\ntest_audit_record_allows_close_only_after_pass (tests.test_cli.CliTests.test_audit_record_allows_close_only_after_pass) ... ok\\\\ntest_core_read_commands_support_json_output (tests.test_cli.CliTests.test_core_read_commands_support_json_output) ... ok\\\\ntest_core_reexports_pl'",
+    "command='python3 -m abh doctor'; exit_code=0; duration_seconds=0.063; stdout='doctor: ok'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "/Users/cc/ai/harness-before",
+    "git": {
+      "commit": "b665dbb13ae52fb2aca41e059a9d5b2d7b3d29de",
+      "dirty": true,
+      "status_hash": "f600020a31e73b6689f320109b44bc3bba2596998d6b765d610db1ce05b27f9e",
+      "available": true
+    },
+    "abh": {
+      "version": "0.2.0"
+    },
+    "python": {
+      "version": "3.13.3 (main, Jan 27 2026, 20:15:53) [Clang 17.0.0 (clang-1700.6.3.2)]",
+      "executable": "/Users/cc/.pyenv/versions/3.13.3/bin/python3"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 2
+    },
+    "commands": [
+      {
+        "command": "python3 -m unittest tests/test_cli.py -v",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests/test_cli.py",
+          "-v"
+        ]
+      },
+      {
+        "command": "python3 -m abh doctor",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "doctor"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-05-24T12:57:21.141569+00:00",
+      "content_hash": "270b9672a12fd6bf58a89852e9ec09090c583c1128daf6234024c6e1f9fa5195",
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-05-24T13:04:04.969977+00:00"
+}
