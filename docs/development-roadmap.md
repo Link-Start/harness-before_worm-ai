@@ -231,11 +231,11 @@
 
 ## 4. 当前执行焦点
 
-当前处于 Sprint 13。
+Sprint 13 已完成，当前没有 running plan。下一轮建议进入 Sprint 14，以 `plan-018-core-module-split` 作为阶段 3 的下一条最小切片。
 
 `plan-015-controlled-mcp-write-tools` 已关闭。阶段 2 Agent Protocol Foundation 已完整完成：核心只读命令具备显式 JSON 输出和结构化错误格式，MCP stdio Server 同时提供只读工具和受控写工具，写工具必须显式 `confirm=true` 并复用现有 ABH 门禁。
 
-当前执行计划：`plan-017-plan-update` 已关闭。ABH 现在可以通过 CLI 双写更新计划内容和 validation checklist，并提供精确移除错误 validation checklist 的修复路径。
+最近关闭计划：`plan-017-plan-update`。ABH 现在可以通过 CLI 双写更新计划内容和 validation checklist，并提供精确移除错误 validation checklist 的修复路径。
 
 当前阶段状态：
 
@@ -245,8 +245,8 @@
 - 阶段 2 判定：完成。JSON contract、结构化错误、只读 MCP 和受控 MCP 写工具均已通过 verification 与独立审计。
 - 当前里程碑：v0.3 Verify Runner 阶段已启动；已完成 `plan-016-verify-runner` 和 `plan-017-plan-update`。
 - 当前阶段：阶段 3 验证执行器已启动，Verify Runner MVP 与 Plan Update MVP 已交付。
-- 当前阶段 3 焦点：下一步建议切分 `plan-018-core-module-split`，先降低 `core.py` 持续膨胀风险。
-- 不进入当前切片：Attractor Registry、Web UI、外部数据库。
+- 下一阶段 3 焦点：切分 `plan-018-core-module-split`，先降低 `core.py` 持续膨胀风险。
+- 不进入下一切片：Attractor Registry、Web UI、外部数据库。
 
 ## 5. 长期阶段线
 
@@ -328,6 +328,13 @@
 - 当 validation checklist、plan 内容或 git 状态变化后，旧 verification 应能被识别为可能 stale。
 - 支持 `abh plan update`，补充 goals、non-goals、exit criteria、validation checklist 和 closure evidence。
 - 在不破坏现有 CLI 的前提下，逐步拆分 `core.py` 为更小的领域模块，例如 `plans.py`、`audits.py`、`memory.py`、`drift.py`、`routing.py`。
+
+当前状态：
+
+- 已完成：`plan-016-verify-runner` 交付 `abh verify run <plan>` MVP，能够执行 validation checklist、记录 stdout/stderr 摘要、退出码、耗时和 artifact，并在失败时阻断 ready/running plan。
+- 已完成：`plan-017-plan-update` 交付 `abh plan update <plan>`，支持追加计划字段、去重、JSON/Markdown 双写，以及通过 `--remove-validation` 精确修复错误 validation checklist。
+- 已记录：plan-017 dogfood 中的递归验证风暴已压缩保留 7 条代表性 verification 作为证据，重复超时记录未继续保留。
+- 未完成：git commit/dirty status、ABH/Python 环境元信息、可信等级、stale 检测、环境失败分类和 `core.py` 模块拆分。
 
 建议版本：v0.3。
 
@@ -435,37 +442,12 @@
 
 ## 7. 下一批推荐计划
 
-本节列下一批推荐计划。已关闭的 `plan-012-agent-protocol-foundation`、`plan-013-json-output-and-errors`、`plan-014-readonly-mcp-server`、`plan-015-controlled-mcp-write-tools`、`plan-016-verify-runner` 和 `plan-017-plan-update` 归入第 3 章历史执行线与第 6 章阶段映射。
+本节只列下一批仍可切分执行的计划。已关闭的 `plan-012-agent-protocol-foundation`、`plan-013-json-output-and-errors`、`plan-014-readonly-mcp-server`、`plan-015-controlled-mcp-write-tools`、`plan-016-verify-runner` 和 `plan-017-plan-update` 已归入第 3 章历史执行线与第 6 章阶段映射。
 
-### plan-016-verify-runner
+已完成参考：
 
-状态：已完成。
-
-范围：
-
-- 实现 `abh verify run <plan>`。
-- 执行 validation checklist 中的命令。
-- 保存退出码、耗时、输出摘要和 artifact。
-- 失败时自动阻断计划。
-
-不做：
-
-- 不实现 CI 服务端。
-- 不改变 audit 关闭规则。
-
-### plan-017-plan-update
-
-状态：已完成。
-
-范围：
-
-- 支持更新 plan 的 goals、non-goals、exit criteria、validation checklist 和 closure evidence。
-- 确保更新后 JSON 与 Markdown 双写一致。
-- 精确移除错误的 validation checklist 条目，用于修复 dogfood 中发现的递归自调用风险。
-
-不做：
-
-- 不引入交互式编辑器。
+- `plan-016-verify-runner`：交付 `abh verify run <plan>` MVP，执行 validation checklist 并记录机器验证证据。
+- `plan-017-plan-update`：交付 `abh plan update <plan>` MVP，支持计划字段追加、去重、双写同步和 validation checklist 精确修复。
 
 ### plan-018-core-module-split
 
