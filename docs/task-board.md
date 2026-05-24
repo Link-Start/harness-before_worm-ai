@@ -242,3 +242,15 @@ Sprint 16：阶段 3 Functional Plan（已完成）
 | S19-004 | 补充原子写与并发写入回归测试 | Done | `tests/test_cli.py` |
 | S19-005 | 同步阶段 3 文档 | Done | `README.md`, `docs/development-roadmap.md`, `docs/阶段规划.md` |
 | S19-006 | plan-023 验证与独立审计 | Done | `.abh/verifications/ver-889f8cddf60c.json`, `docs/audits/audit-023-atomic-abh-writes.md` |
+
+## Sprint 20
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S20-001 | 启动 Memory/Drift/Routing Module Split 计划 | Done | `docs/plans/plan-024-memory-drift-routing-module-split.md` |
+| S20-002 | 拆出 memory 领域模块 | Done | `abh/memory.py`, `abh/core.py` |
+| S20-003 | 拆出 drift 领域模块 | Done | `abh/drift.py`, `abh/core.py` |
+| S20-004 | 拆出 routing 领域模块 | Done | `abh/routing.py`, `abh/core.py` |
+| S20-005 | 补充 core re-export 和 CLI/MCP 回归测试 | Done | `tests/test_cli.py` |
+| S20-006 | 同步阶段 3 文档 | Done | `README.md`, `docs/development-roadmap.md`, `docs/阶段规划.md` |
+| S20-007 | plan-024 验证与独立审计 | Done | `.abh/verifications/ver-e44f2ac2dc7a.json`, `docs/audits/audit-024-memory-drift-routing-module-split.md` |

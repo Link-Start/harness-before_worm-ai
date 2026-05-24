@@ -1,0 +1,66 @@
+{
+  "schema_version": "1",
+  "id": "ver-d88dc5cfe2f1",
+  "plan_id": "plan-024-memory-drift-routing-module-split",
+  "command": "python3 -m unittest tests/test_cli.py -v && python3 -m abh doctor",
+  "result": "pass",
+  "artifacts": [
+    "command='python3 -m unittest tests/test_cli.py -v'; exit_code=0; duration_seconds=1.850; stdout=''; stderr='test_abh_error_json_returns_structured_error (tests.test_cli.CliTests.test_abh_error_json_returns_structured_error) ... ok\\\\ntest_audit_list_returns_all_audits (tests.test_cli.CliTests.test_audit_list_returns_all_audits) ... ok\\\\ntest_audit_record_allows_close_only_after_pass (tests.test_cli.CliTests.test_audit_record_allows_close_only_after_pass) ... ok\\\\ntest_core_read_commands_support_json_output (tests.test_cli.CliTests.test_core_read_commands_support_json_output) ... ok\\\\ntest_core_reexports_me'",
+    "command='python3 -m abh doctor'; exit_code=0; duration_seconds=0.045; stdout='doctor: ok'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "/Users/cc/ai/harness-before",
+    "git": {
+      "commit": "3ee47cab3e6b54e2188ae18ba2c5cbcff5d005ae",
+      "dirty": true,
+      "status_hash": "9ad6f9e89ae8d15227d466c9f61e9e5d186f6c61e98c844b6b8279bf81611acd",
+      "available": true
+    },
+    "abh": {
+      "version": "0.2.0"
+    },
+    "python": {
+      "version": "3.13.3 (main, Jan 27 2026, 20:15:53) [Clang 17.0.0 (clang-1700.6.3.2)]",
+      "executable": "/Users/cc/.pyenv/versions/3.13.3/bin/python3"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 2
+    },
+    "commands": [
+      {
+        "command": "python3 -m unittest tests/test_cli.py -v",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests/test_cli.py",
+          "-v"
+        ]
+      },
+      {
+        "command": "python3 -m abh doctor",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "doctor"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-05-24T13:35:23.033347+00:00",
+      "content_hash": "bef085578003667fb057bae3ba26f7bd240cb5ef617f11684c2fee62707f73a0",
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-05-24T13:41:54.488736+00:00"
+}

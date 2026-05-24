@@ -398,8 +398,8 @@ python3 -m abh.mcp_server
 
 当前仓库已经覆盖计划、验证、审计、关闭、记忆、路由和基础漂移分析。后续计划：
 
-- 继续推进阶段 3：`plan-016-verify-runner`、`plan-017-plan-update`、`plan-018-core-module-split`、`plan-019-verification-environment-metadata`、`plan-020-stage-3-functional-plan`、`plan-021-verification-trust-and-stale-detection`、`plan-022-verification-failure-classification` 和 `plan-023-atomic-abh-writes` 已完成，下一步进入 `plan-024-memory-drift-routing-module-split`
-- 阶段 3 剩余队列：`plan-024-memory-drift-routing-module-split`、`plan-025-stage-3-finalization`
+- 继续推进阶段 3：`plan-016-verify-runner`、`plan-017-plan-update`、`plan-018-core-module-split`、`plan-019-verification-environment-metadata`、`plan-020-stage-3-functional-plan`、`plan-021-verification-trust-and-stale-detection`、`plan-022-verification-failure-classification`、`plan-023-atomic-abh-writes` 和 `plan-024-memory-drift-routing-module-split` 已完成，下一步进入 `plan-025-stage-3-finalization`
+- 阶段 3 剩余队列：`plan-025-stage-3-finalization`
 - 提升漂移分析精度：从关键词匹配升级到更高质量的证据提取
 - 增加 `abh report`，展示计划关闭率、审计驳回率和重复漂移情况
 - 支持 Git hook 集成，在提交前自动验证状态一致性

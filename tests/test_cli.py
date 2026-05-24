@@ -70,6 +70,15 @@ class CliTests(TestCase):
         self.assertIs(request_audit, audits.request_audit)
         self.assertIs(record_audit, audits.record_audit)
 
+    def test_core_reexports_memory_drift_and_routing_module_functions(self) -> None:
+        from abh import core, drift, memory, routing
+
+        self.assertIs(core.add_memory, memory.add_memory)
+        self.assertIs(core.search_memory, memory.search_memory)
+        self.assertIs(core.list_memories, memory.list_memories)
+        self.assertIs(core.analyze_drift, drift.analyze_drift)
+        self.assertIs(core.route_question, routing.route_question)
+
     def test_plan_create_status_transition_and_verify(self) -> None:
         code, out, err = self.run_cli(
             "plan",
