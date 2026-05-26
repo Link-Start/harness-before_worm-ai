@@ -11,12 +11,15 @@ from .core import (
     AbhError,
     add_memory,
     analyze_drift,
+    active_attractor,
     close_plan,
     create_plan,
     doctor,
+    list_attractors,
     list_audits,
     list_memories,
     list_plans,
+    load_attractor,
     load_plan,
     record_audit,
     record_verification,
@@ -117,6 +120,20 @@ def call_plan_status(arguments: dict[str, Any]) -> dict[str, Any]:
     plan_id = require_string(arguments, "plan_id")
     plan = load_plan(plan_id)
     return {"plan": plan.to_dict(), "verification_summary": verification_freshness_summary(plan)}
+
+
+def call_attractor_list(arguments: dict[str, Any]) -> dict[str, Any]:
+    attractors = list_attractors()
+    return {"attractors": [attractor.to_dict() for attractor in attractors], "total": len(attractors)}
+
+
+def call_attractor_show(arguments: dict[str, Any]) -> dict[str, Any]:
+    attractor_id = require_string(arguments, "attractor_id")
+    return {"attractor": load_attractor(attractor_id).to_dict()}
+
+
+def call_attractor_active(arguments: dict[str, Any]) -> dict[str, Any]:
+    return {"attractor": active_attractor().to_dict()}
 
 
 def call_audit_list(arguments: dict[str, Any]) -> dict[str, Any]:
@@ -244,6 +261,9 @@ def call_drift_analyze(arguments: dict[str, Any]) -> dict[str, Any]:
 
 
 TOOL_HANDLERS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
+    "abh_attractor_list": call_attractor_list,
+    "abh_attractor_show": call_attractor_show,
+    "abh_attractor_active": call_attractor_active,
     "abh_plan_list": call_plan_list,
     "abh_plan_status": call_plan_status,
     "abh_audit_list": call_audit_list,

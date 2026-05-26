@@ -24,7 +24,7 @@ from abh.core import (
     transition_plan,
     update_plan_record,
 )
-from abh.models import AuditRecord, DriftReport, MemoryRecord, PlanRecord, VerificationRun
+from abh.models import AttractorRecord, AuditRecord, DriftReport, MemoryRecord, PlanRecord, VerificationRun
 from abh.storage import drift_json_path, write_json
 from abh.verifications import normalized_git_status
 
@@ -103,6 +103,197 @@ class CliTests(TestCase):
         self.assertTrue(envelope["ok"])
         self.assertEqual(envelope["command"], "plan.status")
         self.assertEqual(envelope["errors"], [])
+
+    def test_attractor_create_active_show_list_and_supersede_json_flow(self) -> None:
+        code, out, err = self.run_cli(
+            "attractor",
+            "create",
+            "--id",
+            "attractor-product",
+            "--title",
+            "Product Attractor",
+            "--version",
+            "0.1.0",
+            "--path",
+            "docs/architecture/attractors/product.md",
+            "--owner",
+            "architecture",
+            "--intent",
+            "Keep product work evidence-first.",
+            "--invariant",
+            "Plans must cite product evidence.",
+            "--json",
+        )
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["command"], "attractor create")
+        attractor = payload["data"]["attractor"]
+        self.assertEqual(attractor["id"], "attractor-product")
+        self.assertEqual(attractor["status"], "active")
+        self.assertTrue((self.root / ".abh" / "attractors" / "attractor-product.json").exists())
+        self.assertTrue((self.root / "docs" / "architecture" / "attractors" / "product.md").exists())
+
+        code, out, err = self.run_cli("attractor", "active", "--json")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(json.loads(out)["data"]["attractor"]["id"], "attractor-product")
+
+        code, out, err = self.run_cli("attractor", "show", "attractor-product", "--json")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(json.loads(out)["data"]["attractor"]["path"], "docs/architecture/attractors/product.md")
+
+        code, out, err = self.run_cli("attractor", "list", "--json")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(json.loads(out)["data"]["total"], 1)
+
+        code, out, err = self.run_cli(
+            "attractor",
+            "supersede",
+            "attractor-product",
+            "--id",
+            "attractor-product-v2",
+            "--title",
+            "Product Attractor V2",
+            "--version",
+            "0.2.0",
+            "--path",
+            "docs/architecture/attractors/product-v2.md",
+            "--reason",
+            "Audit found missing release boundary.",
+            "--impact",
+            "New plans must cite release evidence.",
+            "--migration-strategy",
+            "Existing plans keep old attractor; new plans use v2.",
+            "--json",
+        )
+        self.assertEqual(code, 0, err)
+        supersede_payload = json.loads(out)
+        self.assertEqual(supersede_payload["data"]["old_attractor"]["status"], "inactive")
+        self.assertEqual(supersede_payload["data"]["attractor"]["supersedes"], "attractor-product")
+
+        code, out, err = self.run_cli("attractor", "active", "--json")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(json.loads(out)["data"]["attractor"]["id"], "attractor-product-v2")
+
+    def test_attractor_create_does_not_overwrite_existing_markdown(self) -> None:
+        existing = self.root / "docs" / "architecture" / "attractors" / "existing.md"
+        existing.write_text("# Existing Attractor\n\n## Custom Section\n\nDo not overwrite.\n", encoding="utf-8")
+
+        code, out, err = self.run_cli(
+            "attractor",
+            "create",
+            "--id",
+            "attractor-existing",
+            "--title",
+            "Existing",
+            "--version",
+            "1.0.0",
+            "--path",
+            "docs/architecture/attractors/existing.md",
+            "--intent",
+            "Register existing document.",
+            "--json",
+        )
+
+        self.assertEqual(code, 0, err)
+        self.assertEqual(existing.read_text(encoding="utf-8"), "# Existing Attractor\n\n## Custom Section\n\nDo not overwrite.\n")
+        self.assertEqual(json.loads(out)["data"]["attractor"]["doc_path"], "docs/architecture/attractors/existing.md")
+
+    def test_ready_plan_must_reference_active_attractor_by_id_or_path(self) -> None:
+        code, out, err = self.run_cli(
+            "attractor",
+            "create",
+            "--id",
+            "attractor-active",
+            "--title",
+            "Active",
+            "--version",
+            "1.0.0",
+            "--path",
+            "docs/architecture/attractors/active.md",
+            "--intent",
+            "Active attractor",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-active-by-id",
+            "--title",
+            "Active By ID",
+            "--attractor",
+            "attractor-active",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "use active id",
+            "--non-goal",
+            "inactive attractor",
+            "--exit-criterion",
+            "plan ready",
+            "--validation",
+            "python3 -m abh doctor",
+            "--closure-evidence",
+            "tests/test_cli.py",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-active-by-path",
+            "--title",
+            "Active By Path",
+            "--attractor",
+            "docs/architecture/attractors/active.md",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "use active path",
+            "--non-goal",
+            "inactive attractor",
+            "--exit-criterion",
+            "plan ready",
+            "--validation",
+            "python3 -m abh doctor",
+            "--closure-evidence",
+            "tests/test_cli.py",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-inactive-attractor",
+            "--title",
+            "Inactive",
+            "--attractor",
+            "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "reject inactive",
+            "--non-goal",
+            "accept inactive",
+            "--exit-criterion",
+            "rejected",
+            "--validation",
+            "python3 -m abh doctor",
+            "--closure-evidence",
+            "tests/test_cli.py",
+        )
+        self.assertEqual(code, 2)
+        self.assertIn("active attractor", err)
 
     def test_plan_create_status_transition_and_verify(self) -> None:
         code, out, err = self.run_cli(
@@ -1346,6 +1537,13 @@ class CliTests(TestCase):
     def test_model_serialization_includes_schema_version(self) -> None:
         records = [
             VerificationRun(id="ver-schema", plan_id="plan-schema", command="cmd", result="pass"),
+            AttractorRecord(
+                id="attractor-schema",
+                title="Attractor Schema",
+                version="1.0.0",
+                path="docs/architecture/attractors/schema.md",
+                intent="schema",
+            ),
             AuditRecord(id="audit-schema", plan_id="plan-schema", auditor="auditor", scope="scope"),
             MemoryRecord(
                 id="mem-schema",
@@ -1373,6 +1571,19 @@ class CliTests(TestCase):
         self.assertEqual(verification.environment, {})
         self.assertEqual(verification.trust_level, "unknown")
         self.assertEqual(verification.failure_classifications, [])
+
+        attractor = AttractorRecord.from_dict(
+            {
+                "id": "attractor-legacy",
+                "title": "Legacy Attractor",
+                "version": "1.0.0",
+                "path": "docs/architecture/attractors/legacy.md",
+                "intent": "legacy",
+            }
+        )
+        self.assertEqual(attractor.status, "active")
+        self.assertEqual(attractor.supersedes, "none")
+        self.assertEqual(attractor.invariants, [])
 
         plan = PlanRecord.from_dict(
             {
@@ -1521,11 +1732,15 @@ class McpServerTests(TestCase):
         tool_names = {tool["name"] for tool in tools}
         self.assertIn("abh_plan_list", tool_names)
         self.assertIn("abh_plan_status", tool_names)
+        self.assertIn("abh_attractor_list", tool_names)
+        self.assertIn("abh_attractor_show", tool_names)
+        self.assertIn("abh_attractor_active", tool_names)
         self.assertIn("abh_close_plan", tool_names)
         for tool in tools:
             self.assertEqual(tool["inputSchema"]["type"], "object")
         readonly = {tool["name"]: tool["annotations"]["readOnlyHint"] for tool in tools}
         self.assertTrue(readonly["abh_plan_list"])
+        self.assertTrue(readonly["abh_attractor_active"])
         self.assertTrue(readonly["abh_doctor"])
         self.assertFalse(readonly["abh_plan_create"])
         self.assertFalse(readonly["abh_verify_record"])
@@ -1596,6 +1811,54 @@ class McpServerTests(TestCase):
         )
         route_envelope = route_response["result"]["structuredContent"]
         self.assertEqual(route_envelope["data"]["route"]["route"], "completion_audit")
+
+    def test_mcp_attractor_read_tools_return_registry_data(self) -> None:
+        code, out, err = self.run_cli(
+            "attractor",
+            "create",
+            "--id",
+            "attractor-mcp",
+            "--title",
+            "MCP Attractor",
+            "--version",
+            "1.0.0",
+            "--path",
+            "docs/architecture/attractors/mcp.md",
+            "--intent",
+            "MCP can read active attractor.",
+        )
+        self.assertEqual(code, 0, err)
+
+        active_response = self.call_mcp(
+            {
+                "jsonrpc": "2.0",
+                "id": 18,
+                "method": "tools/call",
+                "params": {"name": "abh_attractor_active", "arguments": {}},
+            }
+        )
+        active = active_response["result"]["structuredContent"]["data"]["attractor"]
+        self.assertEqual(active["id"], "attractor-mcp")
+
+        show_response = self.call_mcp(
+            {
+                "jsonrpc": "2.0",
+                "id": 19,
+                "method": "tools/call",
+                "params": {"name": "abh_attractor_show", "arguments": {"attractor_id": "attractor-mcp"}},
+            }
+        )
+        self.assertEqual(show_response["result"]["structuredContent"]["data"]["attractor"]["path"], "docs/architecture/attractors/mcp.md")
+
+        list_response = self.call_mcp(
+            {
+                "jsonrpc": "2.0",
+                "id": 20,
+                "method": "tools/call",
+                "params": {"name": "abh_attractor_list", "arguments": {}},
+            }
+        )
+        self.assertEqual(list_response["result"]["structuredContent"]["data"]["total"], 1)
 
     def test_mcp_drift_list_reads_existing_reports_without_writing(self) -> None:
         with Chdir(self.root):
