@@ -9,12 +9,16 @@ from .core import (
     AbhError,
     add_memory,
     analyze_drift,
+    active_attractor,
     close_plan,
     create_plan,
+    create_attractor,
     doctor,
+    list_attractors,
     list_audits,
     list_memories,
     list_plans,
+    load_attractor,
     plan_status_line,
     record_audit,
     record_verification,
@@ -22,6 +26,7 @@ from .core import (
     route_question,
     run_verification,
     search_memory,
+    supersede_attractor,
     transition_plan,
     update_plan_record,
     validate_identifier,
@@ -34,7 +39,7 @@ def add_json_argument(parser: argparse.ArgumentParser) -> None:
 
 def command_name(args: argparse.Namespace) -> str:
     parts = [str(args.command)]
-    for attr in ("plan_command", "verify_command", "audit_command", "memory_command", "drift_command"):
+    for attr in ("plan_command", "verify_command", "audit_command", "memory_command", "drift_command", "attractor_command"):
         value = getattr(args, attr, None)
         if value:
             parts.append(str(value))
@@ -161,6 +166,48 @@ def build_parser() -> argparse.ArgumentParser:
     close = subparsers.add_parser("close", help="close a plan after passing audit")
     close.add_argument("plan_id")
     close.set_defaults(handler=handle_close)
+
+    attractor_parser = subparsers.add_parser("attractor", help="manage attractors")
+    attractor_sub = attractor_parser.add_subparsers(dest="attractor_command", required=True)
+
+    attractor_list = attractor_sub.add_parser("list", help="list attractors")
+    add_json_argument(attractor_list)
+    attractor_list.set_defaults(handler=handle_attractor_list)
+
+    attractor_show = attractor_sub.add_parser("show", help="show an attractor")
+    attractor_show.add_argument("attractor_id")
+    add_json_argument(attractor_show)
+    attractor_show.set_defaults(handler=handle_attractor_show)
+
+    attractor_active = attractor_sub.add_parser("active", help="show active attractor")
+    add_json_argument(attractor_active)
+    attractor_active.set_defaults(handler=handle_attractor_active)
+
+    attractor_create = attractor_sub.add_parser("create", help="create an attractor")
+    attractor_create.add_argument("--id", required=True)
+    attractor_create.add_argument("--title", required=True)
+    attractor_create.add_argument("--version", required=True)
+    attractor_create.add_argument("--path", required=True)
+    attractor_create.add_argument("--owner", default="architecture")
+    attractor_create.add_argument("--intent", required=True)
+    attractor_create.add_argument("--invariant", action="append", default=[])
+    add_json_argument(attractor_create)
+    attractor_create.set_defaults(handler=handle_attractor_create)
+
+    attractor_supersede = attractor_sub.add_parser("supersede", help="supersede an attractor")
+    attractor_supersede.add_argument("old_id")
+    attractor_supersede.add_argument("--id", required=True)
+    attractor_supersede.add_argument("--title", required=True)
+    attractor_supersede.add_argument("--version", required=True)
+    attractor_supersede.add_argument("--path", required=True)
+    attractor_supersede.add_argument("--owner", default="architecture")
+    attractor_supersede.add_argument("--intent")
+    attractor_supersede.add_argument("--invariant", action="append", default=[])
+    attractor_supersede.add_argument("--reason", required=True)
+    attractor_supersede.add_argument("--impact", required=True)
+    attractor_supersede.add_argument("--migration-strategy", required=True)
+    add_json_argument(attractor_supersede)
+    attractor_supersede.set_defaults(handler=handle_attractor_supersede)
 
     doctor_parser = subparsers.add_parser("doctor", help="check workspace consistency")
     add_json_argument(doctor_parser)
@@ -365,6 +412,84 @@ def handle_audit_list(args: argparse.Namespace) -> int:
 def handle_close(args: argparse.Namespace) -> int:
     plan = close_plan(args.plan_id)
     print(f"closed plan {plan.id}")
+    return 0
+
+
+def handle_attractor_list(args: argparse.Namespace) -> int:
+    attractors = list_attractors()
+    if args.json:
+        print_json_envelope(
+            ok=True,
+            command=command_name(args),
+            data={"attractors": [attractor.to_dict() for attractor in attractors], "total": len(attractors)},
+        )
+        return 0
+    for attractor in attractors:
+        print(f"{attractor.id}  [{attractor.status}]  {attractor.title}  ({attractor.version})")
+    print(f"\ntotal: {len(attractors)} attractor(s)")
+    return 0
+
+
+def handle_attractor_show(args: argparse.Namespace) -> int:
+    attractor = load_attractor(args.attractor_id)
+    if args.json:
+        print_json_envelope(ok=True, command=command_name(args), data={"attractor": attractor.to_dict()})
+        return 0
+    print(f"{attractor.id} [{attractor.status}]")
+    print(f"title: {attractor.title}")
+    print(f"version: {attractor.version}")
+    print(f"path: {attractor.path}")
+    return 0
+
+
+def handle_attractor_active(args: argparse.Namespace) -> int:
+    attractor = active_attractor()
+    if args.json:
+        print_json_envelope(ok=True, command=command_name(args), data={"attractor": attractor.to_dict()})
+        return 0
+    print(f"{attractor.id} [{attractor.status}] {attractor.path}")
+    return 0
+
+
+def handle_attractor_create(args: argparse.Namespace) -> int:
+    attractor = create_attractor(
+        attractor_id=args.id,
+        title=args.title,
+        version=args.version,
+        path=args.path,
+        owner=args.owner,
+        intent=args.intent,
+        invariants=args.invariant,
+    )
+    if args.json:
+        print_json_envelope(ok=True, command=command_name(args), data={"attractor": attractor.to_dict()})
+        return 0
+    print(f"created attractor {attractor.id}")
+    return 0
+
+
+def handle_attractor_supersede(args: argparse.Namespace) -> int:
+    old, attractor = supersede_attractor(
+        old_id=args.old_id,
+        new_id=args.id,
+        title=args.title,
+        version=args.version,
+        path=args.path,
+        owner=args.owner,
+        intent=args.intent,
+        invariants=args.invariant or None,
+        reason=args.reason,
+        impact=args.impact,
+        migration_strategy=args.migration_strategy,
+    )
+    if args.json:
+        print_json_envelope(
+            ok=True,
+            command=command_name(args),
+            data={"old_attractor": old.to_dict(), "attractor": attractor.to_dict()},
+        )
+        return 0
+    print(f"superseded {old.id} -> {attractor.id}")
     return 0
 
 
