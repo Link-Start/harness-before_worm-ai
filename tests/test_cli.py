@@ -25,6 +25,7 @@ from abh.core import (
     update_plan_record,
 )
 from abh.models import AttractorRecord, AuditRecord, DriftReport, MemoryRecord, PlanRecord, VerificationRun
+from abh.models import RoadmapItem, RoadmapQueue
 from abh.storage import drift_json_path, write_json
 from abh.verifications import normalized_git_status
 
@@ -354,6 +355,141 @@ class CliTests(TestCase):
         )
         self.assertEqual(code, 0, err)
         self.assertIn("transitioned plan-100-demo -> running", out)
+
+    def test_roadmap_next_id_list_and_materialize_queue_item(self) -> None:
+        queue = self.root / ".abh" / "roadmap.json"
+        queue.parent.mkdir(parents=True, exist_ok=True)
+        queue.write_text(
+            json.dumps(
+                {
+                    "schema_version": "1",
+                    "items": [
+                        {
+                            "key": "stage4.abh-init-active-attractor",
+                            "title": "ABH Init Active Attractor",
+                            "stage": "stage4",
+                            "summary": "Initialize a repository around the active attractor.",
+                            "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+                            "baseline": "queue baseline",
+                            "goals": ["materialize the next plan id"],
+                            "non_goals": ["preassign plan numbers in docs"],
+                            "exit_criteria": ["plan exists"],
+                            "validation_checklist": ["python3 -m abh doctor"],
+                            "closure_evidence": ["docs/development-roadmap.md"],
+                        }
+                    ],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        code, out, err = self.run_cli("roadmap", "next-id", "--json")
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertEqual(payload["command"], "roadmap next-id")
+        self.assertEqual(payload["data"]["next_plan_id"], "plan-001")
+        self.assertEqual(payload["data"]["next_sequence"], 1)
+
+        code, out, err = self.run_cli("roadmap", "list", "--json")
+        self.assertEqual(code, 0, err)
+        list_payload = json.loads(out)
+        self.assertEqual(list_payload["data"]["items"][0]["key"], "stage4.abh-init-active-attractor")
+        self.assertIsNone(list_payload["data"]["items"][0]["plan_id"])
+
+        code, out, err = self.run_cli("roadmap", "materialize", "stage4.abh-init-active-attractor", "--json")
+        self.assertEqual(code, 0, err)
+        materialize_payload = json.loads(out)
+        self.assertEqual(materialize_payload["data"]["plan"]["id"], "plan-001-abh-init-active-attractor")
+        self.assertEqual(materialize_payload["data"]["item"]["plan_id"], "plan-001-abh-init-active-attractor")
+        self.assertTrue((self.root / ".abh" / "plans" / "plan-001-abh-init-active-attractor.json").exists())
+
+        code, out, err = self.run_cli("roadmap", "next-id", "--json")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(json.loads(out)["data"]["next_plan_id"], "plan-002")
+
+    def test_roadmap_materialize_rejects_preassigned_plan_id(self) -> None:
+        queue = self.root / ".abh" / "roadmap.json"
+        queue.parent.mkdir(parents=True, exist_ok=True)
+        queue.write_text(
+            json.dumps(
+                {
+                    "schema_version": "1",
+                    "items": [
+                        {
+                            "key": "stage4.bad-preassigned",
+                            "title": "Bad Preassigned",
+                            "stage": "stage4",
+                            "summary": "Bad item",
+                            "planned_plan_id": "plan-999-bad",
+                            "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+                            "baseline": "baseline",
+                        }
+                    ],
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        code, out, err = self.run_cli("roadmap", "materialize", "stage4.bad-preassigned", "--json")
+
+        self.assertEqual(code, 2)
+        payload = json.loads(out)
+        self.assertFalse(payload["ok"])
+        self.assertIn("must not preassign plan id", payload["errors"][0]["message"])
+
+    def test_roadmap_materialize_uses_allocation_lock(self) -> None:
+        queue = self.root / ".abh" / "roadmap.json"
+        queue.parent.mkdir(parents=True, exist_ok=True)
+        queue.write_text(
+            json.dumps(
+                {
+                    "schema_version": "1",
+                    "items": [
+                        {
+                            "key": "stage4.concurrent-alpha",
+                            "title": "Concurrent Alpha",
+                            "stage": "stage4",
+                            "summary": "alpha",
+                            "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+                            "baseline": "baseline",
+                        },
+                        {
+                            "key": "stage4.concurrent-beta",
+                            "title": "Concurrent Beta",
+                            "stage": "stage4",
+                            "summary": "beta",
+                            "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+                            "baseline": "baseline",
+                        },
+                    ],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        from abh import roadmap
+
+        locked_paths: list[Path] = []
+
+        class SpyLock:
+            def __init__(self, path: Path) -> None:
+                self.path = path
+
+            def __enter__(self):
+                locked_paths.append(self.path)
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        with patch("abh.roadmap.file_lock", side_effect=lambda path: SpyLock(path), create=True):
+            roadmap.materialize_roadmap_item("stage4.concurrent-alpha", cwd=self.root)
+
+        self.assertEqual(locked_paths, [self.root / ".abh" / "roadmap.materialize"])
 
     def test_plan_update_appends_fields_deduplicates_and_syncs_markdown(self) -> None:
         code, out, err = self.run_cli(
@@ -1439,6 +1575,82 @@ class CliTests(TestCase):
         self.assertEqual(payload["errors"][0]["category"], "consistency")
         self.assertEqual(payload["errors"][0]["code"], "doctor_issues")
 
+    def test_doctor_reports_roadmap_queue_preassigned_plan_ids(self) -> None:
+        queue = self.root / ".abh" / "roadmap.json"
+        queue.parent.mkdir(parents=True, exist_ok=True)
+        queue.write_text(
+            json.dumps(
+                {
+                    "schema_version": "1",
+                    "items": [
+                        {
+                            "key": "stage4.preassigned",
+                            "title": "Preassigned",
+                            "stage": "stage4",
+                            "planned_plan_id": "plan-123-preassigned",
+                        }
+                    ],
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        code, out, err = self.run_cli("doctor")
+
+        self.assertEqual(code, 1)
+        self.assertEqual(err, "")
+        self.assertIn("roadmap item stage4.preassigned must not preassign plan id plan-123-preassigned", out)
+
+    def test_doctor_reports_queued_roadmap_item_with_plan_id(self) -> None:
+        queue = self.root / ".abh" / "roadmap.json"
+        queue.parent.mkdir(parents=True, exist_ok=True)
+        queue.write_text(
+            json.dumps(
+                {
+                    "schema_version": "1",
+                    "items": [
+                        {
+                            "key": "stage4.queued-with-plan",
+                            "title": "Queued With Plan",
+                            "stage": "stage4",
+                            "status": "queued",
+                            "plan_id": "plan-existing",
+                        }
+                    ],
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        code, out, err = self.run_cli("doctor")
+
+        self.assertEqual(code, 1)
+        self.assertEqual(err, "")
+        self.assertIn("queued roadmap item stage4.queued-with-plan must have null plan_id", out)
+
+    def test_doctor_reports_duplicate_plan_number_except_legacy_allowlist(self) -> None:
+        for plan_id in ("plan-010-alpha", "plan-010-beta"):
+            self.run_cli(
+                "plan",
+                "create",
+                "--id",
+                plan_id,
+                "--title",
+                plan_id,
+                "--attractor",
+                "docs/architecture/attractors/abh-core-attractor.md",
+                "--baseline",
+                "baseline",
+            )
+
+        code, out, err = self.run_cli("doctor")
+
+        self.assertEqual(code, 1)
+        self.assertEqual(err, "")
+        self.assertIn("duplicate plan sequence 010", out)
+
     def test_write_json_keeps_existing_file_when_atomic_replace_fails(self) -> None:
         path = self.root / ".abh" / "plans" / "plan-atomic.json"
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -1735,12 +1947,18 @@ class McpServerTests(TestCase):
         self.assertIn("abh_attractor_list", tool_names)
         self.assertIn("abh_attractor_show", tool_names)
         self.assertIn("abh_attractor_active", tool_names)
+        self.assertIn("abh_roadmap_list", tool_names)
+        self.assertIn("abh_roadmap_next_id", tool_names)
+        self.assertIn("abh_roadmap_check", tool_names)
         self.assertIn("abh_close_plan", tool_names)
         for tool in tools:
             self.assertEqual(tool["inputSchema"]["type"], "object")
         readonly = {tool["name"]: tool["annotations"]["readOnlyHint"] for tool in tools}
         self.assertTrue(readonly["abh_plan_list"])
         self.assertTrue(readonly["abh_attractor_active"])
+        self.assertTrue(readonly["abh_roadmap_list"])
+        self.assertTrue(readonly["abh_roadmap_next_id"])
+        self.assertTrue(readonly["abh_roadmap_check"])
         self.assertTrue(readonly["abh_doctor"])
         self.assertFalse(readonly["abh_plan_create"])
         self.assertFalse(readonly["abh_verify_record"])
@@ -1859,6 +2077,55 @@ class McpServerTests(TestCase):
             }
         )
         self.assertEqual(list_response["result"]["structuredContent"]["data"]["total"], 1)
+
+    def test_mcp_roadmap_read_tools_return_queue_data(self) -> None:
+        with Chdir(self.root):
+            write_json(
+                self.root / ".abh" / "roadmap.json",
+                RoadmapQueue(
+                    items=[
+                        RoadmapItem(
+                            key="stage4.mcp-roadmap",
+                            title="MCP Roadmap",
+                            stage="stage4",
+                            summary="MCP reads roadmap queue.",
+                        )
+                    ]
+                ).to_dict(),
+            )
+
+        list_response = self.call_mcp(
+            {
+                "jsonrpc": "2.0",
+                "id": 21,
+                "method": "tools/call",
+                "params": {"name": "abh_roadmap_list", "arguments": {}},
+            }
+        )
+        list_envelope = list_response["result"]["structuredContent"]
+        self.assertTrue(list_envelope["ok"])
+        self.assertEqual(list_envelope["data"]["items"][0]["key"], "stage4.mcp-roadmap")
+
+        next_response = self.call_mcp(
+            {
+                "jsonrpc": "2.0",
+                "id": 22,
+                "method": "tools/call",
+                "params": {"name": "abh_roadmap_next_id", "arguments": {}},
+            }
+        )
+        next_envelope = next_response["result"]["structuredContent"]
+        self.assertEqual(next_envelope["data"]["next_plan_id"], "plan-001")
+
+        check_response = self.call_mcp(
+            {
+                "jsonrpc": "2.0",
+                "id": 23,
+                "method": "tools/call",
+                "params": {"name": "abh_roadmap_check", "arguments": {}},
+            }
+        )
+        self.assertEqual(check_response["result"]["structuredContent"]["data"]["issues"], [])
 
     def test_mcp_drift_list_reads_existing_reports_without_writing(self) -> None:
         with Chdir(self.root):
