@@ -248,7 +248,7 @@ Sprint 25 已完成 `plan-029-attractor-registry`。`plan-028-agent-first-comman
 
 `plan-015-controlled-mcp-write-tools` 已关闭。阶段 2 Agent Protocol Foundation 已完整完成：核心只读命令具备显式 JSON 输出和结构化错误格式，MCP stdio Server 同时提供只读工具和受控写工具，写工具必须显式 `confirm=true` 并复用现有 ABH 门禁。
 
-当前执行计划：`plan-030-abh-init-active-attractor` 将作为下一条 Stage 4 实现计划启动。
+当前执行计划：`plan-030-roadmap-queue-and-plan-numbering`。这一切片先修复路线图编号机制：未创建的未来事项使用 `.abh/roadmap.json` 中的稳定 key，真实 `plan-NNN-*` 只在 `abh roadmap materialize <key>` 时分配。下一条 Stage 4 实现项是 queue key `stage4.abh-init-active-attractor`，不在文档中预留具体编号。
 
 当前阶段状态：
 
@@ -260,7 +260,7 @@ Sprint 25 已完成 `plan-029-attractor-registry`。`plan-028-agent-first-comman
 - 当前阶段：阶段 3 验证执行器已经具备 v0.3 所需能力，`plan-025-stage-3-finalization` 已留下收尾验证、独立审计和阶段 4 启动证据。
 - 当前阶段 3 判定：完成。v0.3 Verify Runner 里程碑已关闭。
 - 已完成 release-prep：`plan-026-v0-3-release-prep` 已将版本元数据、release notes、验证证据和 tag readiness 对齐到 v0.3.0。
-- 下一阶段焦点：阶段 4 Agent-First 吸引子入口层已从 `plan-027-stage-4-attractor-entry-plan` 启动；`plan-028-agent-first-command-contract` 和 `plan-029-attractor-registry` 已完成，`plan-030-abh-init-active-attractor` 将接入仓库初始化与默认 active attractor 绑定。
+- 下一阶段焦点：阶段 4 Agent-First 吸引子入口层已从 `plan-027-stage-4-attractor-entry-plan` 启动；`plan-028-agent-first-command-contract` 和 `plan-029-attractor-registry` 已完成，当前 `plan-030-roadmap-queue-and-plan-numbering` 将消除未来插队导致的编号错乱风险，随后由 queue key `stage4.abh-init-active-attractor` 接入仓库初始化与默认 active attractor 绑定。
 
 ## 5. 长期阶段线
 
@@ -407,11 +407,19 @@ Sprint 25 已完成 `plan-029-attractor-registry`。`plan-028-agent-first-comman
 - `plan-027-stage-4-attractor-entry-plan`（已完成）
 - `plan-028-agent-first-command-contract`（已完成）
 - `plan-029-attractor-registry`（已完成）
-- `plan-030-abh-init-active-attractor`（下一步）
-- `plan-031-agent-contract-setup`
-- `plan-032-git-hooks-guardrails`
-- `plan-033-abh-next-and-onboarding-check`
-- `plan-034-quickstart-recipes-and-distribution`
+- `plan-030-roadmap-queue-and-plan-numbering`（当前）
+- `stage4.abh-init-active-attractor`（下一步，待 materialize）
+- `stage4.agent-contract-setup`
+- `stage4.git-hooks-guardrails`
+- `stage4.abh-next-and-onboarding-check`
+- `stage4.quickstart-recipes-and-distribution`
+
+Roadmap queue 规则：
+
+- 具体 `plan-NNN-*` 只代表已经存在于 `.abh/plans/` 的计划事实。
+- 未创建的未来事项使用稳定 key，例如 `stage4.abh-init-active-attractor`。
+- 插入 checkpoint、紧急修复或前置治理切片时，只需要 materialize 新 key，不再批量改写后续计划编号。
+- `abh roadmap next-id --json` 计算下一个可用 plan 编号；`abh roadmap materialize <key> --json` 将 queue item 转成真实 plan。
 
 ### 阶段 5：真正独立审计
 
@@ -431,8 +439,8 @@ Sprint 25 已完成 `plan-029-attractor-registry`。`plan-028-agent-first-comman
 
 建议后续计划：
 
-- `plan-035-audit-prompt-bundle`
-- `plan-036-independent-audit-gate`
+- `stage5.audit-prompt-bundle`
+- `stage5.independent-audit-gate`
 
 ### 阶段 6：漂移与记忆质量提升
 
@@ -451,9 +459,9 @@ Sprint 25 已完成 `plan-029-attractor-registry`。`plan-028-agent-first-comman
 
 建议后续计划：
 
-- `plan-037-drift-quality`
-- `plan-038-memory-index`
-- `plan-039-reporting`
+- `stage6.drift-quality`
+- `stage6.memory-index`
+- `stage6.reporting`
 
 ### 阶段 7：团队可用与生态集成
 
@@ -472,9 +480,9 @@ Sprint 25 已完成 `plan-029-attractor-registry`。`plan-028-agent-first-comman
 
 建议后续计划：
 
-- `plan-040-ci-templates`
-- `plan-041-multi-repo-sharing`
-- `plan-042-team-policy-and-release-automation`
+- `stage7.ci-templates`
+- `stage7.multi-repo-sharing`
+- `stage7.team-policy-and-release-automation`
 
 ## 6. 历史执行线与长期阶段映射
 
@@ -490,7 +498,7 @@ Sprint 25 已完成 `plan-029-attractor-registry`。`plan-028-agent-first-comman
 
 ## 7. 下一批推荐计划
 
-本节只列下一批仍可切分执行的计划。已关闭的 `plan-012-agent-protocol-foundation`、`plan-013-json-output-and-errors`、`plan-014-readonly-mcp-server`、`plan-015-controlled-mcp-write-tools`、阶段 3 的 `plan-016` 至 `plan-025`、release-prep 的 `plan-026-v0-3-release-prep`、Stage 4 入口校准的 `plan-027-stage-4-attractor-entry-plan`、共享命令契约的 `plan-028-agent-first-command-contract` 和 active attractor registry 的 `plan-029-attractor-registry` 已归入第 3 章历史执行线与第 6 章阶段映射；当前执行计划是 `plan-030-abh-init-active-attractor`。
+本节只列下一批仍可切分执行的计划。已关闭的 `plan-012-agent-protocol-foundation`、`plan-013-json-output-and-errors`、`plan-014-readonly-mcp-server`、`plan-015-controlled-mcp-write-tools`、阶段 3 的 `plan-016` 至 `plan-025`、release-prep 的 `plan-026-v0-3-release-prep`、Stage 4 入口校准的 `plan-027-stage-4-attractor-entry-plan`、共享命令契约的 `plan-028-agent-first-command-contract` 和 active attractor registry 的 `plan-029-attractor-registry` 已归入第 3 章历史执行线与第 6 章阶段映射；当前执行计划是 `plan-030-roadmap-queue-and-plan-numbering`。未来事项的事实来源是 `.abh/roadmap.json`，文档中不再为未 materialize 项预写具体 plan 编号。
 
 已完成参考：
 

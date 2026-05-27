@@ -317,3 +317,16 @@ Sprint 25：Attractor Registry MVP（已完成）
 | S25-006 | 注册当前仓库 active attractor | Done | `.abh/attractors/attractor-abh-core.json`, `docs/architecture/attractors/abh-core-attractor.md` |
 | S25-007 | 同步 Stage 4 文档 | Done | `README.md`, `docs/development-roadmap.md`, `docs/阶段规划.md`, `docs/architecture/agent-protocol.md` |
 | S25-008 | plan-029 验证与独立审计 | Done | `.abh/verifications/ver-ed85ce8d3ae8.json`, `docs/audits/audit-029-attractor-registry.md` |
+
+## Sprint 26
+
+目标：建立 roadmap queue 与 plan 编号 materialize 机制，避免临时插入治理计划时批量改写未来 plan 编号。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S26-001 | 启动 Roadmap Queue and Plan Numbering 计划 | Done | `docs/plans/plan-030-roadmap-queue-and-plan-numbering.md` |
+| S26-002 | 新增 roadmap queue 数据文件和领域模块 | Doing | `.abh/roadmap.json`, `abh/roadmap.py` |
+| S26-003 | 新增 `abh roadmap list/next-id/check/materialize` | Doing | `abh/cli.py`, `abh/commands.py`, `abh/mcp_server.py` |
+| S26-004 | 接入 doctor 编号/queue 一致性检查 | Doing | `abh/core.py`, `tests/test_cli.py` |
+| S26-005 | 将未来计划文档改为稳定 queue key | Doing | `README.md`, `docs/development-roadmap.md`, `docs/阶段规划.md`, `docs/architecture/agent-protocol.md` |
+| S26-006 | plan-030 验证与独立审计 | To Do | `.abh/verifications/`, `docs/audits/audit-030-roadmap-queue-and-plan-numbering.md` |
