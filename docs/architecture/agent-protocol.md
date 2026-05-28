@@ -241,6 +241,10 @@ This is the main convenience layer for agents. Agents should not have to memoriz
 - `plan-032-abh-init-active-attractor`: completed; binds repository initialization to the current active attractor and seeds the baseline `.abh/` layout plus AGE owner docs.
 - `plan-033-agent-contract-setup`: completed; materialized from `stage4.agent-contract-setup` and implemented read-only Codex, Claude Code, and MCP setup bundle export from the shared command contract.
 - `plan-034-git-hooks-guardrails`: completed; materialized from `stage4.git-hooks-guardrails` and implements local hook profile preview plus confirmed managed pre-commit installation.
+- `plan-035-abh-next-and-onboarding-check`: completed; materialized from `stage4.abh-next-and-onboarding-check` and implements read-only agent navigation plus onboarding readiness checks.
+- `plan-036-quickstart-recipes-and-distribution`: completed; materialized from `stage4.quickstart-recipes-and-distribution` and documents quickstart, recipes, and current git/editable distribution paths.
+- `plan-037-audit-prompt-bundle`: completed; materialized from `stage5.audit-prompt-bundle` and adds a read-only `abh audit bundle <plan> --json` surface for independent audit prompts and evidence paths.
+- `plan-038-independent-audit-gate`: completed; materialized from `stage5.independent-audit-gate` and adds audit verdict metadata plus close-time independent/fresh verification checks.
 
 Current setup export MVP:
 
@@ -256,6 +260,34 @@ Current hook guardrail MVP:
 - `abh hooks install --write --confirm --json` writes or refreshes only an ABH-managed hook;
 - unmanaged existing hooks are blockers and must not be overwritten by this MVP;
 - the default hook runs `python3 -m abh doctor`, `python3 -m abh roadmap check --json`, and `git diff --check`.
+
+Current navigation and onboarding MVP:
+
+- `abh next --json` returns `next_action`, `recommended_command`, `requires_confirmation`, `rationale`, `source`, and `alternatives`;
+- `abh next --json` prioritizes existing open plans before materializing new roadmap queue items;
+- after fresh passing verification and before audit evidence exists, `abh next --json` recommends requesting independent audit evidence;
+- `abh onboarding check --json` returns read-only readiness checks for active attractor, AGE owner docs, agent setup export, hook guardrails, doctor, and closed-loop evidence;
+- neither command writes repository files, installs hooks, writes Agent config, or replaces audit judgment.
+
+Current quickstart and recipe MVP:
+
+- `docs/quickstart.md` gives a five-minute path from install to `abh next --json`;
+- `docs/recipes/` covers Codex, Claude Code, MCP, hooks, first loop, and distribution usage;
+- distribution docs describe git-based `uvx --from` / `uv tool install --from` and local editable install paths;
+- PyPI publication, release automation, team policy, and config-file writers remain future work.
+
+Current audit bundle MVP:
+
+- `abh audit bundle <plan> --json` returns an `audit_bundle` payload with plan metadata, latest verification freshness, requested audit summaries, evidence paths, and a copyable independent-review prompt;
+- the command is read-only and has no confirmation requirement;
+- it does not call an LLM, request or record audits, transition plans, or close plans.
+
+Current independent audit gate MVP:
+
+- `abh audit record` can persist `auditor_context`, `independence`, and `verification_id` metadata for the reviewer verdict;
+- `abh close` requires a complete passing audit marked `independent` and tied to the plan's current latest fresh passing verification;
+- older audit records remain readable, but a passing audit without independent/fresh verification metadata is no longer sufficient close evidence;
+- ABH records the declared audit context and basis; it does not verify real-world auditor identity or call an automated reviewer.
 
 Roadmap discipline: concrete `plan-NNN-*` ids are facts about plans that already exist. Future work must use stable queue keys such as `stage4.abh-init-active-attractor` until `abh roadmap materialize <key>` allocates the next available plan id.
 

@@ -4,9 +4,11 @@ import argparse
 import sys
 from typing import Any
 
-from .commands import dumps_envelope, make_envelope
 from .agent_setup import agent_setup_bundle
+from .audit_bundle import audit_bundle
+from .commands import dumps_envelope, make_envelope
 from .hooks import hook_profile, install_hooks
+from .navigation import onboarding_check, recommend_next_action
 from .core import (
     AbhError,
     add_memory,
@@ -57,6 +59,7 @@ def command_name(args: argparse.Namespace) -> str:
         "agent_command",
         "agent_setup_command",
         "hooks_command",
+        "onboarding_command",
     ):
         value = getattr(args, attr, None)
         if value:
@@ -127,6 +130,16 @@ def build_parser() -> argparse.ArgumentParser:
     hooks_install_parser.add_argument("--confirm", action="store_true", help="confirm hook writes")
     add_json_argument(hooks_install_parser)
     hooks_install_parser.set_defaults(handler=handle_hooks_install)
+
+    next_parser = subparsers.add_parser("next", help="recommend the next ABH action")
+    add_json_argument(next_parser)
+    next_parser.set_defaults(handler=handle_next)
+
+    onboarding_parser = subparsers.add_parser("onboarding", help="check ABH onboarding readiness")
+    onboarding_sub = onboarding_parser.add_subparsers(dest="onboarding_command", required=True)
+    onboarding_check_parser = onboarding_sub.add_parser("check", help="check whether this repository is ABH-ready")
+    add_json_argument(onboarding_check_parser)
+    onboarding_check_parser.set_defaults(handler=handle_onboarding_check)
 
     plan_parser = subparsers.add_parser("plan", help="manage plans")
     plan_sub = plan_parser.add_subparsers(dest="plan_command", required=True)
@@ -202,6 +215,9 @@ def build_parser() -> argparse.ArgumentParser:
     audit_record.add_argument("audit_id")
     audit_record.add_argument("--result", required=True, choices=["pass", "fail", "partial", "need_info"])
     audit_record.add_argument("--rationale", required=True)
+    audit_record.add_argument("--auditor-context")
+    audit_record.add_argument("--independence", choices=["unknown", "independent", "self_review"])
+    audit_record.add_argument("--verification-id")
     audit_record.add_argument("--finding", action="append", default=[])
     audit_record.add_argument("--follow-up", action="append", default=[])
     audit_record.set_defaults(handler=handle_audit_record)
@@ -209,6 +225,11 @@ def build_parser() -> argparse.ArgumentParser:
     audit_list = audit_sub.add_parser("list", help="list all audits")
     add_json_argument(audit_list)
     audit_list.set_defaults(handler=handle_audit_list)
+
+    audit_bundle_parser = audit_sub.add_parser("bundle", help="generate a read-only audit prompt bundle")
+    audit_bundle_parser.add_argument("plan_id")
+    add_json_argument(audit_bundle_parser)
+    audit_bundle_parser.set_defaults(handler=handle_audit_bundle)
 
     close = subparsers.add_parser("close", help="close a plan after passing audit")
     close.add_argument("plan_id")
@@ -362,6 +383,25 @@ def handle_hooks_install(args: argparse.Namespace) -> int:
     return 0
 
 
+def handle_next(args: argparse.Namespace) -> int:
+    result = recommend_next_action()
+    if args.json:
+        print_json_envelope(ok=True, command=command_name(args), data={"next": result})
+        return 0
+    print(result["recommended_command"])
+    return 0
+
+
+def handle_onboarding_check(args: argparse.Namespace) -> int:
+    result = onboarding_check()
+    if args.json:
+        print_json_envelope(ok=bool(result["ready"]), command=command_name(args), data={"onboarding": result})
+        return 0 if result["ready"] else 1
+    status = "ready" if result["ready"] else "not ready"
+    print(f"onboarding: {status}")
+    return 0 if result["ready"] else 1
+
+
 def handle_plan_create(args: argparse.Namespace) -> int:
     create_plan(
         plan_id=args.id,
@@ -490,6 +530,9 @@ def handle_audit_record(args: argparse.Namespace) -> int:
         audit_id=args.audit_id,
         result=args.result,
         rationale=args.rationale,
+        auditor_context=args.auditor_context,
+        independence=args.independence,
+        verification_id=args.verification_id,
         findings=args.finding,
         follow_ups=args.follow_up,
     )
@@ -511,6 +554,15 @@ def handle_audit_list(args: argparse.Namespace) -> int:
         result_info = f" result={audit.result}" if audit.status == "complete" else ""
         print(f"{audit.id}  -> {audit.plan_id}{status_info}{result_info}")
     print(f"\ntotal: {len(audits)} audit(s)")
+    return 0
+
+
+def handle_audit_bundle(args: argparse.Namespace) -> int:
+    bundle = audit_bundle(args.plan_id)
+    if args.json:
+        print_json_envelope(ok=True, command=command_name(args), data={"audit_bundle": bundle})
+        return 0
+    print(bundle["prompt"])
     return 0
 
 

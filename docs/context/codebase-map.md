@@ -7,6 +7,8 @@
 - `abh/agent_setup.py` — read-only setup bundle export for Codex, Claude Code, and generic MCP clients.
 - `abh/hooks.py` — local hook guardrail profile preview and managed pre-commit installation.
 - `abh/init.py` — `abh init` preview/write planning, AGE owner-doc templates, and default active attractor seeding.
+- `abh/navigation.py` — read-only next-action recommendation and onboarding readiness checks.
+- `abh/audit_bundle.py` — read-only audit prompt and evidence bundle generation.
 - `abh/models.py` — schema-versioned records for attractors, plans, verifications, audits, memory, drift, and roadmap queue items.
 - `abh/storage.py` — path helpers, workspace directories, atomic text/JSON writes, and local file locks.
 - `abh/core.py` — compatibility re-export layer plus workspace doctor.
@@ -16,7 +18,8 @@
 - `abh/attractors.py` — active attractor registry, creation, supersession, Markdown rendering.
 - `abh/plans.py` — plan creation, update, transition, ready validation, close gate.
 - `abh/verifications.py` — manual verification records and local validation runner.
-- `abh/audits.py` — audit request, record, rendering, and parsing.
+- `abh/audits.py` — audit request, record, reviewer metadata, rendering, and parsing.
+- `abh/audit_bundle.py` — audit bundle assembly from plan, verification, audit, and closure evidence state.
 - `abh/memory.py` — externalized memory records and search.
 - `abh/drift.py` — drift report creation and simple rule-based analysis.
 - `abh/routing.py` — reading-order suggestions for questions.
@@ -27,6 +30,11 @@
 
 - `tests/test_cli.py` is the main regression suite. It covers CLI behavior, JSON envelopes, MCP contracts, roadmap queue behavior, active attractor checks, verification metadata, atomic writes, and doctor checks.
 
+## Onboarding Docs
+
+- `docs/quickstart.md` — five-minute Agent-First entry path.
+- `docs/recipes/` — Codex, Claude Code, MCP, hooks, first-loop, and distribution recipes.
+
 ## Primary Command Families
 
 - `abh attractor ...`
@@ -34,6 +42,8 @@
 - `abh hooks profile`
 - `abh hooks install`
 - `abh init`
+- `abh next`
+- `abh onboarding check`
 - `abh plan ...`
 - `abh verify ...`
 - `abh audit ...`
@@ -44,4 +54,4 @@
 - `abh route ...`
 - `abh doctor`
 
-Future Stage 4 command families should extend `abh.commands` before or alongside their CLI/MCP adapters. `agent setup` is currently a read-only export surface; write/install behavior for agent config files remains a later confirmed-write slice. `hooks install` is the first local hook write surface and requires `--write --confirm`; it only manages `.git/hooks/pre-commit` files containing the ABH managed marker.
+Future agent-facing command families should extend `abh.commands` before or alongside their CLI/MCP adapters. Stage 4 command families are complete: `agent setup` is a read-only export surface; write/install behavior for agent config files remains a later confirmed-write slice. `hooks install` is the first local hook write surface and requires `--write --confirm`; it only manages `.git/hooks/pre-commit` files containing the ABH managed marker. `next` and `onboarding check` are read-only navigation surfaces and must not install hooks or write Agent config. Quickstart and recipes are documentation-only adoption surfaces; PyPI publication and release automation remain future work. `audit bundle` is a Stage 5 read-only audit preparation surface; it must not call models, record verdicts, transition plans, or close plans. `audit record` now carries declared reviewer context, independence, and verification basis metadata; `close` enforces an independent passing audit tied to the current fresh passing verification.

@@ -1,0 +1,104 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from .audits import load_audit
+from .errors import validate_identifier
+from .plans import load_plan, verification_freshness_summary
+from .storage import audit_doc_path, audit_json_path, plan_doc_path, plan_json_path, root_dir, verification_path
+
+
+def audit_bundle(plan_id: str, cwd: Path | None = None) -> dict[str, object]:
+    validate_identifier(plan_id, "plan id")
+    root = root_dir(cwd)
+    plan = load_plan(plan_id, cwd)
+    verification_summary = verification_freshness_summary(plan, cwd)
+    latest_verification_id = verification_summary.get("latest_id")
+    latest_verification_path = (
+        str(verification_path(str(latest_verification_id), cwd)) if latest_verification_id else None
+    )
+
+    requested_audits: list[dict[str, object]] = []
+    audit_evidence_paths: list[str] = []
+    for audit_id in plan.audit_ids:
+        audit = load_audit(audit_id, cwd)
+        requested_audits.append(
+            {
+                "id": audit.id,
+                "auditor": audit.auditor,
+                "auditor_context": audit.auditor_context,
+                "independence": audit.independence,
+                "verification_id": audit.verification_id,
+                "scope": audit.scope,
+                "status": audit.status,
+                "result": audit.result,
+                "evidence": list(audit.evidence),
+                "json_path": str(audit_json_path(audit.id, cwd)),
+                "doc_path": str(audit_doc_path(audit.id, cwd)),
+            }
+        )
+        audit_evidence_paths.extend([str(audit_json_path(audit.id, cwd)), str(audit_doc_path(audit.id, cwd))])
+
+    evidence = {
+        "plan": [str(plan_doc_path(plan.id, cwd)), str(plan_json_path(plan.id, cwd))],
+        "latest_verification": latest_verification_path,
+        "audits": audit_evidence_paths,
+        "closure_evidence": list(plan.closure_evidence),
+    }
+    prompt = render_audit_prompt(
+        root=root,
+        plan_id=plan.id,
+        plan_title=plan.title,
+        evidence=evidence,
+        verification_summary=verification_summary,
+    )
+
+    return {
+        "schema_version": "1",
+        "plan": {
+            "id": plan.id,
+            "title": plan.title,
+            "status": plan.status,
+            "attractor": plan.attractor,
+            "goals": list(plan.goals),
+            "non_goals": list(plan.non_goals),
+            "exit_criteria": list(plan.exit_criteria),
+        },
+        "latest_verification": verification_summary,
+        "requested_audits": requested_audits,
+        "evidence": evidence,
+        "prompt": prompt,
+        "write_policy": "read_only; does not request, record, transition, close, or execute audits",
+    }
+
+
+def render_audit_prompt(
+    *,
+    root: Path,
+    plan_id: str,
+    plan_title: str,
+    evidence: dict[str, object],
+    verification_summary: dict[str, object],
+) -> str:
+    evidence_paths: list[str] = []
+    for value in evidence.values():
+        if isinstance(value, list):
+            evidence_paths.extend(str(item) for item in value)
+        elif value:
+            evidence_paths.append(str(value))
+    evidence_text = "; ".join(evidence_paths)
+    stale = verification_summary.get("stale")
+    stale_reasons = verification_summary.get("reasons", [])
+    return (
+        "Independent audit only. Do not modify files. "
+        f"Repo: {root}. Audit {plan_id} ({plan_title}) against goals, non-goals, exit criteria, "
+        "docs, code, and verification evidence. "
+        f"Evidence: {evidence_text}. "
+        f"Latest verification: result={verification_summary.get('result')}, "
+        f"trust={verification_summary.get('trust_level')}, stale={stale}, reasons={stale_reasons}. "
+        "Check that verification covers the exit criteria and that no non-goals were implemented. "
+        "Return exactly: Result: pass|fail|partial|need_info\n"
+        "Rationale: ...\n"
+        "Findings:\n"
+        "Severity|Title|Evidence|Recommendation. If no findings, Findings:\nnone"
+    )

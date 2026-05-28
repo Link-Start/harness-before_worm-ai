@@ -1,0 +1,128 @@
+{
+  "schema_version": "1",
+  "id": "ver-26001e78ac41",
+  "plan_id": "plan-035-abh-next-and-onboarding-check",
+  "command": "python3 -m unittest tests/test_cli.py -v && python3 -m abh doctor && git diff --check && python3 -m abh roadmap check --json && python3 -m abh next --json && python3 -m abh onboarding check --json && python3 -m abh plan status plan-035-abh-next-and-onboarding-check --json",
+  "result": "pass",
+  "artifacts": [
+    "command='python3 -m unittest tests/test_cli.py -v'; exit_code=0; duration_seconds=2.247; stdout=''; stderr='test_abh_error_json_returns_structured_error (tests.test_cli.CliTests.test_abh_error_json_returns_structured_error) ... ok\\\\ntest_agent_first_command_contract_describes_existing_agent_commands (tests.test_cli.CliTests.test_agent_first_command_contract_describes_existing_agent_commands) ... ok\\\\ntest_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command'",
+    "command='python3 -m abh doctor'; exit_code=0; duration_seconds=0.060; stdout='doctor: ok'; stderr=''",
+    "command='git diff --check'; exit_code=0; duration_seconds=0.016; stdout=''; stderr=''",
+    "command='python3 -m abh roadmap check --json'; exit_code=0; duration_seconds=0.042; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='python3 -m abh next --json'; exit_code=0; duration_seconds=0.060; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"next\", \"data\": {\"next\": {\"next_action\": \"run_verification\", \"recommended_command\": \"abh verify run plan-035-abh-next-and-onboarding-check --json\", \"requires_confirmation\": false, \"rationale\": \"open running plan plan-035-abh-next-and-onboarding-check should gather fresh local verification evidence\", \"source\": {\"plan_id\": \"plan-035-abh-next-and-onboarding-check\", \"plan_status\": \"running\"}, \"alternatives\": [\"abh plan status plan-035-abh-next-and-onboa'; stderr=''",
+    "command='python3 -m abh onboarding check --json'; exit_code=0; duration_seconds=0.046; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"onboarding check\", \"data\": {\"onboarding\": {\"ready\": true, \"checks\": [{\"id\": \"active_attractor\", \"label\": \"Active attractor is available\", \"status\": \"pass\", \"ok\": true, \"details\": {\"id\": \"attractor-abh-core\", \"path\": \"docs/architecture/attractors/abh-core-attractor.md\"}, \"recommended_action\": \"\"}, {\"id\": \"owner_docs\", \"label\": \"AGE owner docs are present\", \"status\": \"pass\", \"ok\": true, \"details\": {\"required\": [\"docs/index.md\", \"docs/context/source-o'; stderr=''",
+    "command='python3 -m abh plan status plan-035-abh-next-and-onboarding-check --json'; exit_code=0; duration_seconds=0.058; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"plan status\", \"data\": {\"plan\": {\"schema_version\": \"1\", \"id\": \"plan-035-abh-next-and-onboarding-check\", \"title\": \"ABH Next and Onboarding Check\", \"attractor\": \"docs/architecture/attractors/abh-core-attractor.md\", \"baseline\": \"Expose the next recommended ABH action and check whether a repository is ABH-ready.\", \"owner\": \"platform\", \"status\": \"running\", \"goals\": [\"Add shared Agent-First command contract entries for abh next and abh onboarding check.\",'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "/Users/cc/ai/harness-before",
+    "git": {
+      "commit": "306539c4acb8285a5a2b2f6f303de7c519c8476e",
+      "dirty": true,
+      "status_hash": "77882b5767c879dbf0c1e41a9a6566e1ef0915ac8edb30339da29e31f6f0c25f",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.13.3 (main, Jan 27 2026, 20:15:53) [Clang 17.0.0 (clang-1700.6.3.2)]",
+      "executable": "/Users/cc/.pyenv/versions/3.13.3/bin/python3"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 7
+    },
+    "commands": [
+      {
+        "command": "python3 -m unittest tests/test_cli.py -v",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests/test_cli.py",
+          "-v"
+        ]
+      },
+      {
+        "command": "python3 -m abh doctor",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "doctor"
+        ]
+      },
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": "python3 -m abh roadmap check --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": "python3 -m abh next --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "next",
+          "--json"
+        ]
+      },
+      {
+        "command": "python3 -m abh onboarding check --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "onboarding",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": "python3 -m abh plan status plan-035-abh-next-and-onboarding-check --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "plan",
+          "status",
+          "plan-035-abh-next-and-onboarding-check",
+          "--json"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-05-28T00:21:26.681245+00:00",
+      "content_hash": "f6e80e1fd039a8b1fa575271b0a8de1f9bc0f15c6597249e5639a9e710f96fd4",
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json",
+        "python3 -m abh next --json",
+        "python3 -m abh onboarding check --json",
+        "python3 -m abh plan status plan-035-abh-next-and-onboarding-check --json"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-05-28T00:22:42.471216+00:00"
+}

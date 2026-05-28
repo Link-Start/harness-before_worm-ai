@@ -8,6 +8,9 @@ from .plans import load_plan, save_plan
 from .storage import audit_doc_path, audit_json_path, audits_dir, ensure_workspace, read_json, write_json, write_text
 
 
+AUDIT_INDEPENDENCE_VALUES = {"unknown", "independent", "self_review"}
+
+
 def parse_finding(value: str) -> AuditFinding:
     parts = value.split("|", 3)
     if len(parts) != 4 or not all(part.strip() for part in parts):
@@ -87,15 +90,26 @@ def record_audit(
     audit_id: str,
     result: str,
     rationale: str,
+    auditor_context: str | None = None,
+    independence: str | None = None,
+    verification_id: str | None = None,
     findings: list[str] | None = None,
     follow_ups: list[str] | None = None,
     cwd: Path | None = None,
 ) -> AuditRecord:
     if result not in AUDIT_RESULTS:
         raise AbhError(f"invalid audit result: {result}")
+    if independence is not None and independence not in AUDIT_INDEPENDENCE_VALUES:
+        raise AbhError(f"invalid audit independence: {independence}")
     audit = load_audit(audit_id, cwd)
     audit.result = result
     audit.rationale = rationale
+    if auditor_context is not None:
+        audit.auditor_context = auditor_context
+    if independence is not None:
+        audit.independence = independence
+    if verification_id is not None:
+        audit.verification_id = verification_id
     audit.status = "complete"
     audit.findings = [parse_finding(value) for value in (findings or [])]
     audit.follow_ups = list(follow_ups or [])
@@ -121,6 +135,9 @@ def render_audit_markdown(audit: AuditRecord) -> str:
         f"- Audit ID: {audit.id}\n"
         f"- Plan: {audit.plan_id}\n"
         f"- Auditor: {audit.auditor}\n"
+        f"- Auditor Context: {audit.auditor_context or 'unknown'}\n"
+        f"- Independence: {audit.independence}\n"
+        f"- Verification ID: {audit.verification_id or 'none'}\n"
         f"- Status: {audit.status}\n"
         f"- Created: {audit.created_at}\n"
         f"- Updated: {audit.updated_at}\n\n"

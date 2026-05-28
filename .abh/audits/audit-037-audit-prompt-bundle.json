@@ -1,0 +1,30 @@
+{
+  "schema_version": "1",
+  "id": "audit-037-audit-prompt-bundle",
+  "plan_id": "plan-037-audit-prompt-bundle",
+  "auditor": "opencode-deepseek-v4-pro",
+  "scope": "Independent opencode DeepSeek audit of plan-037 audit prompt bundle",
+  "status": "complete",
+  "result": "pass",
+  "rationale": "opencode DeepSeek audit passed: all goals and exit criteria are met; audit bundle implementation is read-only, assembles plan metadata, verification freshness, audit records, evidence paths, and prompt without LLM or network calls; command contract declares read_only true, confirmation none, and no side effects; docs accurately describe the read-only boundary without claiming automated audit execution or close-gate enforcement; tests, doctor, roadmap check, and diff check passed; findings none.",
+  "evidence": [
+    "docs/plans/plan-037-audit-prompt-bundle.md",
+    ".abh/plans/plan-037-audit-prompt-bundle.json",
+    ".abh/verifications/ver-80899a7722f2.json",
+    "abh/audit_bundle.py",
+    "abh/cli.py",
+    "abh/commands.py",
+    "tests/test_cli.py",
+    "README.md",
+    "docs/development-roadmap.md",
+    "docs/task-board.md",
+    "docs/architecture/agent-protocol.md",
+    "docs/context/codebase-map.md",
+    ".abh/roadmap.json"
+  ],
+  "findings": [],
+  "follow_ups": [],
+  "created_at": "2026-05-28T07:21:29.587753+00:00",
+  "updated_at": "2026-05-28T07:24:19.679201+00:00",
+  "doc_path": "/Users/cc/ai/harness-before/docs/audits/audit-037-audit-prompt-bundle.md"
+}

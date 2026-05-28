@@ -1,0 +1,77 @@
+# Plan: Quickstart Recipes and Distribution
+
+## Metadata
+
+- ID: plan-036-quickstart-recipes-and-distribution
+- Status: closed
+- Attractor: docs/architecture/attractors/abh-core-attractor.md
+- Baseline: Publish quickstart recipes, demo loop, and package distribution path for agent-first adoption.
+- Owner: platform
+- Created: 2026-05-28T05:00:02.781079+00:00
+- Updated: 2026-05-28T07:02:25.590663+00:00
+
+## Goals
+
+- Add docs/quickstart.md as a five-minute Agent-First onboarding path from install to next action.
+- Add docs/recipes/ for Codex, Claude Code, MCP, hooks, first-loop demo, and distribution usage.
+- Document the current supported distribution paths: uvx/uv tool install from git and editable local install, while keeping PyPI publication as future work.
+- Synchronize README, docs/index, Agent Protocol, roadmap, task-board, and codebase map with the Stage 4 quickstart/recipes boundary.
+- Validate the package entry point with an isolated local install smoke test.
+
+## Non-Goals
+
+- Do not publish to PyPI, create release automation, change version metadata, or claim that the abh package name is already available from PyPI.
+- Do not add new CLI or MCP commands, change runtime state machines, install hooks, or write Agent configuration files.
+- Do not introduce team policy, remote distribution, CI templates, network-dependent tests, or external services in this slice.
+
+## Exit Criteria
+
+- docs/quickstart.md exists and gives a concise five-minute path using existing ABH commands.
+- docs/recipes/codex.md and docs/recipes/claude-code.md explain setup bundle usage without writing Agent config.
+- docs/recipes/mcp.md, docs/recipes/hooks.md, docs/recipes/first-loop.md, and docs/recipes/distribution.md exist and stay within current Stage 4 capabilities.
+- Distribution docs distinguish supported from-git/editable install paths from future PyPI publication.
+- README, docs/index, Agent Protocol, roadmap, task-board, and codebase map point to quickstart/recipes without claiming release automation or team policy.
+- A local isolated install smoke test can run abh --help from an editable install.
+
+## Validation Checklist
+
+- python3 -m unittest tests/test_cli.py -v
+- python3 -m abh doctor
+- git diff --check
+- python3 -m abh roadmap check --json
+- python3 -m abh next --json
+- python3 -m abh onboarding check --json
+- python3 -c "from pathlib import Path; required=['docs/quickstart.md','docs/recipes/codex.md','docs/recipes/claude-code.md','docs/recipes/mcp.md','docs/recipes/hooks.md','docs/recipes/first-loop.md','docs/recipes/distribution.md']; missing=[p for p in required if not Path(p).exists()]; raise SystemExit('missing '+', '.join(missing) if missing else 0)"
+- python3 -m venv /private/tmp/abh-plan-036-smoke
+- /private/tmp/abh-plan-036-smoke/bin/python -m pip install -e .
+- /private/tmp/abh-plan-036-smoke/bin/abh --help
+
+## Closure Evidence
+
+- docs/quickstart.md
+- docs/recipes/codex.md
+- docs/recipes/claude-code.md
+- docs/recipes/mcp.md
+- docs/recipes/hooks.md
+- docs/recipes/first-loop.md
+- docs/recipes/distribution.md
+- README.md
+- docs/index.md
+- docs/development-roadmap.md
+- docs/task-board.md
+- docs/architecture/agent-protocol.md
+- docs/context/codebase-map.md
+- audit-036-quickstart-recipes-and-distribution
+
+## Verification Runs
+
+- ver-dec534393ad5
+- ver-ac71ba84575e
+- ver-df37aaf1be23
+- ver-32d602fc759a
+- ver-083e4b962240
+- ver-3c8aa3e83d06
+
+## Audits
+
+- audit-036-quickstart-recipes-and-distribution

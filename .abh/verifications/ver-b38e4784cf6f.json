@@ -1,0 +1,117 @@
+{
+  "schema_version": "1",
+  "id": "ver-b38e4784cf6f",
+  "plan_id": "plan-038-independent-audit-gate",
+  "command": "python3 -m unittest tests/test_cli.py -v && python3 -m abh doctor && git diff --check && python3 -m abh roadmap check --json && python3 -m abh audit bundle plan-038-independent-audit-gate --json && python3 -m abh plan status plan-038-independent-audit-gate --json",
+  "result": "pass",
+  "artifacts": [
+    "command='python3 -m unittest tests/test_cli.py -v'; exit_code=0; duration_seconds=2.467; stdout=''; stderr='test_abh_error_json_returns_structured_error (tests.test_cli.CliTests.test_abh_error_json_returns_structured_error) ... ok\\\\ntest_agent_first_command_contract_describes_existing_agent_commands (tests.test_cli.CliTests.test_agent_first_command_contract_describes_existing_agent_commands) ... ok\\\\ntest_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command'",
+    "command='python3 -m abh doctor'; exit_code=0; duration_seconds=0.051; stdout='doctor: ok'; stderr=''",
+    "command='git diff --check'; exit_code=0; duration_seconds=0.016; stdout=''; stderr=''",
+    "command='python3 -m abh roadmap check --json'; exit_code=0; duration_seconds=0.044; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='python3 -m abh audit bundle plan-038-independent-audit-gate --json'; exit_code=0; duration_seconds=0.043; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"audit bundle\", \"data\": {\"audit_bundle\": {\"schema_version\": \"1\", \"plan\": {\"id\": \"plan-038-independent-audit-gate\", \"title\": \"Independent Audit Gate\", \"status\": \"ready\", \"attractor\": \"docs/architecture/attractors/abh-core-attractor.md\", \"goals\": [\"Add auditor context/source, independence, and verification basis metadata to audit records while preserving backward-compatible reads.\", \"Allow CLI and MCP audit record flows to capture independent review m'; stderr=''",
+    "command='python3 -m abh plan status plan-038-independent-audit-gate --json'; exit_code=0; duration_seconds=0.043; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"plan status\", \"data\": {\"plan\": {\"schema_version\": \"1\", \"id\": \"plan-038-independent-audit-gate\", \"title\": \"Independent Audit Gate\", \"attractor\": \"docs/architecture/attractors/abh-core-attractor.md\", \"baseline\": \"Record auditor context and enforce freshness/independence metadata at close time.\", \"owner\": \"platform\", \"status\": \"ready\", \"goals\": [\"Add auditor context/source, independence, and verification basis metadata to audit records while preservin'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "/Users/cc/ai/harness-before",
+    "git": {
+      "commit": "306539c4acb8285a5a2b2f6f303de7c519c8476e",
+      "dirty": true,
+      "status_hash": "f7a2a0627af63159d29a4b3f806c564ae073b29256dec16db64c4e837397c2fe",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.13.3 (main, Jan 27 2026, 20:15:53) [Clang 17.0.0 (clang-1700.6.3.2)]",
+      "executable": "/Users/cc/.pyenv/versions/3.13.3/bin/python3"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 6
+    },
+    "commands": [
+      {
+        "command": "python3 -m unittest tests/test_cli.py -v",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests/test_cli.py",
+          "-v"
+        ]
+      },
+      {
+        "command": "python3 -m abh doctor",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "doctor"
+        ]
+      },
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": "python3 -m abh roadmap check --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": "python3 -m abh audit bundle plan-038-independent-audit-gate --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "audit",
+          "bundle",
+          "plan-038-independent-audit-gate",
+          "--json"
+        ]
+      },
+      {
+        "command": "python3 -m abh plan status plan-038-independent-audit-gate --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "plan",
+          "status",
+          "plan-038-independent-audit-gate",
+          "--json"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-05-28T11:02:41.392662+00:00",
+      "content_hash": "59304af4e33e9db6243d07e3b0e6f6f8492d7c7ff1d2c029c9579bc247161cff",
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json",
+        "python3 -m abh audit bundle plan-038-independent-audit-gate --json",
+        "python3 -m abh plan status plan-038-independent-audit-gate --json"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-05-28T11:24:43.107959+00:00"
+}

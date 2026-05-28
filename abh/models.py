@@ -151,6 +151,9 @@ class AuditRecord:
     plan_id: str
     auditor: str
     scope: str
+    auditor_context: str = ""
+    independence: str = "unknown"
+    verification_id: str = ""
     status: str = "requested"
     result: str = "need_info"
     rationale: str = ""
@@ -168,6 +171,9 @@ class AuditRecord:
             "plan_id": self.plan_id,
             "auditor": self.auditor,
             "scope": self.scope,
+            "auditor_context": self.auditor_context,
+            "independence": self.independence,
+            "verification_id": self.verification_id,
             "status": self.status,
             "result": self.result,
             "rationale": self.rationale,
@@ -186,6 +192,9 @@ class AuditRecord:
             plan_id=data["plan_id"],
             auditor=data["auditor"],
             scope=data["scope"],
+            auditor_context=data.get("auditor_context", ""),
+            independence=data.get("independence", "unknown"),
+            verification_id=data.get("verification_id", ""),
             status=data.get("status", "requested"),
             result=data.get("result", "need_info"),
             rationale=data.get("rationale", ""),

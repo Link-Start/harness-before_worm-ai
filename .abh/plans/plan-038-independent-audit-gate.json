@@ -1,0 +1,65 @@
+{
+  "schema_version": "1",
+  "id": "plan-038-independent-audit-gate",
+  "title": "Independent Audit Gate",
+  "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+  "baseline": "Record auditor context and enforce freshness/independence metadata at close time.",
+  "owner": "platform",
+  "status": "closed",
+  "goals": [
+    "Add auditor context/source, independence, and verification basis metadata to audit records while preserving backward-compatible reads.",
+    "Allow CLI and MCP audit record flows to capture independent review metadata in structured JSON and Markdown.",
+    "Enforce close-time selection of a passing audit that is independent and tied to the current fresh passing verification.",
+    "Document the Stage 5 independent audit gate boundary in README, Agent Protocol, roadmap, task-board, and codebase map."
+  ],
+  "non_goals": [
+    "Do not call an LLM, opencode, DeepSeek, OpenAI, network services, or any automated auditor from ABH.",
+    "Do not remove historical audit records or migrate closed historical plans in this slice.",
+    "Do not change audit bundle generation beyond surfacing new audit metadata if already present.",
+    "Do not implement team policy, auditor identity verification beyond explicit metadata, or release-time policy gates."
+  ],
+  "exit_criteria": [
+    "Audit JSON includes auditor_context, independence, and verification_id fields with backward-compatible defaults for older records.",
+    "abh audit record accepts auditor context/source, independence, and verification basis arguments and renders them in docs/audits Markdown.",
+    "abh close refuses pass audits that are not marked independent.",
+    "abh close refuses independent pass audits when their verification basis is missing, stale, failing, or not the plan's latest verification.",
+    "abh close succeeds when a plan has closure evidence plus a complete pass audit marked independent against the current fresh passing verification.",
+    "Command contracts and MCP write tool schema expose the new audit record metadata fields."
+  ],
+  "validation_checklist": [
+    "python3 -m unittest tests/test_cli.py -v",
+    "python3 -m abh doctor",
+    "git diff --check",
+    "python3 -m abh roadmap check --json",
+    "python3 -m abh audit bundle plan-038-independent-audit-gate --json",
+    "python3 -m abh plan status plan-038-independent-audit-gate --json"
+  ],
+  "closure_evidence": [
+    "abh/models.py",
+    "abh/audits.py",
+    "abh/plans.py",
+    "abh/cli.py",
+    "abh/commands.py",
+    "abh/mcp_server.py",
+    "abh/audit_bundle.py",
+    "tests/test_cli.py",
+    "README.md",
+    "docs/development-roadmap.md",
+    "docs/task-board.md",
+    "docs/architecture/agent-protocol.md",
+    "docs/context/codebase-map.md",
+    "docs/plans/plan-038-independent-audit-gate.md",
+    "audit-038-independent-audit-gate"
+  ],
+  "verification_runs": [
+    "ver-b38e4784cf6f",
+    "ver-3a5431a9418c",
+    "ver-743dd6030a57"
+  ],
+  "audit_ids": [
+    "audit-038-independent-audit-gate"
+  ],
+  "created_at": "2026-05-28T10:51:57.048973+00:00",
+  "updated_at": "2026-05-28T14:48:11.540941+00:00",
+  "doc_path": "/Users/cc/ai/harness-before/docs/plans/plan-038-independent-audit-gate.md"
+}

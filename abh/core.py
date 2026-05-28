@@ -12,6 +12,7 @@ from .audits import (
     request_audit,
     save_audit,
 )
+from .audit_bundle import audit_bundle
 from .attractors import (
     active_attractor,
     create_attractor,

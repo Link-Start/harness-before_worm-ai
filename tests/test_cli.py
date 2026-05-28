@@ -84,6 +84,20 @@ class CliTests(TestCase):
     def test_agent_first_command_contract_describes_existing_agent_commands(self) -> None:
         from abh.commands import command_contract, make_envelope
 
+        next_contract = command_contract("next")
+        self.assertEqual(next_contract.cli_command, "next")
+        self.assertTrue(next_contract.read_only)
+        self.assertEqual(next_contract.confirmation, "none")
+        self.assertEqual(next_contract.side_effects, [])
+        self.assertEqual(next_contract.output_keys, ["next"])
+
+        onboarding_contract = command_contract("onboarding.check")
+        self.assertEqual(onboarding_contract.cli_command, "onboarding check")
+        self.assertTrue(onboarding_contract.read_only)
+        self.assertEqual(onboarding_contract.confirmation, "none")
+        self.assertEqual(onboarding_contract.side_effects, [])
+        self.assertEqual(onboarding_contract.output_keys, ["onboarding"])
+
         hooks_profile = command_contract("hooks.profile")
         self.assertEqual(hooks_profile.cli_command, "hooks profile")
         self.assertTrue(hooks_profile.read_only)
@@ -106,6 +120,22 @@ class CliTests(TestCase):
         self.assertEqual(plan_status.confirmation, "none")
         self.assertEqual(plan_status.side_effects, [])
         self.assertIn("plan_id", plan_status.input_schema["properties"])
+
+        audit_bundle = command_contract("audit.bundle")
+        self.assertEqual(audit_bundle.cli_command, "audit bundle")
+        self.assertTrue(audit_bundle.read_only)
+        self.assertEqual(audit_bundle.confirmation, "none")
+        self.assertEqual(audit_bundle.side_effects, [])
+        self.assertEqual(audit_bundle.output_keys, ["audit_bundle"])
+        self.assertIn("plan_id", audit_bundle.input_schema["properties"])
+
+        audit_record = command_contract("audit.record")
+        self.assertEqual(audit_record.cli_command, "audit record")
+        self.assertEqual(audit_record.mcp_tool, "abh_audit_record")
+        self.assertFalse(audit_record.read_only)
+        self.assertIn("auditor_context", audit_record.input_schema["properties"])
+        self.assertIn("independence", audit_record.input_schema["properties"])
+        self.assertIn("verification_id", audit_record.input_schema["properties"])
 
         plan_create = command_contract("plan.create")
         self.assertEqual(plan_create.cli_command, "plan create")
@@ -353,6 +383,187 @@ class CliTests(TestCase):
         self.assertFalse(payload["ok"])
         self.assertIn("existing unmanaged hook", payload["errors"][0]["message"])
         self.assertEqual(hook_path.read_text(encoding="utf-8"), "#!/bin/sh\necho custom\n")
+
+    def test_next_json_recommends_materializing_next_queued_item_when_no_open_plans(self) -> None:
+        self.run_cli("init", "--write", "--confirm", "--json")
+        queue = self.root / ".abh" / "roadmap.json"
+        queue.write_text(
+            json.dumps(
+                {
+                    "schema_version": "1",
+                    "items": [
+                        {
+                            "key": "stage4.abh-next-and-onboarding-check",
+                            "title": "ABH Next and Onboarding Check",
+                            "stage": "stage4",
+                            "summary": "Expose next action.",
+                        }
+                    ],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        code, out, err = self.run_cli("next", "--json")
+
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["command"], "next")
+        result = payload["data"]["next"]
+        self.assertEqual(result["next_action"], "materialize_roadmap_item")
+        self.assertEqual(result["recommended_command"], "abh roadmap materialize stage4.abh-next-and-onboarding-check --json")
+        self.assertFalse(result["requires_confirmation"])
+        self.assertIn("no open plans", result["rationale"])
+        self.assertEqual(result["source"]["roadmap_key"], "stage4.abh-next-and-onboarding-check")
+        self.assertIn("abh roadmap list --json", result["alternatives"])
+
+    def test_next_json_prioritizes_existing_draft_plan(self) -> None:
+        self.run_cli("init", "--write", "--confirm", "--json")
+        code, out, err = self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-200-draft",
+            "--title",
+            "Draft Plan",
+            "--attractor",
+            "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline",
+            "baseline",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli("next", "--json")
+
+        self.assertEqual(code, 0, err)
+        result = json.loads(out)["data"]["next"]
+        self.assertEqual(result["next_action"], "complete_plan_definition")
+        self.assertEqual(result["recommended_command"], "abh plan status plan-200-draft --json")
+        self.assertFalse(result["requires_confirmation"])
+        self.assertEqual(result["source"]["plan_id"], "plan-200-draft")
+
+    def test_next_json_recommends_audit_after_fresh_passing_verification(self) -> None:
+        self.run_cli("init", "--write", "--confirm", "--json")
+        code, out, err = self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-202-verified",
+            "--title",
+            "Verified Plan",
+            "--attractor",
+            "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "recommend audit",
+            "--non-goal",
+            "close automatically",
+            "--exit-criterion",
+            "audit recommended",
+            "--validation",
+            "python3 -c 'print(\"verified\")'",
+            "--closure-evidence",
+            "docs/plans/plan-202-verified.md",
+        )
+        self.assertEqual(code, 0, err)
+        code, out, err = self.run_cli("verify", "run", "plan-202-verified", "--json")
+        self.assertEqual(code, 0, err)
+        verification_id = json.loads(out)["data"]["verification"]["id"]
+
+        code, out, err = self.run_cli("next", "--json")
+
+        self.assertEqual(code, 0, err)
+        result = json.loads(out)["data"]["next"]
+        self.assertEqual(result["next_action"], "request_audit")
+        self.assertEqual(
+            result["recommended_command"],
+            f'abh audit request plan-202-verified --id audit-202-verified --auditor human-independent-review --scope "Independent audit of plan-202-verified" --evidence docs/plans/plan-202-verified.md --evidence .abh/verifications/{verification_id}.json',
+        )
+        self.assertFalse(result["requires_confirmation"])
+        self.assertEqual(result["source"]["plan_id"], "plan-202-verified")
+        self.assertEqual(result["source"]["latest_verification"], verification_id)
+
+    def test_onboarding_check_json_reports_readiness(self) -> None:
+        self.run_cli("init", "--write", "--confirm", "--json")
+        self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-201-loop",
+            "--title",
+            "Loop",
+            "--attractor",
+            "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "close a loop",
+            "--non-goal",
+            "ship ui",
+            "--exit-criterion",
+            "closed",
+            "--validation",
+            "python3 -m abh doctor",
+            "--closure-evidence",
+            "docs/plans/plan-201-loop.md",
+        )
+        self.run_cli("verify", "record", "plan-201-loop", "--command", "python3 -m abh doctor", "--result", "pass")
+        plan = json.loads(self.run_cli("plan", "status", "plan-201-loop", "--json")[1])["data"]["plan"]
+        verification_id = plan["verification_runs"][-1]
+        self.run_cli(
+            "audit",
+            "request",
+            "plan-201-loop",
+            "--id",
+            "audit-201-loop",
+            "--auditor",
+            "reviewer",
+            "--scope",
+            "loop",
+            "--evidence",
+            "docs/plans/plan-201-loop.md",
+        )
+        self.run_cli(
+            "audit",
+            "record",
+            "audit-201-loop",
+            "--result",
+            "pass",
+            "--rationale",
+            "ok",
+            "--auditor-context",
+            "independent onboarding smoke reviewer",
+            "--independence",
+            "independent",
+            "--verification-id",
+            verification_id,
+        )
+        self.run_cli("close", "plan-201-loop")
+
+        code, out, err = self.run_cli("onboarding", "check", "--json")
+
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["command"], "onboarding check")
+        onboarding = payload["data"]["onboarding"]
+        self.assertTrue(onboarding["ready"])
+        check_statuses = {check["id"]: check["status"] for check in onboarding["checks"]}
+        self.assertEqual(check_statuses["active_attractor"], "pass")
+        self.assertEqual(check_statuses["owner_docs"], "pass")
+        self.assertEqual(check_statuses["agent_setup_export"], "pass")
+        self.assertEqual(check_statuses["hook_guardrails"], "pass")
+        self.assertEqual(check_statuses["doctor"], "pass")
+        self.assertEqual(check_statuses["closed_loop_evidence"], "pass")
+        self.assertEqual(onboarding["recommended_actions"], [])
 
     def test_attractor_create_active_show_list_and_supersede_json_flow(self) -> None:
         code, out, err = self.run_cli(
@@ -1420,8 +1631,12 @@ class CliTests(TestCase):
         status = "\n".join(
             [
                 " M .abh/plans/plan-021-verification-trust-and-stale-detection.json",
+                " M .abh/audits/audit-021-verification-trust-and-stale-detection.json",
+                "?? .abh/memory/mem-opencode-deepseek-audit-models.json",
                 "?? .abh/verifications/ver-runtime.json",
                 "?? docs/plans/plan-021-verification-trust-and-stale-detection.md",
+                "?? docs/audits/audit-021-verification-trust-and-stale-detection.md",
+                "?? docs/memory/mem-opencode-deepseek-audit-models.md",
             ]
         )
 
@@ -1487,6 +1702,18 @@ class CliTests(TestCase):
 
     def test_audit_record_allows_close_only_after_pass(self) -> None:
         self.create_ready_plan()
+        code, out, err = self.run_cli(
+            "verify",
+            "record",
+            "plan-200-audit",
+            "--command",
+            "unit tests pass",
+            "--result",
+            "pass",
+        )
+        self.assertEqual(code, 0, err)
+        plan = json.loads(self.run_cli("plan", "status", "plan-200-audit", "--json")[1])["data"]["plan"]
+        verification_id = plan["verification_runs"][-1]
         code, out, err = self.run_cli("close", "plan-200-audit")
         self.assertEqual(code, 2)
         self.assertIn("passing audit", err)
@@ -1537,12 +1764,257 @@ class CliTests(TestCase):
         self.assertEqual(code, 0, err)
 
         code, out, err = self.run_cli("close", "plan-200-audit")
+        self.assertEqual(code, 2)
+        self.assertIn("independent", err)
+
+        code, out, err = self.run_cli(
+            "audit",
+            "record",
+            "audit-200-audit",
+            "--result",
+            "pass",
+            "--rationale",
+            "all exit criteria verified independently",
+            "--auditor-context",
+            "separate review session",
+            "--independence",
+            "independent",
+            "--verification-id",
+            verification_id,
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli("close", "plan-200-audit")
         self.assertEqual(code, 0, err)
         self.assertIn("closed plan plan-200-audit", out)
 
         code, out, err = self.run_cli("plan", "status", "plan-200-audit")
         self.assertEqual(code, 0, err)
         self.assertIn("plan-200-audit [closed]", out)
+
+    def test_audit_record_persists_independent_context_and_verification_basis(self) -> None:
+        self.create_ready_plan("plan-211-audit-context")
+        code, out, err = self.run_cli(
+            "verify",
+            "record",
+            "plan-211-audit-context",
+            "--command",
+            "unit tests pass",
+            "--result",
+            "pass",
+        )
+        self.assertEqual(code, 0, err)
+        plan = json.loads(self.run_cli("plan", "status", "plan-211-audit-context", "--json")[1])["data"]["plan"]
+        verification_id = plan["verification_runs"][-1]
+
+        code, out, err = self.run_cli(
+            "audit",
+            "request",
+            "plan-211-audit-context",
+            "--id",
+            "audit-211-audit-context",
+            "--auditor",
+            "opencode-deepseek-v4-pro",
+            "--scope",
+            "Independent close gate audit",
+            "--evidence",
+            f".abh/verifications/{verification_id}.json",
+        )
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli(
+            "audit",
+            "record",
+            "audit-211-audit-context",
+            "--result",
+            "pass",
+            "--rationale",
+            "independent reviewer checked fresh evidence",
+            "--auditor-context",
+            "opencode isolated session using DeepSeek V4 Pro",
+            "--independence",
+            "independent",
+            "--verification-id",
+            verification_id,
+        )
+        self.assertEqual(code, 0, err)
+
+        audit_path = self.root / ".abh" / "audits" / "audit-211-audit-context.json"
+        audit = json.loads(audit_path.read_text(encoding="utf-8"))
+        self.assertEqual(audit["auditor_context"], "opencode isolated session using DeepSeek V4 Pro")
+        self.assertEqual(audit["independence"], "independent")
+        self.assertEqual(audit["verification_id"], verification_id)
+        audit_doc = (self.root / "docs" / "audits" / "audit-211-audit-context.md").read_text(encoding="utf-8")
+        self.assertIn("- Auditor Context: opencode isolated session using DeepSeek V4 Pro", audit_doc)
+        self.assertIn("- Independence: independent", audit_doc)
+        self.assertIn(f"- Verification ID: {verification_id}", audit_doc)
+
+    def test_close_requires_independent_audit_tied_to_fresh_latest_verification(self) -> None:
+        self.create_ready_plan("plan-212-independent-close")
+        self.run_cli(
+            "verify",
+            "record",
+            "plan-212-independent-close",
+            "--command",
+            "unit tests pass",
+            "--result",
+            "pass",
+        )
+        plan = json.loads(self.run_cli("plan", "status", "plan-212-independent-close", "--json")[1])["data"]["plan"]
+        first_verification_id = plan["verification_runs"][-1]
+        self.run_cli(
+            "audit",
+            "request",
+            "plan-212-independent-close",
+            "--id",
+            "audit-212-non-independent",
+            "--auditor",
+            "same-session",
+            "--scope",
+            "Non-independent audit",
+            "--evidence",
+            "tests/test_cli.py",
+        )
+        self.run_cli(
+            "audit",
+            "record",
+            "audit-212-non-independent",
+            "--result",
+            "pass",
+            "--rationale",
+            "same session reviewed it",
+            "--auditor-context",
+            "same implementation session",
+            "--independence",
+            "self_review",
+            "--verification-id",
+            first_verification_id,
+        )
+
+        code, out, err = self.run_cli("close", "plan-212-independent-close")
+        self.assertEqual(code, 2)
+        self.assertIn("independent", err)
+
+        self.run_cli(
+            "audit",
+            "request",
+            "plan-212-independent-close",
+            "--id",
+            "audit-212-stale-independent",
+            "--auditor",
+            "independent-reviewer",
+            "--scope",
+            "Independent audit tied to old verification",
+            "--evidence",
+            "tests/test_cli.py",
+        )
+        self.run_cli(
+            "audit",
+            "record",
+            "audit-212-stale-independent",
+            "--result",
+            "pass",
+            "--rationale",
+            "old verification looked good before the plan changed",
+            "--auditor-context",
+            "separate session",
+            "--independence",
+            "independent",
+            "--verification-id",
+            first_verification_id,
+        )
+        self.run_cli(
+            "verify",
+            "record",
+            "plan-212-independent-close",
+            "--command",
+            "unit tests pass",
+            "--result",
+            "pass",
+        )
+
+        code, out, err = self.run_cli("close", "plan-212-independent-close")
+        self.assertEqual(code, 2)
+        self.assertIn("latest verification", err)
+
+        current_plan = json.loads(self.run_cli("plan", "status", "plan-212-independent-close", "--json")[1])["data"]["plan"]
+        latest_verification_id = current_plan["verification_runs"][-1]
+        self.run_cli(
+            "audit",
+            "request",
+            "plan-212-independent-close",
+            "--id",
+            "audit-212-independent-current",
+            "--auditor",
+            "independent-reviewer",
+            "--scope",
+            "Independent audit tied to current verification",
+            "--evidence",
+            "tests/test_cli.py",
+        )
+        self.run_cli(
+            "audit",
+            "record",
+            "audit-212-independent-current",
+            "--result",
+            "pass",
+            "--rationale",
+            "fresh independent evidence verified",
+            "--auditor-context",
+            "separate session",
+            "--independence",
+            "independent",
+            "--verification-id",
+            latest_verification_id,
+        )
+
+        code, out, err = self.run_cli("close", "plan-212-independent-close")
+        self.assertEqual(code, 0, err)
+        self.assertIn("closed plan plan-212-independent-close", out)
+
+    def test_audit_bundle_json_returns_prompt_and_structured_evidence(self) -> None:
+        self.create_ready_plan("plan-210-bundle")
+        self.run_cli(
+            "audit",
+            "request",
+            "plan-210-bundle",
+            "--id",
+            "audit-210-bundle",
+            "--auditor",
+            "opencode-deepseek-v4-pro",
+            "--scope",
+            "Independent audit of plan-210-bundle",
+            "--evidence",
+            "docs/plans/plan-210-bundle.md",
+        )
+        self.run_cli(
+            "verify",
+            "record",
+            "plan-210-bundle",
+            "--command",
+            "unit tests pass",
+            "--result",
+            "pass",
+            "--artifact",
+            "tests/test_cli.py",
+        )
+
+        code, out, err = self.run_cli("audit", "bundle", "plan-210-bundle", "--json")
+
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["command"], "audit bundle")
+        bundle = payload["data"]["audit_bundle"]
+        self.assertEqual(bundle["plan"]["id"], "plan-210-bundle")
+        self.assertEqual(bundle["latest_verification"]["result"], "pass")
+        self.assertFalse(bundle["latest_verification"]["stale"])
+        self.assertIn(".abh/verifications/", bundle["evidence"]["latest_verification"])
+        self.assertTrue(any(path.endswith("docs/plans/plan-210-bundle.md") for path in bundle["evidence"]["plan"]))
+        self.assertIn("audit-210-bundle", bundle["requested_audits"][0]["id"])
+        self.assertIn("Independent audit only", bundle["prompt"])
+        self.assertIn("Do not modify files", bundle["prompt"])
+        self.assertIn("Result: pass|fail|partial|need_info", bundle["prompt"])
 
     def test_memory_add_and_search_by_type_and_keyword(self) -> None:
         code, out, err = self.run_cli(
@@ -2533,7 +3005,7 @@ class McpServerTests(TestCase):
                     "arguments": {
                         "confirm": True,
                         "plan_id": "plan-mcp-write",
-                        "command": "python3 -m unittest tests/test_cli.py -v",
+                        "command": "unit tests pass",
                         "result": "pass",
                         "artifacts": ["tests/test_cli.py"],
                     },
@@ -2588,6 +3060,9 @@ class McpServerTests(TestCase):
                         "audit_id": "audit-mcp-write",
                         "result": "pass",
                         "rationale": "mcp write flow verified",
+                        "auditor_context": "independent MCP write-flow reviewer",
+                        "independence": "independent",
+                        "verification_id": verification["id"],
                     },
                 },
             }

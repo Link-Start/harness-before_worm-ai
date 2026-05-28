@@ -11,6 +11,7 @@ This index routes Agent and maintainer questions to the owner docs that should a
 5. `docs/context/codebase-map.md` — current module map and command surface.
 6. `docs/development-roadmap.md` — historical execution line and future roadmap queue discipline.
 7. `docs/architecture/agent-protocol.md` — Agent-facing command contract, MCP, and navigation baseline.
+8. `docs/quickstart.md` — five-minute path into the Agent-First ABH loop.
 
 ## Question Routing
 
@@ -20,6 +21,7 @@ This index routes Agent and maintainer questions to the owner docs that should a
 | What is the current project context? | `docs/context/project-context.md` | `README.md`, `docs/development-roadmap.md` |
 | Which source wins when docs disagree? | `docs/context/source-of-truth.md` | active attractor, code, tests, plan/audit records |
 | How should an Agent behave in this repo? | `docs/architecture/agent-protocol.md` | `docs/context/conventions.md`, `abh/commands.py` |
+| How do I start using ABH quickly? | `docs/quickstart.md` | `docs/recipes/` |
 | What should be built next? | `.abh/roadmap.json` | `docs/development-roadmap.md`, `docs/task-board.md` |
 | How should a specific change close? | `docs/plans/<plan-id>.md` | `.abh/plans/<plan-id>.json`, verification records, audit records |
 | Did the change really complete? | `docs/audits/<audit-id>.md` | verification artifacts, code, tests, plan exit criteria |
@@ -32,4 +34,4 @@ ABH adopts the AGE distinction between stable attractors and control mechanisms:
 - Stable owner docs: `docs/context/`, `docs/requirements/`, `docs/design/`, `docs/architecture/`.
 - Control records: `docs/plans/`, `docs/audits/`, `docs/memory/`, `docs/drift/`, future `docs/logs/`.
 
-`abh init` seeds this index in new workspaces. `abh agent setup` consumes it when exporting setup bundles. Future `abh next` and `abh onboarding check` should also consume this index rather than inventing separate reading-order rules.
+`abh init` seeds this index in new workspaces. `abh agent setup` consumes it when exporting setup bundles. `abh next` and `abh onboarding check` help Agents stay inside this reading order rather than inventing separate workflow rules.

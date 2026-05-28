@@ -179,60 +179,212 @@
       "title": "ABH Next and Onboarding Check",
       "stage": "stage4",
       "summary": "Expose the next recommended ABH action and check whether a repository is ABH-ready.",
-      "attractor": "",
-      "baseline": "",
-      "goals": [],
-      "non_goals": [],
-      "exit_criteria": [],
-      "validation_checklist": [],
-      "closure_evidence": [],
-      "status": "queued",
-      "plan_id": null
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "Stage 4 already has active attractor, Agent-First command contracts, roadmap queue, AGE owner docs, abh init, read-only agent setup export, and local hook guardrails. Agents still need one read-only navigation entry for the next ABH action and one readiness report for onboarding.",
+      "goals": [
+        "Add shared Agent-First command contract entries for abh next and abh onboarding check.",
+        "Expose abh next --json as a read-only navigation command that recommends the next safe ABH action from repository state.",
+        "Expose abh onboarding check --json as a read-only ABH readiness report for active attractor, AGE owner docs, agent setup export, hook guardrail availability, and closed-loop evidence.",
+        "Keep recommendations grounded in existing local records: active attractor, roadmap queue, open plans, verification summaries, audits, doctor issues, and known Stage 4 command availability.",
+        "Document next/onboarding MVP behavior in README, Agent Protocol, roadmap, task-board, and codebase map."
+      ],
+      "non_goals": [
+        "Do not implement onboarding writes, agent config writes, hook installation, quickstart recipes, package distribution, or team policy in this slice.",
+        "Do not change plan, verification, audit, close, doctor, hook, init, agent setup, or MCP write semantics.",
+        "Do not build a ranking engine, LLM planner, route replacement, or external service.",
+        "Do not require a perfectly clean working tree for next/onboarding read-only output."
+      ],
+      "exit_criteria": [
+        "abh next --json returns next_action, recommended_command, requires_confirmation, rationale, and alternatives.",
+        "With no open plans and queued roadmap items, abh next --json recommends materializing the next queued roadmap key.",
+        "With a draft plan, abh next --json recommends completing or transitioning that plan before materializing new work.",
+        "abh onboarding check --json returns checks with status, ok boolean, ready boolean, and recommended actions.",
+        "On the current repository, onboarding check reports active attractor, owner docs, agent setup export, hook guardrail commands, doctor, and closed-loop evidence as available.",
+        "Command contracts are registered in abh.commands before or alongside CLI adapters.",
+        "With a running plan whose latest verification is fresh pass and no audit exists, abh next --json recommends requesting independent audit evidence."
+      ],
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json",
+        "python3 -m abh next --json",
+        "python3 -m abh onboarding check --json",
+        "python3 -m abh plan status plan-035-abh-next-and-onboarding-check --json"
+      ],
+      "closure_evidence": [
+        "README.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/architecture/agent-protocol.md",
+        "docs/context/codebase-map.md",
+        "abh/navigation.py",
+        "abh/cli.py",
+        "abh/commands.py",
+        "tests/test_cli.py"
+      ],
+      "status": "materialized",
+      "plan_id": "plan-035-abh-next-and-onboarding-check"
     },
     {
       "key": "stage4.quickstart-recipes-and-distribution",
       "title": "Quickstart Recipes and Distribution",
       "stage": "stage4",
       "summary": "Publish quickstart recipes, demo loop, and package distribution path for agent-first adoption.",
-      "attractor": "",
-      "baseline": "",
-      "goals": [],
-      "non_goals": [],
-      "exit_criteria": [],
-      "validation_checklist": [],
-      "closure_evidence": [],
-      "status": "queued",
-      "plan_id": null
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "Publish quickstart recipes, demo loop, and package distribution path for agent-first adoption.",
+      "goals": [
+        "Add docs/quickstart.md as a five-minute Agent-First onboarding path from install to next action.",
+        "Add docs/recipes/ for Codex, Claude Code, MCP, hooks, first-loop demo, and distribution usage.",
+        "Document the current supported distribution paths: uvx/uv tool install from git and editable local install, while keeping PyPI publication as future work.",
+        "Synchronize README, docs/index, Agent Protocol, roadmap, task-board, and codebase map with the Stage 4 quickstart/recipes boundary.",
+        "Validate the package entry point with an isolated local install smoke test."
+      ],
+      "non_goals": [
+        "Do not publish to PyPI, create release automation, change version metadata, or claim that the abh package name is already available from PyPI.",
+        "Do not add new CLI or MCP commands, change runtime state machines, install hooks, or write Agent configuration files.",
+        "Do not introduce team policy, remote distribution, CI templates, network-dependent tests, or external services in this slice."
+      ],
+      "exit_criteria": [
+        "docs/quickstart.md exists and gives a concise five-minute path using existing ABH commands.",
+        "docs/recipes/codex.md and docs/recipes/claude-code.md explain setup bundle usage without writing Agent config.",
+        "docs/recipes/mcp.md, docs/recipes/hooks.md, docs/recipes/first-loop.md, and docs/recipes/distribution.md exist and stay within current Stage 4 capabilities.",
+        "Distribution docs distinguish supported from-git/editable install paths from future PyPI publication.",
+        "README, docs/index, Agent Protocol, roadmap, task-board, and codebase map point to quickstart/recipes without claiming release automation or team policy.",
+        "A local isolated install smoke test can run abh --help from an editable install."
+      ],
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json",
+        "python3 -m abh next --json",
+        "python3 -m abh onboarding check --json",
+        "python3 -c \"from pathlib import Path; required=['docs/quickstart.md','docs/recipes/codex.md','docs/recipes/claude-code.md','docs/recipes/mcp.md','docs/recipes/hooks.md','docs/recipes/first-loop.md','docs/recipes/distribution.md']; missing=[p for p in required if not Path(p).exists()]; raise SystemExit('missing '+', '.join(missing) if missing else 0)\"",
+        "python3 -m venv /private/tmp/abh-plan-036-smoke",
+        "/private/tmp/abh-plan-036-smoke/bin/python -m pip install -e .",
+        "/private/tmp/abh-plan-036-smoke/bin/abh --help"
+      ],
+      "closure_evidence": [
+        "docs/quickstart.md",
+        "docs/recipes/codex.md",
+        "docs/recipes/claude-code.md",
+        "docs/recipes/mcp.md",
+        "docs/recipes/hooks.md",
+        "docs/recipes/first-loop.md",
+        "docs/recipes/distribution.md",
+        "README.md",
+        "docs/index.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/architecture/agent-protocol.md",
+        "docs/context/codebase-map.md"
+      ],
+      "status": "materialized",
+      "plan_id": "plan-036-quickstart-recipes-and-distribution"
     },
     {
       "key": "stage5.audit-prompt-bundle",
       "title": "Audit Prompt Bundle",
       "stage": "stage5",
       "summary": "Generate independent audit prompts and evidence bundles from plan state.",
-      "attractor": "",
-      "baseline": "",
-      "goals": [],
-      "non_goals": [],
-      "exit_criteria": [],
-      "validation_checklist": [],
-      "closure_evidence": [],
-      "status": "queued",
-      "plan_id": null
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "Stage 5 starts by helping humans and independent agents request audits consistently. ABH should generate a read-only audit prompt and evidence bundle from an existing plan state, without recording a verdict, calling an LLM, or weakening the independent audit close gate.",
+      "goals": [
+        "Add a read-only audit bundle surface that can generate an independent audit prompt from a plan id.",
+        "Include plan metadata, latest verification summary, audit status, closure evidence paths, and key non-goal reminders in the bundle.",
+        "Register the command in the Agent-First command contract and expose JSON output suitable for opencode or another independent reviewer.",
+        "Document Stage 5 audit prompt bundle behavior in README, Agent Protocol, roadmap, task-board, and codebase map."
+      ],
+      "non_goals": [
+        "Do not call opencode, DeepSeek, OpenAI, network services, or any LLM from the ABH command.",
+        "Do not record audit results, create or complete audit records, transition plans, close plans, or change verification freshness rules.",
+        "Do not implement the later independent audit gate, auditor identity enforcement, or close-time independence policy in this slice."
+      ],
+      "exit_criteria": [
+        "abh audit bundle <plan-id> --json returns a stable envelope with an audit_bundle payload.",
+        "The bundle includes a copyable prompt that tells the reviewer to audit independently, avoid file edits, check goals/non-goals/exit criteria, inspect verification freshness, and return Result/Rationale/Findings.",
+        "The bundle includes structured evidence paths for the plan document, plan JSON, latest verification JSON when available, requested audits, and closure evidence paths.",
+        "The bundle reports latest verification result, trust level, stale flag, and stale reasons using the existing plan status freshness logic.",
+        "The command is read-only, has no confirmation requirement, and is registered in abh.commands.",
+        "README, Agent Protocol, roadmap, task-board, and codebase map describe the read-only boundary without claiming automated audit execution or close-gate enforcement."
+      ],
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json",
+        "python3 -m abh audit bundle plan-037-audit-prompt-bundle --json",
+        "python3 -m abh plan status plan-037-audit-prompt-bundle --json"
+      ],
+      "closure_evidence": [
+        "abh/audit_bundle.py",
+        "abh/cli.py",
+        "abh/commands.py",
+        "tests/test_cli.py",
+        "README.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/architecture/agent-protocol.md",
+        "docs/context/codebase-map.md",
+        "docs/plans/plan-037-audit-prompt-bundle.md"
+      ],
+      "status": "materialized",
+      "plan_id": "plan-037-audit-prompt-bundle"
     },
     {
       "key": "stage5.independent-audit-gate",
       "title": "Independent Audit Gate",
       "stage": "stage5",
       "summary": "Record auditor context and enforce freshness/independence metadata at close time.",
-      "attractor": "",
-      "baseline": "",
-      "goals": [],
-      "non_goals": [],
-      "exit_criteria": [],
-      "validation_checklist": [],
-      "closure_evidence": [],
-      "status": "queued",
-      "plan_id": null
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "Stage 5 has a read-only audit bundle surface, but audit verdicts still lack explicit context/source metadata and close only checks for any passing audit.",
+      "goals": [
+        "Add auditor context/source, independence, and verification basis metadata to audit records while preserving backward-compatible reads.",
+        "Allow CLI and MCP audit record flows to capture independent review metadata in structured JSON and Markdown.",
+        "Enforce close-time selection of a passing audit that is independent and tied to the current fresh passing verification.",
+        "Document the Stage 5 independent audit gate boundary in README, Agent Protocol, roadmap, task-board, and codebase map."
+      ],
+      "non_goals": [
+        "Do not call an LLM, opencode, DeepSeek, OpenAI, network services, or any automated auditor from ABH.",
+        "Do not remove historical audit records or migrate closed historical plans in this slice.",
+        "Do not change audit bundle generation beyond surfacing new audit metadata if already present.",
+        "Do not implement team policy, auditor identity verification beyond explicit metadata, or release-time policy gates."
+      ],
+      "exit_criteria": [
+        "Audit JSON includes auditor_context, independence, and verification_id fields with backward-compatible defaults for older records.",
+        "abh audit record accepts auditor context/source, independence, and verification basis arguments and renders them in docs/audits Markdown.",
+        "abh close refuses pass audits that are not marked independent.",
+        "abh close refuses independent pass audits when their verification basis is missing, stale, failing, or not the plan's latest verification.",
+        "abh close succeeds when a plan has closure evidence plus a complete pass audit marked independent against the current fresh passing verification.",
+        "Command contracts and MCP write tool schema expose the new audit record metadata fields."
+      ],
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json",
+        "python3 -m abh audit bundle plan-038-independent-audit-gate --json",
+        "python3 -m abh plan status plan-038-independent-audit-gate --json"
+      ],
+      "closure_evidence": [
+        "abh/models.py",
+        "abh/audits.py",
+        "abh/plans.py",
+        "abh/cli.py",
+        "abh/commands.py",
+        "abh/mcp_server.py",
+        "abh/audit_bundle.py",
+        "tests/test_cli.py",
+        "README.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/architecture/agent-protocol.md",
+        "docs/context/codebase-map.md",
+        "docs/plans/plan-038-independent-audit-gate.md"
+      ],
+      "status": "materialized",
+      "plan_id": "plan-038-independent-audit-gate"
     },
     {
       "key": "stage6.drift-quality",

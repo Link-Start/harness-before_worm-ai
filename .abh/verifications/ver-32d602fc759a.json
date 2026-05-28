@@ -1,0 +1,157 @@
+{
+  "schema_version": "1",
+  "id": "ver-32d602fc759a",
+  "plan_id": "plan-036-quickstart-recipes-and-distribution",
+  "command": "python3 -m unittest tests/test_cli.py -v && python3 -m abh doctor && git diff --check && python3 -m abh roadmap check --json && python3 -m abh next --json && python3 -m abh onboarding check --json && python3 -c \"from pathlib import Path; required=['docs/quickstart.md','docs/recipes/codex.md','docs/recipes/claude-code.md','docs/recipes/mcp.md','docs/recipes/hooks.md','docs/recipes/first-loop.md','docs/recipes/distribution.md']; missing=[p for p in required if not Path(p).exists()]; raise SystemExit('missing '+', '.join(missing) if missing else 0)\" && python3 -m venv /private/tmp/abh-plan-036-smoke && /private/tmp/abh-plan-036-smoke/bin/python -m pip install -e . && /private/tmp/abh-plan-036-smoke/bin/abh --help",
+  "result": "pass",
+  "artifacts": [
+    "command='python3 -m unittest tests/test_cli.py -v'; exit_code=0; duration_seconds=2.345; stdout=''; stderr='test_abh_error_json_returns_structured_error (tests.test_cli.CliTests.test_abh_error_json_returns_structured_error) ... ok\\\\ntest_agent_first_command_contract_describes_existing_agent_commands (tests.test_cli.CliTests.test_agent_first_command_contract_describes_existing_agent_commands) ... ok\\\\ntest_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command'",
+    "command='python3 -m abh doctor'; exit_code=0; duration_seconds=0.049; stdout='doctor: ok'; stderr=''",
+    "command='git diff --check'; exit_code=0; duration_seconds=0.014; stdout=''; stderr=''",
+    "command='python3 -m abh roadmap check --json'; exit_code=0; duration_seconds=0.042; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='python3 -m abh next --json'; exit_code=0; duration_seconds=0.062; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"next\", \"data\": {\"next\": {\"next_action\": \"run_verification\", \"recommended_command\": \"abh verify run plan-036-quickstart-recipes-and-distribution --json\", \"requires_confirmation\": false, \"rationale\": \"open running plan plan-036-quickstart-recipes-and-distribution should gather fresh local verification evidence\", \"source\": {\"plan_id\": \"plan-036-quickstart-recipes-and-distribution\", \"plan_status\": \"running\"}, \"alternatives\": [\"abh plan status plan-036-'; stderr=''",
+    "command='python3 -m abh onboarding check --json'; exit_code=0; duration_seconds=0.047; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"onboarding check\", \"data\": {\"onboarding\": {\"ready\": true, \"checks\": [{\"id\": \"active_attractor\", \"label\": \"Active attractor is available\", \"status\": \"pass\", \"ok\": true, \"details\": {\"id\": \"attractor-abh-core\", \"path\": \"docs/architecture/attractors/abh-core-attractor.md\"}, \"recommended_action\": \"\"}, {\"id\": \"owner_docs\", \"label\": \"AGE owner docs are present\", \"status\": \"pass\", \"ok\": true, \"details\": {\"required\": [\"docs/index.md\", \"docs/context/source-o'; stderr=''",
+    "command='python3 -c \"from pathlib import Path; required=[\\'docs/quickstart.md\\',\\'docs/recipes/codex.md\\',\\'docs/recipes/claude-code.md\\',\\'docs/recipes/mcp.md\\',\\'docs/recipes/hooks.md\\',\\'docs/recipes/first-loop.md\\',\\'docs/recipes/distribution.md\\']; missing=[p for p in required if not Path(p).exists()]; raise SystemExit(\\'missing \\'+\\', \\'.join(missing) if missing else 0)\"'; exit_code=0; duration_seconds=0.018; stdout=''; stderr=''",
+    "command='python3 -m venv /private/tmp/abh-plan-036-smoke'; exit_code=0; duration_seconds=1.163; stdout=''; stderr=''",
+    "command='/private/tmp/abh-plan-036-smoke/bin/python -m pip install -e .'; exit_code=0; duration_seconds=3.361; stdout=\"Obtaining file:///Users/cc/ai/harness-before\\\\n  Installing build dependencies: started\\\\n  Installing build dependencies: finished with status 'done'\\\\n  Checking if build backend supports build_editable: started\\\\n  Checking if build backend supports build_editable: finished with status 'done'\\\\n  Getting requirements to build editable: started\\\\n  Getting requirements to build editable: finished with status 'done'\\\\n  Preparing editable metadata (pyproject.toml): started\\\\n  Preparing editable metada\"; stderr='[notice] A new release of pip is available: 25.0.1 -> 26.1.1\\\\n[notice] To update, run: python -m pip install --upgrade pip'",
+    "command='/private/tmp/abh-plan-036-smoke/bin/abh --help'; exit_code=0; duration_seconds=0.566; stdout='usage: abh [-h]\\\\n           {init,agent,hooks,next,onboarding,plan,verify,audit,close,attractor,roadmap,doctor,memory,route,drift} ...\\\\n\\\\nAttractor Before Harness CLI\\\\n\\\\npositional arguments:\\\\n  {init,agent,hooks,next,onboarding,plan,verify,audit,close,attractor,roadmap,doctor,memory,route,drift}\\\\n    init                preview or initialize an ABH workspace\\\\n    agent               export agent setup bundles\\\\n    hooks               inspect or install local ABH hook guardrails\\\\n    next       '; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "/Users/cc/ai/harness-before",
+    "git": {
+      "commit": "306539c4acb8285a5a2b2f6f303de7c519c8476e",
+      "dirty": true,
+      "status_hash": "2a171178d3f8ce2a170b6cb76a8dcc7686e6900da80e4af0df20e2b469eda78d",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.13.3 (main, Jan 27 2026, 20:15:53) [Clang 17.0.0 (clang-1700.6.3.2)]",
+      "executable": "/Users/cc/.pyenv/versions/3.13.3/bin/python3"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 10
+    },
+    "commands": [
+      {
+        "command": "python3 -m unittest tests/test_cli.py -v",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests/test_cli.py",
+          "-v"
+        ]
+      },
+      {
+        "command": "python3 -m abh doctor",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "doctor"
+        ]
+      },
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": "python3 -m abh roadmap check --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": "python3 -m abh next --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "next",
+          "--json"
+        ]
+      },
+      {
+        "command": "python3 -m abh onboarding check --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "onboarding",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": "python3 -c \"from pathlib import Path; required=['docs/quickstart.md','docs/recipes/codex.md','docs/recipes/claude-code.md','docs/recipes/mcp.md','docs/recipes/hooks.md','docs/recipes/first-loop.md','docs/recipes/distribution.md']; missing=[p for p in required if not Path(p).exists()]; raise SystemExit('missing '+', '.join(missing) if missing else 0)\"",
+        "argv": [
+          "python3",
+          "-c",
+          "from pathlib import Path; required=['docs/quickstart.md','docs/recipes/codex.md','docs/recipes/claude-code.md','docs/recipes/mcp.md','docs/recipes/hooks.md','docs/recipes/first-loop.md','docs/recipes/distribution.md']; missing=[p for p in required if not Path(p).exists()]; raise SystemExit('missing '+', '.join(missing) if missing else 0)"
+        ]
+      },
+      {
+        "command": "python3 -m venv /private/tmp/abh-plan-036-smoke",
+        "argv": [
+          "python3",
+          "-m",
+          "venv",
+          "/private/tmp/abh-plan-036-smoke"
+        ]
+      },
+      {
+        "command": "/private/tmp/abh-plan-036-smoke/bin/python -m pip install -e .",
+        "argv": [
+          "/private/tmp/abh-plan-036-smoke/bin/python",
+          "-m",
+          "pip",
+          "install",
+          "-e",
+          "."
+        ]
+      },
+      {
+        "command": "/private/tmp/abh-plan-036-smoke/bin/abh --help",
+        "argv": [
+          "/private/tmp/abh-plan-036-smoke/bin/abh",
+          "--help"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-05-28T05:20:35.395354+00:00",
+      "content_hash": "fe3b874db8bb798f409f9578f45550282faf6f854ff22301ff3dc9ea236dee30",
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json",
+        "python3 -m abh next --json",
+        "python3 -m abh onboarding check --json",
+        "python3 -c \"from pathlib import Path; required=['docs/quickstart.md','docs/recipes/codex.md','docs/recipes/claude-code.md','docs/recipes/mcp.md','docs/recipes/hooks.md','docs/recipes/first-loop.md','docs/recipes/distribution.md']; missing=[p for p in required if not Path(p).exists()]; raise SystemExit('missing '+', '.join(missing) if missing else 0)\"",
+        "python3 -m venv /private/tmp/abh-plan-036-smoke",
+        "/private/tmp/abh-plan-036-smoke/bin/python -m pip install -e .",
+        "/private/tmp/abh-plan-036-smoke/bin/abh --help"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-05-28T05:20:57.849208+00:00"
+}

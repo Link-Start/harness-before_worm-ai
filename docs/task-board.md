@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-Sprint 30：Git Hooks Guardrails（已完成）
+阶段 5：真正独立审计（Done）；下一步：`stage6.drift-quality`
 
 ## 状态说明
 
@@ -378,3 +378,51 @@ Sprint 30：Git Hooks Guardrails（已完成）
 | S30-003 | 实现 `abh hooks profile --json` 和 `abh hooks install` | Done | `abh/hooks.py`, `abh/cli.py`, `tests/test_cli.py` |
 | S30-004 | 同步 README、roadmap、task-board、Agent Protocol 和 codebase map | Done | `README.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/architecture/agent-protocol.md`, `docs/context/codebase-map.md` |
 | S30-005 | plan-034 验证、独立审计和关闭 | Done | `.abh/verifications/ver-4b6212dd48da.json`, `docs/audits/audit-034-git-hooks-guardrails.md`, `docs/plans/plan-034-git-hooks-guardrails.md` |
+
+## Sprint 31
+
+目标：把 `stage4.abh-next-and-onboarding-check` dogfood 成 `plan-035-abh-next-and-onboarding-check`，交付只读 Agent navigation 和 onboarding readiness MVP，让 Agent 能问“下一步做什么”和“这个仓库是否 ABH-ready”。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S31-001 | materialize ABH Next and Onboarding Check 计划 | Done | `stage4.abh-next-and-onboarding-check` -> `docs/plans/plan-035-abh-next-and-onboarding-check.md` |
+| S31-002 | 定义 next/onboarding command contract 和红灯测试 | Done | `abh/commands.py`, `tests/test_cli.py` |
+| S31-003 | 实现 `abh next --json` 和 `abh onboarding check --json` | Done | `abh/navigation.py`, `abh/cli.py`, `tests/test_cli.py` |
+| S31-004 | 同步 README、roadmap、task-board、Agent Protocol 和 codebase map | Done | `README.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/architecture/agent-protocol.md`, `docs/context/codebase-map.md` |
+| S31-005 | plan-035 验证、独立审计和关闭 | Done | `docs/audits/audit-035-abh-next-and-onboarding-check.md`, `docs/plans/plan-035-abh-next-and-onboarding-check.md` |
+
+## Sprint 32
+
+目标：把 `stage4.quickstart-recipes-and-distribution` dogfood 成 `plan-036-quickstart-recipes-and-distribution`，补齐 Stage 4 adoption 入口文档、Agent recipes 和当前支持的 git/editable 分发路径，同时不发布 PyPI、不引入 release automation 或团队策略。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S32-001 | materialize Quickstart Recipes and Distribution 计划 | Done | `stage4.quickstart-recipes-and-distribution` -> `docs/plans/plan-036-quickstart-recipes-and-distribution.md` |
+| S32-002 | 定义 quickstart/recipes/distribution 文档范围 | Done | `docs/plans/plan-036-quickstart-recipes-and-distribution.md`, `.abh/roadmap.json` |
+| S32-003 | 新增 quickstart 和 recipes 文档 | Done | `docs/quickstart.md`, `docs/recipes/` |
+| S32-004 | 同步 README、docs index、Agent Protocol、roadmap、task-board 和 codebase map | Done | `README.md`, `docs/index.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/architecture/agent-protocol.md`, `docs/context/codebase-map.md` |
+| S32-005 | plan-036 验证、opencode DeepSeek 审计和关闭 | Done | `docs/audits/audit-036-quickstart-recipes-and-distribution.md`, `docs/plans/plan-036-quickstart-recipes-and-distribution.md` |
+
+## Sprint 33
+
+目标：把 `stage5.audit-prompt-bundle` dogfood 成 `plan-037-audit-prompt-bundle`，交付只读 `abh audit bundle <plan> --json`，让人类或独立 Agent 可以拿到一致的审计 prompt、证据路径和最新 verification freshness 摘要，同时不自动调用模型、不记录 verdict、不改变关闭门禁。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S33-001 | materialize Audit Prompt Bundle 计划 | Done | `stage5.audit-prompt-bundle` -> `docs/plans/plan-037-audit-prompt-bundle.md` |
+| S33-002 | 定义 audit bundle command contract 和红灯测试 | Done | `abh/commands.py`, `tests/test_cli.py` |
+| S33-003 | 实现 `abh audit bundle <plan> --json` | Done | `abh/audit_bundle.py`, `abh/cli.py`, `tests/test_cli.py` |
+| S33-004 | 同步 README、roadmap、task-board、Agent Protocol 和 codebase map | Done | `README.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/architecture/agent-protocol.md`, `docs/context/codebase-map.md` |
+| S33-005 | plan-037 验证、opencode DeepSeek 审计和关闭 | Done | `docs/audits/audit-037-audit-prompt-bundle.md`, `docs/plans/plan-037-audit-prompt-bundle.md` |
+
+## Sprint 34
+
+目标：把 `stage5.independent-audit-gate` dogfood 成 `plan-038-independent-audit-gate`，让 audit verdict 显式记录审计来源/上下文、独立性声明和所依据的 verification，并让 `abh close` 只接受绑定当前 fresh passing verification 的 independent pass audit。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S34-001 | materialize Independent Audit Gate 计划 | Done | `stage5.independent-audit-gate` -> `docs/plans/plan-038-independent-audit-gate.md` |
+| S34-002 | 定义 audit context 和 close gate 红灯测试 | Done | `tests/test_cli.py` |
+| S34-003 | 实现 audit metadata 与 independent/fresh close gate | Done | `abh/models.py`, `abh/audits.py`, `abh/plans.py`, `abh/cli.py`, `abh/commands.py`, `abh/mcp_server.py` |
+| S34-004 | 同步 README、roadmap、task-board、Agent Protocol 和 codebase map | Done | `README.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/architecture/agent-protocol.md`, `docs/context/codebase-map.md` |
+| S34-005 | plan-038 验证、独立审计和关闭 | Done | `.abh/verifications/`, `docs/audits/audit-038-independent-audit-gate.md`, `docs/plans/plan-038-independent-audit-gate.md` |

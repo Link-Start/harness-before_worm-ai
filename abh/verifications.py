@@ -16,8 +16,12 @@ from .plans import load_plan, plan_verification_snapshot, save_plan
 from .storage import ensure_workspace, read_json, verification_path, write_json
 
 GIT_STATUS_HASH_IGNORED_PREFIXES = (
+    ".abh/audits/",
+    ".abh/memory/",
     ".abh/plans/",
     ".abh/verifications/",
+    "docs/audits/",
+    "docs/memory/",
     "docs/plans/",
 )
 

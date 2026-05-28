@@ -239,6 +239,9 @@ def call_audit_record(arguments: dict[str, Any]) -> dict[str, Any]:
         audit_id=require_string(arguments, "audit_id"),
         result=require_string(arguments, "result"),
         rationale=require_string(arguments, "rationale"),
+        auditor_context=optional_string(arguments, "auditor_context"),
+        independence=optional_string(arguments, "independence"),
+        verification_id=optional_string(arguments, "verification_id"),
         findings=optional_string_list(arguments, "findings"),
         follow_ups=optional_string_list(arguments, "follow_ups"),
     )

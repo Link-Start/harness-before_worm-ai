@@ -199,13 +199,20 @@ def transition_plan(plan_id: str, target_status: str, cwd: Path | None = None) -
 def close_plan(plan_id: str, cwd: Path | None = None) -> PlanRecord:
     plan = load_plan(plan_id, cwd)
     passing_audit = None
+    rejection_reasons: list[str] = []
     from .audits import load_audit
 
     for audit_id in plan.audit_ids:
         audit = load_audit(audit_id, cwd)
         if audit.result == "pass" and audit.status == "complete":
+            reason = audit_close_blocker(plan, audit, cwd)
+            if reason:
+                rejection_reasons.append(f"{audit.id}: {reason}")
+                continue
             passing_audit = audit
     if passing_audit is None:
+        if rejection_reasons:
+            raise AbhError(f"cannot close plan without independent fresh passing audit ({'; '.join(rejection_reasons)})")
         raise AbhError("cannot close plan without a passing audit")
     if not plan.closure_evidence:
         raise AbhError("cannot close plan without closure evidence")
@@ -213,6 +220,23 @@ def close_plan(plan_id: str, cwd: Path | None = None) -> PlanRecord:
     if passing_audit.id not in plan.closure_evidence:
         plan.closure_evidence.append(passing_audit.id)
     return save_plan(plan, cwd)
+
+
+def audit_close_blocker(plan: PlanRecord, audit, cwd: Path | None = None) -> str | None:
+    if audit.independence != "independent":
+        return "audit is not marked independent"
+    if not audit.verification_id:
+        return "audit is missing verification_id"
+    summary = verification_freshness_summary(plan, cwd)
+    latest_id = summary.get("latest_id")
+    if audit.verification_id != latest_id:
+        return "audit verification_id does not match latest verification"
+    if summary.get("result") != "pass":
+        return "latest verification is not passing"
+    if summary.get("stale"):
+        reasons = summary.get("reasons", [])
+        return f"latest verification is stale: {reasons}"
+    return None
 
 
 def render_plan_markdown(plan: PlanRecord) -> str:

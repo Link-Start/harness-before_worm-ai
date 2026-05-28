@@ -1,0 +1,117 @@
+{
+  "schema_version": "1",
+  "id": "ver-6b88f5ddd727",
+  "plan_id": "plan-037-audit-prompt-bundle",
+  "command": "python3 -m unittest tests/test_cli.py -v && python3 -m abh doctor && git diff --check && python3 -m abh roadmap check --json && python3 -m abh audit bundle plan-037-audit-prompt-bundle --json && python3 -m abh plan status plan-037-audit-prompt-bundle --json",
+  "result": "pass",
+  "artifacts": [
+    "command='python3 -m unittest tests/test_cli.py -v'; exit_code=0; duration_seconds=2.338; stdout=''; stderr='test_abh_error_json_returns_structured_error (tests.test_cli.CliTests.test_abh_error_json_returns_structured_error) ... ok\\\\ntest_agent_first_command_contract_describes_existing_agent_commands (tests.test_cli.CliTests.test_agent_first_command_contract_describes_existing_agent_commands) ... ok\\\\ntest_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command'",
+    "command='python3 -m abh doctor'; exit_code=0; duration_seconds=0.050; stdout='doctor: ok'; stderr=''",
+    "command='git diff --check'; exit_code=0; duration_seconds=0.014; stdout=''; stderr=''",
+    "command='python3 -m abh roadmap check --json'; exit_code=0; duration_seconds=0.043; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='python3 -m abh audit bundle plan-037-audit-prompt-bundle --json'; exit_code=0; duration_seconds=0.062; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"audit bundle\", \"data\": {\"audit_bundle\": {\"schema_version\": \"1\", \"plan\": {\"id\": \"plan-037-audit-prompt-bundle\", \"title\": \"Audit Prompt Bundle\", \"status\": \"closed\", \"attractor\": \"docs/architecture/attractors/abh-core-attractor.md\", \"goals\": [\"Add a read-only audit bundle surface that can generate an independent audit prompt from a plan id.\", \"Include plan metadata, latest verification summary, audit status, closure evidence paths, and key non-goal re'; stderr=''",
+    "command='python3 -m abh plan status plan-037-audit-prompt-bundle --json'; exit_code=0; duration_seconds=0.062; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"plan status\", \"data\": {\"plan\": {\"schema_version\": \"1\", \"id\": \"plan-037-audit-prompt-bundle\", \"title\": \"Audit Prompt Bundle\", \"attractor\": \"docs/architecture/attractors/abh-core-attractor.md\", \"baseline\": \"Stage 5 starts by helping humans and independent agents request audits consistently. ABH should generate a read-only audit prompt and evidence bundle from an existing plan state, without recording a verdict, calling an LLM, or weakening the indepe'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "/Users/cc/ai/harness-before",
+    "git": {
+      "commit": "306539c4acb8285a5a2b2f6f303de7c519c8476e",
+      "dirty": true,
+      "status_hash": "41cb4aa5b9e534e8c2d73a3e5ac753019a4e6bd1947fd080f0d21464951f6c6d",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.13.3 (main, Jan 27 2026, 20:15:53) [Clang 17.0.0 (clang-1700.6.3.2)]",
+      "executable": "/Users/cc/.pyenv/versions/3.13.3/bin/python3"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 6
+    },
+    "commands": [
+      {
+        "command": "python3 -m unittest tests/test_cli.py -v",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests/test_cli.py",
+          "-v"
+        ]
+      },
+      {
+        "command": "python3 -m abh doctor",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "doctor"
+        ]
+      },
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": "python3 -m abh roadmap check --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": "python3 -m abh audit bundle plan-037-audit-prompt-bundle --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "audit",
+          "bundle",
+          "plan-037-audit-prompt-bundle",
+          "--json"
+        ]
+      },
+      {
+        "command": "python3 -m abh plan status plan-037-audit-prompt-bundle --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "plan",
+          "status",
+          "plan-037-audit-prompt-bundle",
+          "--json"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-05-28T07:25:19.335514+00:00",
+      "content_hash": "cabbeade146c1d4a1d344101b814e5e8ab8f7774d4151673478483880a107e23",
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json",
+        "python3 -m abh audit bundle plan-037-audit-prompt-bundle --json",
+        "python3 -m abh plan status plan-037-audit-prompt-bundle --json"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-05-28T07:27:05.950863+00:00"
+}

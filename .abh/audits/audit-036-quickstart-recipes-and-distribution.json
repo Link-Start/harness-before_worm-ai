@@ -1,0 +1,33 @@
+{
+  "schema_version": "1",
+  "id": "audit-036-quickstart-recipes-and-distribution",
+  "plan_id": "plan-036-quickstart-recipes-and-distribution",
+  "auditor": "opencode-deepseek-v4-pro",
+  "scope": "Independent opencode DeepSeek audit of plan-036 quickstart recipes and distribution",
+  "status": "complete",
+  "result": "pass",
+  "rationale": "opencode DeepSeek audit passed: all plan-036 goals and exit criteria are met; quickstart and six recipes exist; distribution docs distinguish supported git/editable installs from future PyPI; linked docs avoid release automation, team policy, new CLI/MCP behavior, hook/agent-config writes, remote distribution, CI templates, and unsupported PyPI claims; live read-only checks passed with latest verification ver-32d602fc759a pass and stale=false; findings none.",
+  "evidence": [
+    "docs/plans/plan-036-quickstart-recipes-and-distribution.md",
+    ".abh/verifications/ver-32d602fc759a.json",
+    "docs/quickstart.md",
+    "docs/recipes/codex.md",
+    "docs/recipes/claude-code.md",
+    "docs/recipes/mcp.md",
+    "docs/recipes/hooks.md",
+    "docs/recipes/first-loop.md",
+    "docs/recipes/distribution.md",
+    "README.md",
+    "docs/index.md",
+    "docs/development-roadmap.md",
+    "docs/task-board.md",
+    "docs/architecture/agent-protocol.md",
+    "docs/context/codebase-map.md",
+    ".abh/roadmap.json"
+  ],
+  "findings": [],
+  "follow_ups": [],
+  "created_at": "2026-05-28T05:20:35.394285+00:00",
+  "updated_at": "2026-05-28T06:54:27.220306+00:00",
+  "doc_path": "/Users/cc/ai/harness-before/docs/audits/audit-036-quickstart-recipes-and-distribution.md"
+}

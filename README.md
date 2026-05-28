@@ -28,6 +28,8 @@
 - `roadmap`：维护稳定 roadmap queue，并在 materialize 时分配真实 plan 编号
 - `agent setup`：导出 Codex、Claude Code 和通用 MCP 客户端可读取的只读 setup bundle
 - `hooks`：预览或安装本地 ABH pre-commit guardrail hook
+- `next`：根据本地 ABH 状态推荐下一条安全动作
+- `onboarding check`：检查仓库是否具备 Agent-First ABH readiness 基线
 - `doctor`：检查 `.abh/` JSON 与 `docs/` Markdown 是否保持一致
 
 所有命令把结构化数据写入 `.abh/` 目录（JSON），同时同步生成 `docs/` 下的 Markdown 文档，便于回放、审查和复用。
@@ -94,6 +96,8 @@ python3 -m pip install -e .
 abh --help
 ```
 
+5 分钟上手路径见 `docs/quickstart.md`。Agent 使用配方见 `docs/recipes/`，其中覆盖 Codex、Claude Code、MCP、hooks、第一个闭环和当前支持的分发方式。
+
 如果没有安装包，也可以在仓库根目录直接运行：
 
 ```bash
@@ -116,7 +120,7 @@ python3 -m unittest tests/test_cli.py
 
 项目版本以 `pyproject.toml` 的 `[project].version` 和 `abh.__version__` 为准，两者必须保持一致。README 中声明的新 CLI 能力、安装方式或运行要求发生变化时，必须同步检查版本是否需要提升，并在对应 plan 的 closure evidence 中说明。
 
-当前发布版本为 `0.3.0`，对应阶段 3 Verify Runner：项目已经具备显式 JSON CLI contract、结构化错误输出、只读 MCP Server、受控 MCP 写工具、本地验证执行器、计划更新、验证环境元数据、可信等级、stale 提示、失败分类、原子写和领域模块拆分。当前开发线已经进入阶段 4 Agent-First 吸引子入口层：`plan-031-truth-precedence-and-age-docs` 已完成 AGE owner-doc baseline，`plan-032-abh-init-active-attractor` 已完成 `abh init` 最小初始化切片，`plan-033-agent-contract-setup` 已完成只读 setup export MVP，`plan-034-git-hooks-guardrails` 已完成本地 hook guardrail MVP。受控写工具必须显式传入 `confirm=true`，并复用现有 core 规则，不能绕过 plan 状态机、验证记录、审计关闭门禁或 doctor 一致性检查。
+当前发布版本为 `0.3.0`，对应阶段 3 Verify Runner：项目已经具备显式 JSON CLI contract、结构化错误输出、只读 MCP Server、受控 MCP 写工具、本地验证执行器、计划更新、验证环境元数据、可信等级、stale 提示、失败分类、原子写和领域模块拆分。阶段 4 Agent-First 吸引子入口层已完成：`plan-031-truth-precedence-and-age-docs` 已完成 AGE owner-doc baseline，`plan-032-abh-init-active-attractor` 已完成 `abh init` 最小初始化切片，`plan-033-agent-contract-setup` 已完成只读 setup export MVP，`plan-034-git-hooks-guardrails` 已完成本地 hook guardrail MVP，`plan-035-abh-next-and-onboarding-check` 已完成只读 navigation/readiness MVP，`plan-036-quickstart-recipes-and-distribution` 已完成 quickstart、recipes 和当前 git/editable 分发路径文档。阶段 5 独立审计支持已完成：`plan-037-audit-prompt-bundle` 已交付只读审计 bundle，`plan-038-independent-audit-gate` 已把审计上下文、独立性声明和 fresh verification basis 纳入 `audit record` 与 `close` 门禁。受控写工具必须显式传入 `confirm=true`，并复用现有 core 规则，不能绕过 plan 状态机、验证记录、审计关闭门禁或 doctor 一致性检查。
 
 ## CI 与关闭门禁
 
@@ -234,16 +238,27 @@ abh audit request plan-001 \
 
 审计请求至少需要一条 evidence 引用（通常为文件路径）。审计记录会同时保存为 `.abh/audits/` 下的 JSON 和 `docs/audits/` 下的 Markdown。
 
+阶段 5 开始，`abh audit bundle <plan> --json` 可以从现有 plan 状态生成只读审计提示词和证据清单：
+
+```bash
+abh audit bundle plan-001 --json
+```
+
+该 bundle 会包含计划元数据、最新 verification freshness 摘要、已请求 audit、closure evidence 和可复制给独立审计者的 prompt。它不会调用模型、不会写入 audit record、不会 transition/close plan，也不会替代独立审计判断。
+
 ### 6. 记录审计结论
 
 ```bash
 abh audit record audit-001 \
   --result pass \
   --rationale "证据完整，计划满足关闭条件" \
+  --auditor-context "opencode isolated session using DeepSeek V4 Pro" \
+  --independence independent \
+  --verification-id ver-123456789abc \
   --finding "Low|No blocking issue|tests/test_cli.py|No action"
 ```
 
-`--finding` 格式为 `Severity|Finding|Evidence|Recommendation`，支持多次传入。审计结论可以重复记录（后一次覆盖前一次）。
+`--finding` 格式为 `Severity|Finding|Evidence|Recommendation`，支持多次传入。阶段 5 的关闭门禁要求通过审计同时声明 `--independence independent`，并用 `--verification-id` 绑定当前最新且 fresh 的 passing verification；`--auditor-context` 用于记录审计来源或隔离上下文。审计结论可以重复记录（后一次覆盖前一次）。
 
 ### 7. 查看审计列表
 
@@ -344,6 +359,7 @@ abh audit list --json
 abh memory list --json
 abh memory search --query audit --json
 abh route --question "Can we close this plan?" --json
+abh audit bundle plan-037-audit-prompt-bundle --json
 abh doctor --json
 ```
 
@@ -390,7 +406,23 @@ abh hooks install --write --confirm --json
 
 该命令只会创建或刷新带有 `ABH MANAGED PRE-COMMIT` 标记的 `.git/hooks/pre-commit`。如果已有非 ABH 管理的 hook，它会返回 blocker，不会覆盖用户现有脚本。团队策略、远程分发、strict profile 和发布自动化仍是后续阶段范围。
 
-### 16. MCP Server
+### 16. Agent Navigation and Onboarding
+
+`abh next --json` 是 Agent 的默认导航入口。它读取本地 plan、roadmap queue 和状态机信息，返回下一条建议动作、推荐命令、是否需要确认、依据和备选命令。当前 MVP 优先处理已有 open plan；有 fresh passing verification 但尚无 audit 时推荐请求独立审计，没有 open plan 时推荐 materialize 下一条 queued roadmap item。
+
+```bash
+abh next --json
+```
+
+`abh onboarding check --json` 是只读 readiness 报告。它检查 active attractor、AGE owner docs、agent setup export、hook guardrail commands、doctor 和至少一个 verify/audit/close 闭环证据，并返回每项 check 的 status、details 和 recommended action。
+
+```bash
+abh onboarding check --json
+```
+
+这两个命令不写入仓库，不安装 hook，不写 Agent 配置，也不替代 route/drift 或 audit 判断。
+
+### 17. MCP Server
 
 ABH 提供一个零外部运行时依赖的 MCP stdio Server，供支持 MCP 的 Agent 通过工具协议读取治理状态，并在显式确认后执行受控写操作：
 
@@ -448,7 +480,9 @@ python3 -m abh.mcp_server
 
 - 阶段 3 功能规划已收尾：`plan-016-verify-runner` 至 `plan-025-stage-3-finalization` 构成 v0.3 Verify Runner 里程碑，覆盖本地验证执行、计划更新、验证环境元数据、可信等级、stale 提示、失败分类、原子写和领域模块拆分
 - v0.3.0 发布准备由 `plan-026-v0-3-release-prep` 收口，release notes 见 `docs/releases/v0.3.0.md`
-- 阶段 4 Agent-First 吸引子入口层已启动：`plan-027-stage-4-attractor-entry-plan`、`plan-028-agent-first-command-contract`、`plan-029-attractor-registry`、`plan-030-roadmap-queue-and-plan-numbering`、`plan-031-truth-precedence-and-age-docs`、`plan-032-abh-init-active-attractor`、`plan-033-agent-contract-setup` 和 `plan-034-git-hooks-guardrails` 已完成
+- 阶段 4 Agent-First 吸引子入口层已完成：`plan-027-stage-4-attractor-entry-plan`、`plan-028-agent-first-command-contract`、`plan-029-attractor-registry`、`plan-030-roadmap-queue-and-plan-numbering`、`plan-031-truth-precedence-and-age-docs`、`plan-032-abh-init-active-attractor`、`plan-033-agent-contract-setup`、`plan-034-git-hooks-guardrails`、`plan-035-abh-next-and-onboarding-check` 和 `plan-036-quickstart-recipes-and-distribution` 均已完成；quickstart、recipes 和当前 git/editable 分发路径已纳入 Stage 4 adoption 入口
+- 阶段 5 独立审计支持已完成：`plan-037-audit-prompt-bundle` 已交付只读 `abh audit bundle <plan> --json`，用于生成审计提示词和证据清单；`plan-038-independent-audit-gate` 已把 audit context/source、independence 和 fresh verification basis 纳入 `abh audit record` 与 `abh close` 门禁。自动执行审计和真实身份校验仍属后续切片
+- 下一阶段入口是 `stage6.drift-quality`：提升 drift finding 的 severity、matched span、source excerpt 和 confidence 质量
 - 未来路线图不再为未创建计划预写 `plan-033` 这类具体编号；未 materialize 的事项使用 `.abh/roadmap.json` 中的稳定 key，真实 plan id 只在 `abh roadmap materialize <key>` 时分配
 - 阶段 4 的目标不是普通 onboarding，而是让 Codex、Claude Code 和 MCP 客户端默认通过 JSON/非交互命令进入 active attractor -> plan -> verification -> audit -> memory 的轨迹控制回路；人类主要负责定义吸引子、批准写入和执行独立审计
 - 后续提升漂移分析精度：从关键词匹配升级到更高质量的证据提取
