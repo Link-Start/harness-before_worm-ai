@@ -30,6 +30,7 @@
 - `hooks`：预览或安装本地 ABH pre-commit guardrail hook
 - `next`：根据本地 ABH 状态推荐下一条安全动作
 - `onboarding check`：检查仓库是否具备 Agent-First ABH readiness 基线
+- `report health`：汇总计划、验证、审计、漂移、记忆和 roadmap 信号，生成只读语义压力报告
 - `doctor`：检查 `.abh/` JSON 与 `docs/` Markdown 是否保持一致
 
 所有命令把结构化数据写入 `.abh/` 目录（JSON），同时同步生成 `docs/` 下的 Markdown 文档，便于回放、审查和复用。
@@ -364,6 +365,7 @@ abh memory list --json
 abh memory search --query audit --json
 abh route --question "Can we close this plan?" --json
 abh audit bundle plan-037-audit-prompt-bundle --json
+abh report health --json
 abh doctor --json
 ```
 
@@ -426,7 +428,17 @@ abh onboarding check --json
 
 这两个命令不写入仓库，不安装 hook，不写 Agent 配置，也不替代 route/drift 或 audit 判断。
 
-### 17. MCP Server
+### 17. Project Health Report
+
+`abh report health --json` 是只读质量报告。它读取本地 plan、verification、audit、drift、memory、doctor 和 roadmap queue，输出 health metrics、semantic pressure signals、top risks 和 recommended inspections。
+
+```bash
+abh report health --json
+```
+
+当前报告会暴露 `stale_proof`、`repeated_leakage`、`orphaned_memory` 和 `j_flow_only_evidence` 等语义压力信号。它用于帮助人和 Agent 决定下一步检查什么，不会自动阻塞 plan close、release 或 audit verdict。
+
+### 18. MCP Server
 
 ABH 提供一个零外部运行时依赖的 MCP stdio Server，供支持 MCP 的 Agent 通过工具协议读取治理状态，并在显式确认后执行受控写操作：
 
@@ -444,6 +456,7 @@ python3 -m abh.mcp_server
 - `abh_route`
 - `abh_doctor`
 - `abh_drift_list`
+- `abh_report_health`
 
 当前受控写 MCP 工具：
 
@@ -486,10 +499,11 @@ python3 -m abh.mcp_server
 - v0.3.0 发布准备由 `plan-026-v0-3-release-prep` 收口，release notes 见 `docs/releases/v0.3.0.md`
 - 阶段 4 Agent-First 吸引子入口层已完成：`plan-027-stage-4-attractor-entry-plan`、`plan-028-agent-first-command-contract`、`plan-029-attractor-registry`、`plan-030-roadmap-queue-and-plan-numbering`、`plan-031-truth-precedence-and-age-docs`、`plan-032-abh-init-active-attractor`、`plan-033-agent-contract-setup`、`plan-034-git-hooks-guardrails`、`plan-035-abh-next-and-onboarding-check` 和 `plan-036-quickstart-recipes-and-distribution` 均已完成；quickstart、recipes 和当前 git/editable 分发路径已纳入 Stage 4 adoption 入口
 - 阶段 5 独立审计支持已完成：`plan-037-audit-prompt-bundle` 已交付只读 `abh audit bundle <plan> --json`，用于生成审计提示词和证据清单；`plan-038-independent-audit-gate` 已把 audit context/source、independence 和 fresh verification basis 纳入 `abh audit record` 与 `abh close` 门禁。自动执行审计和真实身份校验仍属后续切片
-- 阶段 6 已启动：`plan-039-quality-signal-model` 定义 product-quality-first / agent-navigation-second 的质量信号模型；`plan-040-drift-quality` 已把 drift finding 提升为带 severity、matched span、source excerpt 和 confidence 的质量信号；`plan-041-memory-index` 正在把 memory 提升为带 tags、status、关系索引和 supersession 的可复用质量知识
+- 阶段 6 已启动：`plan-039-quality-signal-model` 定义 product-quality-first / agent-navigation-second 的质量信号模型；`plan-040-drift-quality` 已把 drift finding 提升为带 severity、matched span、source excerpt 和 confidence 的质量信号；`plan-041-memory-index` 已把 memory 提升为带 tags、status、关系索引和 supersession 的可复用质量知识；`plan-042-project-health-report` 正在把 health report 收敛为语义压力报告，优先暴露 unbound commitment pressure、stale proof、semantic leakage、J-flow-only evidence、orphaned memory 和 repeated leakage
+- Stage 6 后续 queue 已固化 Plan Reference Set、Commitment Phase State、Audit Semantic Conservation 和 Owner Doc Stable Commitments，避免后续实现遗忘 AGE/PHS 文章提出的语义承诺守恒方向
 - 未来路线图不再为未创建计划预写 `plan-033` 这类具体编号；未 materialize 的事项使用 `.abh/roadmap.json` 中的稳定 key，真实 plan id 只在 `abh roadmap materialize <key>` 时分配
 - 阶段 4 的目标不是普通 onboarding，而是让 Codex、Claude Code 和 MCP 客户端默认通过 JSON/非交互命令进入 active attractor -> plan -> verification -> audit -> memory 的轨迹控制回路；人类主要负责定义吸引子、批准写入和执行独立审计
 - 后续提升漂移分析精度：从关键词匹配升级到更高质量的证据提取
-- 增加 `abh report`，展示计划关闭率、审计驳回率和重复漂移情况
+- 增加 `abh report health --json`，展示计划关闭率、审计驳回率、重复漂移、stale verification、memory 复用情况和语义压力 top risks
 - 扩展 Git hook 集成，从当前本地 pre-commit guardrail MVP 演进到团队策略和更多 profile
 - 为验证记录增加更细粒度执行证据，与计划的 closure evidence 形成完整可追溯链路

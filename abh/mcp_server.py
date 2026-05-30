@@ -31,9 +31,10 @@ from .core import (
     search_memory,
     transition_plan,
 )
-from .models import DriftReport, SCHEMA_VERSION
+from .drift import list_drift_reports
+from .models import SCHEMA_VERSION
 from .plans import verification_freshness_summary
-from .storage import drift_dir, read_json
+from .reporting import project_health_report
 
 PROTOCOL_VERSION = "2025-11-25"
 
@@ -102,16 +103,6 @@ def optional_string_list(arguments: dict[str, Any], key: str) -> list[str] | Non
 def require_confirm(arguments: dict[str, Any]) -> None:
     if arguments.get("confirm") is not True:
         raise AbhError("cannot run write tool without confirm=true")
-
-
-def list_drift_reports() -> list[DriftReport]:
-    directory = drift_dir()
-    if not directory.exists():
-        return []
-    reports: list[DriftReport] = []
-    for path in sorted(directory.glob("*.json")):
-        reports.append(DriftReport.from_dict(read_json(path)))
-    return reports
 
 
 def call_plan_list(arguments: dict[str, Any]) -> dict[str, Any]:
@@ -206,6 +197,10 @@ def call_route(arguments: dict[str, Any]) -> dict[str, Any]:
 def call_drift_list(arguments: dict[str, Any]) -> dict[str, Any]:
     reports = list_drift_reports()
     return {"drift_reports": [report.to_dict() for report in reports], "total": len(reports)}
+
+
+def call_report_health(arguments: dict[str, Any]) -> dict[str, Any]:
+    return {"health_report": project_health_report()}
 
 
 def call_plan_create(arguments: dict[str, Any]) -> dict[str, Any]:
@@ -324,6 +319,7 @@ TOOL_HANDLERS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
     "abh_memory_search": call_memory_search,
     "abh_route": call_route,
     "abh_drift_list": call_drift_list,
+    "abh_report_health": call_report_health,
     "abh_plan_create": call_plan_create,
     "abh_plan_transition": call_plan_transition,
     "abh_verify_record": call_verify_record,

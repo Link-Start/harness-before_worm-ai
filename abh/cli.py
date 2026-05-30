@@ -10,6 +10,7 @@ from .commands import dumps_envelope, make_envelope
 from .hooks import hook_profile, install_hooks
 from .navigation import onboarding_check, recommend_next_action
 from .models import MEMORY_STATUSES
+from .reporting import project_health_report
 from .core import (
     AbhError,
     add_memory,
@@ -61,6 +62,7 @@ def command_name(args: argparse.Namespace) -> str:
         "agent_setup_command",
         "hooks_command",
         "onboarding_command",
+        "report_command",
     ):
         value = getattr(args, attr, None)
         if value:
@@ -297,6 +299,13 @@ def build_parser() -> argparse.ArgumentParser:
     roadmap_materialize.add_argument("key")
     add_json_argument(roadmap_materialize)
     roadmap_materialize.set_defaults(handler=handle_roadmap_materialize)
+
+    report_parser = subparsers.add_parser("report", help="generate ABH reports")
+    report_sub = report_parser.add_subparsers(dest="report_command", required=True)
+
+    report_health = report_sub.add_parser("health", help="report project health and semantic pressure")
+    add_json_argument(report_health)
+    report_health.set_defaults(handler=handle_report_health)
 
     doctor_parser = subparsers.add_parser("doctor", help="check workspace consistency")
     add_json_argument(doctor_parser)
@@ -718,6 +727,16 @@ def handle_roadmap_materialize(args: argparse.Namespace) -> int:
         )
         return 0
     print(f"materialized {item.key} -> {plan.id}")
+    return 0
+
+
+def handle_report_health(args: argparse.Namespace) -> int:
+    report = project_health_report()
+    if args.json:
+        print_json_envelope(ok=True, command=command_name(args), data={"health_report": report})
+        return 0
+    print(f"health: {report['posture']}")
+    print(report["summary"])
     return 0
 
 

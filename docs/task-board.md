@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-阶段 6：漂移与记忆质量提升（Doing）；当前计划：`plan-041-memory-index`
+阶段 6：漂移与记忆质量提升（Doing）；当前计划：`plan-043-plan-reference-set`
 
 ## 状态说明
 
@@ -461,4 +461,43 @@
 | S37-003 | 实现 memory metadata、Markdown 渲染和 relationship/status filters | Done | `abh/models.py`, `abh/memory.py`, `abh/cli.py` |
 | S37-004 | 接入 Agent-First command contract 和 MCP 写/读工具 | Done | `abh/commands.py`, `abh/mcp_server.py` |
 | S37-005 | 同步 README、roadmap、task-board、quality signals、Agent Protocol 和 codebase map | Done | `README.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/architecture/quality-signals.md`, `docs/architecture/agent-protocol.md`, `docs/context/codebase-map.md` |
-| S37-006 | plan-041 验证、独立审计和关闭 | Review | `.abh/verifications/`, `docs/audits/audit-041-memory-index.md`, `docs/plans/plan-041-memory-index.md` |
+| S37-006 | plan-041 验证、独立审计和关闭 | Done | `.abh/verifications/`, `docs/audits/audit-041-memory-index.md`, `docs/plans/plan-041-memory-index.md` |
+
+## Sprint 38
+
+目标：把 `stage6.project-health-report` dogfood 成 `plan-042-project-health-report`，让 health report 从普通统计报表升级为 product-quality-first 的语义压力报告，优先暴露 unbound commitment pressure、stale proof、semantic leakage、J-flow-only evidence、orphaned memory 和 repeated leakage。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S38-001 | materialize Project Health Report 计划 | Done | `stage6.project-health-report` -> `docs/plans/plan-042-project-health-report.md` |
+| S38-002 | 定义 semantic pressure report 详细实施计划 | Done | `docs/superpowers/plans/2026-05-30-project-health-report.md` |
+| S38-003 | 定义 report health 红灯测试 | Done | `tests/test_cli.py` |
+| S38-004 | 实现 read-only health reporting module | Done | `abh/reporting.py`, `abh/cli.py`, `abh/commands.py`, `abh/mcp_server.py` |
+| S38-005 | 同步 README、roadmap、task-board、quality signals、Agent Protocol 和 codebase map | Done | `README.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/architecture/quality-signals.md`, `docs/architecture/agent-protocol.md`, `docs/context/codebase-map.md` |
+| S38-006 | plan-042 验证、独立审计和关闭 | Done | `.abh/verifications/`, `docs/audits/audit-042-project-health-report.md`, `docs/plans/plan-042-project-health-report.md` |
+
+## Stage 6 Semantic Commitment Follow-Ups
+
+目标：把 AGE/PHS 文章启发固化为后续 ABH queue，避免 health report 之后遗忘 plan reference、commitment phase、semantic conservation 和 owner-doc stable commitments。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S6-F01 | Plan Reference Set | Doing | `stage6.plan-reference-set` -> `plan-043-plan-reference-set` |
+| S6-F02 | Commitment Phase State | Todo | `stage6.commitment-phase-state` |
+| S6-F03 | Audit Semantic Conservation | Todo | `stage6.audit-semantic-conservation` |
+| S6-F04 | Owner Doc Stable Commitments | Todo | `stage6.owner-doc-stable-commitments` |
+| S6-F05 | Post-Close Freshness Semantics | Todo | `stage6.post-close-freshness-semantics` |
+
+## Sprint 39
+
+目标：把 `stage6.plan-reference-set` dogfood 成 `plan-043-plan-reference-set`，让 plan 明确声明本轮工作必须参考的事实星座。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S39-001 | materialize Plan Reference Set 计划 | Done | `stage6.plan-reference-set` -> `docs/plans/plan-043-plan-reference-set.md` |
+| S39-002 | 定义 Reference Set 详细实施计划 | Done | `docs/superpowers/plans/2026-05-30-plan-reference-set.md` |
+| S39-003 | 定义 Reference Set 红灯测试 | Todo | `tests/test_cli.py` |
+| S39-004 | 实现 PlanRecord/RoadmapItem Reference Set 模型与渲染 | Todo | `abh/models.py`, `abh/plans.py`, `abh/roadmap.py` |
+| S39-005 | 接入 CLI、Agent-First command contract 和 MCP create flow | Todo | `abh/cli.py`, `abh/commands.py`, `abh/mcp_server.py` |
+| S39-006 | 同步 README、plan template、quality signals、roadmap、task-board 和 codebase map | Todo | `README.md`, `docs/plans/templates/plan-template.md`, `docs/architecture/quality-signals.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/context/codebase-map.md` |
+| S39-007 | plan-043 验证、独立审计和关闭 | Todo | `.abh/verifications/`, `docs/audits/audit-043-plan-reference-set.md`, `docs/plans/plan-043-plan-reference-set.md` |

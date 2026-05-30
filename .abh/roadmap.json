@@ -528,25 +528,29 @@
       "key": "stage6.project-health-report",
       "title": "Project Health Report",
       "stage": "stage6",
-      "summary": "Aggregate quality signals into a product-quality-first health report and feed the most important risks into agent navigation.",
+      "summary": "Aggregate quality signals into a product-quality-first semantic pressure report and feed the most important risks into agent navigation.",
       "attractor": "docs/architecture/attractors/abh-core-attractor.md",
-      "baseline": "After drift and memory emit structured quality signals, ABH should summarize project health: where quality is degrading, which risks repeat, and what an agent should inspect next.",
+      "baseline": "After drift and memory emit structured quality signals, ABH should summarize project health as semantic pressure: where quality is degrading, which commitments remain unbound, which risks repeat, and what an agent should inspect next.",
       "goals": [
-        "Add a read-only project health report command that aggregates plan, verification, audit, drift, memory, doctor, and roadmap signals.",
+        "Add a read-only project health report command that aggregates plan, verification, audit, drift, memory, doctor, and roadmap signals into a semantic pressure report.",
         "Report plan close rate, stale verification count, audit rejection/need-info count, repeated drift, reusable memory hits, and top unresolved quality risks.",
+        "Surface unbound commitment pressure, stale proof, semantic leakage, J-flow-only evidence, orphaned memory, and repeated leakage where local evidence supports them.",
+        "Distinguish routed commitments from reduced uncertainty in the report vocabulary without introducing close or release blockers.",
         "Keep the primary health posture product-quality-first, with agent navigation as a secondary consumer.",
         "Expose health report data through JSON and document how abh next may consume top risks later."
       ],
       "non_goals": [
         "Do not add a Web UI, external dashboard, database, LLM scorer, or team policy engine.",
         "Do not make health score automatically block close or release.",
+        "Do not implement plan Reference Set fields, Commitment Phase State fields, audit flow classification fields, or owner-doc Stable Commitments in this slice.",
         "Do not implement Stage 7 CI templates or release automation in this slice."
       ],
       "exit_criteria": [
-        "abh report health --json returns health summary, metrics, top risks, and recommended inspections.",
+        "abh report health --json returns health summary, metrics, semantic pressure signals, top risks, and recommended inspections.",
         "The report uses structured drift and memory quality signals when present and degrades gracefully when absent.",
+        "The report can identify J-flow-only or semantic-leakage risks from existing local records without claiming automated semantic proof.",
         "The command is read-only and registered in the Agent-First command contract.",
-        "Tests cover empty repositories, the current repository shape, repeated drift, stale verification, and JSON envelope output."
+        "Tests cover empty repositories, the current repository shape, repeated drift, stale verification, J-flow-only/semantic-leakage risk, and JSON envelope output."
       ],
       "validation_checklist": [
         "python3 -m unittest tests/test_cli.py -v",
@@ -561,6 +565,223 @@
         "abh/mcp_server.py",
         "tests/test_cli.py",
         "README.md",
+        "docs/architecture/quality-signals.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/context/codebase-map.md"
+      ],
+      "status": "materialized",
+      "plan_id": "plan-042-project-health-report"
+    },
+    {
+      "key": "stage6.plan-reference-set",
+      "title": "Plan Reference Set",
+      "stage": "stage6",
+      "summary": "Make plans declare the reference constellation they depend on so agents do not treat the plan as the only source of truth.",
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "Plans currently declare attractor, baseline, goals, non-goals, exit criteria, validation checklist, and closure evidence, but they do not explicitly name the owner docs, code routes, tests, memory, drift, external contracts, and audit evidence that must be read for the slice.",
+      "goals": [
+        "Add an optional Reference Set structure to plan JSON and Markdown rendering with backward-compatible defaults.",
+        "Expose Reference Set data through plan status JSON, roadmap materialization, and plan update or creation flows without breaking existing plans.",
+        "Update plan templates and documentation to distinguish active owner docs, live code routes, test baselines, known issues, external contracts, and plan/audit evidence.",
+        "Document how future audit bundles, health reports, route ranking, and abh next can consume Reference Set entries."
+      ],
+      "non_goals": [
+        "Do not make Reference Set mandatory for ready plans in the first slice.",
+        "Do not implement embeddings, vector search, external documentation crawlers, or LLM-generated reference discovery.",
+        "Do not change close semantics or audit independence gates."
+      ],
+      "exit_criteria": [
+        "New plans can carry a Reference Set in JSON and Markdown while legacy plans read with empty defaults.",
+        "Plan status JSON exposes the Reference Set.",
+        "Plan templates and docs explain the Reference Set categories and source-of-truth role.",
+        "Tests cover legacy reads, new Reference Set rendering, JSON output, and roadmap materialization behavior."
+      ],
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json"
+      ],
+      "closure_evidence": [
+        "abh/models.py",
+        "abh/plans.py",
+        "abh/cli.py",
+        "abh/roadmap.py",
+        "tests/test_cli.py",
+        "docs/plans/templates/plan-template.md",
+        "docs/architecture/quality-signals.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/context/codebase-map.md"
+      ],
+      "status": "materialized",
+      "plan_id": "plan-043-plan-reference-set"
+    },
+    {
+      "key": "stage6.commitment-phase-state",
+      "title": "Commitment Phase State",
+      "stage": "stage6",
+      "summary": "Let plans distinguish stable state, active change pressure, target stable state, proof of conversion, and residual non-blocking pressure.",
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "Plans currently express baseline, goals, non-goals, exit criteria, and closure evidence, but they do not explicitly model the difference between stable commitments and active change obligations.",
+      "goals": [
+        "Add an optional Commitment Phase State structure to plan JSON and Markdown rendering with backward-compatible defaults.",
+        "Represent stable state now, active change pressure, target stable state after closure, conversion proof, and residual pressure with non-blocking rationale.",
+        "Expose Commitment Phase State through plan status JSON and plan templates.",
+        "Document how audit bundles and future close review can inspect p-to-q conversion without adding automatic close blockers in this slice."
+      ],
+      "non_goals": [
+        "Do not make Commitment Phase State mandatory for ready plans in the first slice.",
+        "Do not automatically infer semantic commitments with an LLM or external service.",
+        "Do not change close gates beyond documentation and optional reporting surfaces."
+      ],
+      "exit_criteria": [
+        "New plans can carry Commitment Phase State in JSON and Markdown while legacy plans read with empty defaults.",
+        "Plan status JSON exposes the Commitment Phase State.",
+        "Plan templates explain stable state, active pressure, target state, conversion proof, and residual pressure.",
+        "Tests cover legacy reads, new state rendering, JSON output, and plan update or creation behavior."
+      ],
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json"
+      ],
+      "closure_evidence": [
+        "abh/models.py",
+        "abh/plans.py",
+        "abh/cli.py",
+        "tests/test_cli.py",
+        "docs/plans/templates/plan-template.md",
+        "docs/architecture/quality-signals.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/context/codebase-map.md"
+      ],
+      "status": "queued",
+      "plan_id": null
+    },
+    {
+      "key": "stage6.audit-semantic-conservation",
+      "title": "Audit Semantic Conservation",
+      "stage": "stage6",
+      "summary": "Upgrade audit prompts and audit documentation so closure review checks semantic conservation and distinguishes routing from real uncertainty reduction.",
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "Audit bundle currently asks independent reviewers to check goals, non-goals, exit criteria, verification freshness, and evidence paths, but it does not explicitly ask whether in-scope commitments disappeared, weakened, or moved to non-authoritative artifacts.",
+      "goals": [
+        "Update audit bundle prompts to ask semantic conservation questions for in-scope commitments.",
+        "Ask reviewers to distinguish J-flow-only routing from R-flow uncertainty reduction using local evidence.",
+        "Document semantic conservation guidance in audit templates and Stage 6 quality signal vocabulary.",
+        "Keep audit execution independent and read-only; ABH still prepares prompts and records results but does not call an auditor model."
+      ],
+      "non_goals": [
+        "Do not add automated semantic proof, LLM scoring, or external audit execution.",
+        "Do not make flow classification mandatory on historical audit records.",
+        "Do not alter independent audit close gates beyond preserving existing freshness and independence rules."
+      ],
+      "exit_criteria": [
+        "abh audit bundle <plan-id> --json includes semantic conservation and J-flow/R-flow review prompts.",
+        "Audit templates and docs include semantic conservation guidance.",
+        "Existing audit records remain readable with no migration.",
+        "Tests cover audit bundle prompt content and JSON envelope output."
+      ],
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json"
+      ],
+      "closure_evidence": [
+        "abh/audit_bundle.py",
+        "tests/test_cli.py",
+        "docs/audits/templates/audit-template.md",
+        "docs/audits/README.md",
+        "docs/architecture/quality-signals.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/context/codebase-map.md"
+      ],
+      "status": "queued",
+      "plan_id": null
+    },
+    {
+      "key": "stage6.owner-doc-stable-commitments",
+      "title": "Owner Doc Stable Commitments",
+      "stage": "stage6",
+      "summary": "Give important owner docs a stable-commitments structure so agents can tell what must remain invariant, what may vary, and how to correct drift.",
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "ABH has source-of-truth precedence and active attractor invariants, but most owner docs do not yet separate stable commitments, allowed variation, drift/leakage signals, and correction paths.",
+      "goals": [
+        "Update owner-doc templates and key ABH owner docs with Stable Commitments, Allowed Variation, Drift / Leakage Signals, and Correction Path sections.",
+        "Document how these owner-doc sections support plan Reference Sets, audit semantic conservation, health reports, and future drift detection.",
+        "Keep the first slice docs-first so the structure can dogfood before JSON fields or doctor checks are added.",
+        "Align docs/index and source-of-truth guidance with the stable-commitments structure."
+      ],
+      "non_goals": [
+        "Do not add new AttractorRecord fields or doctor consistency gates in the first slice.",
+        "Do not rewrite every historical document.",
+        "Do not introduce team policy, release blockers, or external services."
+      ],
+      "exit_criteria": [
+        "Key owner docs and templates include stable commitments, allowed variation, drift/leakage signals, and correction path sections.",
+        "docs/index and source-of-truth docs explain when agents should consult the stable-commitments sections.",
+        "Quality signal docs explain how owner-doc stable commitments feed future health and drift checks.",
+        "Tests or doctor-compatible checks confirm the updated docs exist and roadmap consistency remains clean."
+      ],
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json"
+      ],
+      "closure_evidence": [
+        "docs/index.md",
+        "docs/context/source-of-truth.md",
+        "docs/context/project-context.md",
+        "docs/context/codebase-map.md",
+        "docs/architecture/templates/attractor-template.md",
+        "docs/architecture/quality-signals.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md"
+      ],
+      "status": "queued",
+      "plan_id": null
+    },
+    {
+      "key": "stage6.post-close-freshness-semantics",
+      "title": "Post-Close Freshness Semantics",
+      "stage": "stage6",
+      "summary": "Distinguish real stale product proof from expected audit, close, and post-close documentation metadata churn.",
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "plan-042 health-report dogfooding showed that close and post-close task-board synchronization can update plan evidence after a fresh independent audit, causing the closed plan to be reported as stale_proof. The signal is technically accurate but too coarse for health posture and recommended inspections.",
+      "goals": [
+        "Classify verification stale reasons so health reports can distinguish product or closure-evidence changes from audit, close, and post-close governance metadata churn.",
+        "Keep plan status transparent about stale reasons while making health-report recommendations more precise for closed plans.",
+        "Document when post-close documentation synchronization should create a follow-up signal instead of invalidating the completed close gate.",
+        "Add tests that cover close-time plan updates, audit record writes, and post-close task-board or roadmap synchronization."
+      ],
+      "non_goals": [
+        "Do not weaken the existing independent audit close gate.",
+        "Do not hide real stale verification caused by product code, validation checklist, closure evidence, or owner-doc changes.",
+        "Do not add automatic re-audit, CI execution, external services, or team policy in this slice."
+      ],
+      "exit_criteria": [
+        "plan status --json exposes enough stale reason detail for consumers to distinguish governance metadata churn from product proof drift.",
+        "abh report health --json does not recommend re-running close-time proof solely because a closed plan recorded its audit or close metadata.",
+        "Docs explain the difference between close-gate freshness and post-close health freshness.",
+        "Tests cover closed-plan freshness after audit/close writes and after post-close documentation synchronization."
+      ],
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json"
+      ],
+      "closure_evidence": [
+        "abh/plans.py",
+        "abh/reporting.py",
+        "tests/test_cli.py",
         "docs/architecture/quality-signals.md",
         "docs/development-roadmap.md",
         "docs/task-board.md",

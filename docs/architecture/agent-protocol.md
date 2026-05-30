@@ -120,6 +120,7 @@ Initial tool groups:
 - `memory`: list and search memory
 - `route`: recommend reading order for a question
 - `drift`: analyze text evidence
+- `report`: aggregate quality signals into read-only health and semantic pressure reports
 - `doctor`: report workspace consistency
 
 Each tool must define:
@@ -152,6 +153,8 @@ python3 -m abh.mcp_server
 ```
 
 The server uses stdio JSON-RPC messages and returns MCP tool results with both text content and `structuredContent`. `abh_drift_list` lists existing drift reports without creating new ones.
+
+Stage 6 adds `abh_report_health` as a read-only MCP tool. It returns the same `health_report` payload as `abh report health --json` and does not write reports, transition plans, call models, or alter close gates.
 
 ### Layer 5: Controlled Write MCP Tools
 
@@ -202,6 +205,7 @@ Initial Stage 4 command families:
 - `hooks.*`: install or inspect local guardrail hooks;
 - `next`: recommend the next ABH action from current repository state;
 - `onboarding.check`: check whether the repository is ABH-ready for agents.
+- `report.health`: aggregate local ABH quality signals into a read-only health and semantic pressure report.
 
 The first implementation surface is `abh.commands`. It records stable command ids, CLI command labels, MCP tool names, read/write classification, confirmation boundary, side effects, input schemas, output keys, and failure categories. CLI JSON envelope helpers and MCP tool definitions should consume this layer instead of maintaining parallel schema tables.
 
@@ -247,12 +251,15 @@ This is the main convenience layer for agents. Agents should not have to memoriz
 - `plan-038-independent-audit-gate`: completed; materialized from `stage5.independent-audit-gate` and adds audit verdict metadata plus close-time independent/fresh verification checks.
 - `plan-039-quality-signal-model`: completed; materialized from `stage6.quality-signal-model` and defines the product-quality-first, agent-navigation-second signal model consumed by future drift, memory, route, `abh next`, and health-report surfaces.
 - `plan-040-drift-quality`: completed; materialized from `stage6.drift-quality` and adds severity, confidence, matched span, source excerpt, evidence path, and recommendation metadata to drift findings.
-- `plan-041-memory-index`: in progress; materialized from `stage6.memory-index` and adds memory tags, status, typed plan/audit/drift relationships, supersession metadata, and relationship/status filters.
+- `plan-041-memory-index`: completed; materialized from `stage6.memory-index` and adds memory tags, status, typed plan/audit/drift relationships, supersession metadata, and relationship/status filters.
+- `plan-042-project-health-report`: in progress; materialized from `stage6.project-health-report` and scopes the health report as a product-quality-first semantic pressure report rather than a simple metrics dashboard.
 
 Stage 6 quality signal direction:
 
 - Drift, memory, verification, audit, and health report outputs should share severity, confidence, evidence reference, excerpt, relationship, status, and recommendation vocabulary.
 - Product-quality diagnosis is the primary consumer: ABH should identify where quality is degrading before it tells an agent what to do next.
+- Health reporting should surface semantic pressure signals such as unbound commitment pressure, stale proof, semantic leakage, J-flow-only evidence, orphaned memory, and repeated leakage when local ABH records support them.
+- Follow-up Stage 6 queue items should add Plan Reference Set, Commitment Phase State, Audit Semantic Conservation, and Owner Doc Stable Commitments before ABH attempts deeper commitment-drift automation.
 - Agent navigation is the secondary consumer: future `abh next --json` behavior may use unresolved quality signals to recommend inspections, but it must not replace audit judgment or close gates.
 
 Current setup export MVP:

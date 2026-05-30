@@ -129,6 +129,14 @@ class CliTests(TestCase):
         self.assertEqual(audit_bundle.output_keys, ["audit_bundle"])
         self.assertIn("plan_id", audit_bundle.input_schema["properties"])
 
+        health_report = command_contract("report.health")
+        self.assertEqual(health_report.cli_command, "report health")
+        self.assertEqual(health_report.mcp_tool, "abh_report_health")
+        self.assertTrue(health_report.read_only)
+        self.assertEqual(health_report.confirmation, "none")
+        self.assertEqual(health_report.side_effects, [])
+        self.assertEqual(health_report.output_keys, ["health_report"])
+
         audit_record = command_contract("audit.record")
         self.assertEqual(audit_record.cli_command, "audit record")
         self.assertEqual(audit_record.mcp_tool, "abh_audit_record")
@@ -2156,6 +2164,122 @@ class CliTests(TestCase):
         self.assertEqual(memory["related_audit_ids"], [])
         self.assertEqual(memory["related_drift_ids"], [])
         self.assertEqual(memory["superseded_by"], "")
+
+    def test_report_health_json_empty_workspace(self) -> None:
+        code, out, err = self.run_cli("report", "health", "--json")
+
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["command"], "report health")
+        report = payload["data"]["health_report"]
+        self.assertEqual(report["schema_version"], "1")
+        self.assertEqual(report["posture"], "healthy")
+        self.assertEqual(report["metrics"]["plans"]["total"], 0)
+        self.assertEqual(report["metrics"]["doctor"]["issues"], 0)
+        self.assertEqual(report["semantic_pressure"], [])
+        self.assertEqual(report["top_risks"], [])
+        self.assertIn("no unresolved", report["summary"].lower())
+
+    def test_report_health_flags_stale_verification_pressure(self) -> None:
+        self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-health-stale",
+            "--title",
+            "Health Stale",
+            "--attractor",
+            "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "ship behavior",
+            "--non-goal",
+            "web ui",
+            "--exit-criterion",
+            "tests pass",
+            "--validation",
+            "python3 -m unittest tests/test_cli.py -v",
+            "--closure-evidence",
+            "tests/test_cli.py",
+        )
+        self.run_cli(
+            "verify",
+            "record",
+            "plan-health-stale",
+            "--command",
+            "old command",
+            "--result",
+            "pass",
+        )
+
+        code, out, err = self.run_cli("report", "health", "--json")
+
+        self.assertEqual(code, 0, err)
+        report = json.loads(out)["data"]["health_report"]
+        self.assertEqual(report["metrics"]["plans"]["total"], 1)
+        self.assertEqual(report["metrics"]["plans"]["open"], 1)
+        self.assertEqual(report["metrics"]["verification"]["latest_pass"], 1)
+        self.assertEqual(report["metrics"]["verification"]["stale_latest"], 1)
+        stale = [item for item in report["semantic_pressure"] if item["type"] == "stale_proof"]
+        self.assertEqual(len(stale), 1)
+        self.assertEqual(stale[0]["related_plan_ids"], ["plan-health-stale"])
+        self.assertEqual(stale[0]["severity"], "high")
+        self.assertIn("Run fresh verification", stale[0]["recommendation"])
+        self.assertEqual(report["posture"], "at_risk")
+
+    def test_report_health_aggregates_drift_memory_and_semantic_pressure(self) -> None:
+        drift_source_a = self.root / "drift-a.txt"
+        drift_source_b = self.root / "drift-b.txt"
+        drift_source_a.write_text("Skipped tests and added external database dependency.\n", encoding="utf-8")
+        drift_source_b.write_text("Skipped tests and added another database dependency.\n", encoding="utf-8")
+
+        self.run_cli("drift", "analyze", "--id", "drift-a", "--source", str(drift_source_a), "--json")
+        self.run_cli("drift", "analyze", "--id", "drift-b", "--source", str(drift_source_b), "--json")
+        self.run_cli(
+            "memory",
+            "add",
+            "--id",
+            "mem-orphaned",
+            "--type",
+            "divergent_pattern",
+            "--summary",
+            "Orphaned active memory",
+            "--context",
+            "No typed relationships.",
+            "--implication",
+            "Future agents cannot reuse it reliably.",
+            "--evidence",
+            "docs/memory/mem-orphaned.md",
+        )
+
+        code, out, err = self.run_cli("report", "health", "--json")
+
+        self.assertEqual(code, 0, err)
+        report = json.loads(out)["data"]["health_report"]
+        self.assertEqual(report["metrics"]["drift"]["reports"], 2)
+        self.assertGreaterEqual(report["metrics"]["drift"]["findings"], 2)
+        self.assertGreaterEqual(report["metrics"]["drift"]["by_type"]["dependency_drift"], 2)
+        self.assertEqual(report["metrics"]["memory"]["orphaned_active"], 1)
+        pressure_types = {item["type"] for item in report["semantic_pressure"]}
+        self.assertIn("repeated_leakage", pressure_types)
+        self.assertIn("orphaned_memory", pressure_types)
+        self.assertIn("j_flow_only_evidence", pressure_types)
+        self.assertTrue(report["recommended_inspections"])
+
+    def test_mcp_exposes_report_health_tool(self) -> None:
+        from abh.commands import mcp_tool_names
+        from abh.mcp_server import TOOL_HANDLERS
+
+        self.assertIn("abh_report_health", mcp_tool_names())
+        self.assertIn("abh_report_health", TOOL_HANDLERS)
+        with Chdir(self.root):
+            result = TOOL_HANDLERS["abh_report_health"]({})
+        self.assertIn("health_report", result)
+        self.assertEqual(result["health_report"]["schema_version"], "1")
 
     def test_route_recommends_reading_order_for_close_question(self) -> None:
         code, out, err = self.run_cli(

@@ -9,6 +9,7 @@
 - `abh/init.py` — `abh init` preview/write planning, AGE owner-doc templates, and default active attractor seeding.
 - `abh/navigation.py` — read-only next-action recommendation and onboarding readiness checks.
 - `abh/audit_bundle.py` — read-only audit prompt and evidence bundle generation.
+- `abh/reporting.py` — read-only project health and semantic pressure aggregation over plans, verifications, audits, drift, memory, doctor, and roadmap queue state.
 - `abh/models.py` — schema-versioned records for attractors, plans, verifications, audits, memory, drift, and roadmap queue items.
 - `abh/storage.py` — path helpers, workspace directories, atomic text/JSON writes, and local file locks.
 - `abh/core.py` — compatibility re-export layer plus workspace doctor.
@@ -26,7 +27,7 @@
 - `abh/roadmap.py` — stable roadmap queue, next plan id calculation, materialization, and numbering checks.
 - `abh/mcp_server.py` — MCP stdio adapter over the shared command contract and domain functions.
 
-Stage 6 quality work starts with `docs/architecture/quality-signals.md`. Runtime modules should consume that vocabulary before adding new drift, memory, route, `abh next`, or reporting fields.
+Stage 6 quality work starts with `docs/architecture/quality-signals.md`. Runtime modules should consume that vocabulary before adding new drift, memory, route, `abh next`, or reporting fields. `plan-042-project-health-report` adds `abh/reporting.py` as the read-only health aggregation module and scopes health as a semantic pressure report rather than a single score.
 
 ## Test Surface
 
@@ -56,4 +57,4 @@ Stage 6 quality work starts with `docs/architecture/quality-signals.md`. Runtime
 - `abh route ...`
 - `abh doctor`
 
-Future agent-facing command families should extend `abh.commands` before or alongside their CLI/MCP adapters. Stage 4 command families are complete: `agent setup` is a read-only export surface; write/install behavior for agent config files remains a later confirmed-write slice. `hooks install` is the first local hook write surface and requires `--write --confirm`; it only manages `.git/hooks/pre-commit` files containing the ABH managed marker. `next` and `onboarding check` are read-only navigation surfaces and must not install hooks or write Agent config. Quickstart and recipes are documentation-only adoption surfaces; PyPI publication and release automation remain future work. `audit bundle` is a Stage 5 read-only audit preparation surface; it must not call models, record verdicts, transition plans, or close plans. `audit record` now carries declared reviewer context, independence, and verification basis metadata; `close` enforces an independent passing audit tied to the current fresh passing verification. Stage 6 should stay product-quality-first and agent-navigation-second: drift findings now carry quality signal metadata, and memory records now carry tags, status, typed relationships, and supersession fields before route, `abh next`, and future health reports consume those signals conservatively.
+Future agent-facing command families should extend `abh.commands` before or alongside their CLI/MCP adapters. Stage 4 command families are complete: `agent setup` is a read-only export surface; write/install behavior for agent config files remains a later confirmed-write slice. `hooks install` is the first local hook write surface and requires `--write --confirm`; it only manages `.git/hooks/pre-commit` files containing the ABH managed marker. `next` and `onboarding check` are read-only navigation surfaces and must not install hooks or write Agent config. Quickstart and recipes are documentation-only adoption surfaces; PyPI publication and release automation remain future work. `audit bundle` is a Stage 5 read-only audit preparation surface; it must not call models, record verdicts, transition plans, or close plans. `audit record` now carries declared reviewer context, independence, and verification basis metadata; `close` enforces an independent passing audit tied to the current fresh passing verification. Stage 6 should stay product-quality-first and agent-navigation-second: drift findings now carry quality signal metadata, memory records now carry tags, status, typed relationships, and supersession fields, and health reports should surface semantic pressure before route or `abh next` consume those signals conservatively. Follow-up Stage 6 queue items are `stage6.plan-reference-set`, `stage6.commitment-phase-state`, `stage6.audit-semantic-conservation`, and `stage6.owner-doc-stable-commitments`.

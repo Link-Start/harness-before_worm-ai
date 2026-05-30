@@ -192,6 +192,18 @@ COMMANDS: tuple[CommandContract, ...] = (
         failure_categories=["consistency", "system"],
     ),
     CommandContract(
+        id="report.health",
+        cli_command="report health",
+        mcp_tool="abh_report_health",
+        read_only=True,
+        confirmation="none",
+        side_effects=[],
+        description="Aggregate ABH quality signals into a read-only project health and semantic pressure report.",
+        input_schema=input_schema({}),
+        output_keys=["health_report"],
+        failure_categories=["consistency", "system"],
+    ),
+    CommandContract(
         id="attractor.list",
         cli_command="attractor list",
         mcp_tool="abh_attractor_list",

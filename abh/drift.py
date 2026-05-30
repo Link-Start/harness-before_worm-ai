@@ -81,6 +81,16 @@ def save_drift_report(report: DriftReport, cwd: Path | None = None, write_doc: b
     return report
 
 
+def list_drift_reports(cwd: Path | None = None) -> list[DriftReport]:
+    directory = drift_dir(cwd)
+    if not directory.exists():
+        return []
+    reports: list[DriftReport] = []
+    for path in sorted(directory.glob("*.json")):
+        reports.append(DriftReport.from_dict(read_json(path)))
+    return reports
+
+
 def analyze_drift(
     *,
     drift_id: str,

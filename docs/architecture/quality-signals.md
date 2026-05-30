@@ -108,7 +108,28 @@ Project health is not one score in Stage 6. It is a structured summary:
 - memory metrics, such as reusable active memories and superseded memories still being referenced;
 - recommended inspections for humans and agents.
 
+`plan-042-project-health-report` narrows the first health report into a semantic pressure report. The first implementation exposes `abh report health --json` and the read-only MCP tool `abh_report_health`. In addition to ordinary flow metrics, the report should use local ABH records to surface:
+
+- `unbound_commitment_pressure`: accepted work or findings that are not yet bound to owner docs, verification, audit, memory, or roadmap follow-up evidence.
+- `stale_proof`: verification or audit evidence that no longer matches the latest plan or repository state.
+- `semantic_leakage`: closed or materialized state that is not reflected in the expected owner docs, roadmap, task board, or protocol docs.
+- `j_flow_only_evidence`: evidence that primarily routes or restates commitments without reducing uncertainty through decision, proof, or owner-doc alignment.
+- `orphaned_memory`: active memory that lacks tags, typed relationships, or evidence strong enough for future reuse.
+- `repeated_leakage`: recurring audit findings, memory patterns, or drift families that suggest the same commitment keeps escaping closure.
+
+The first implementation should not claim automated semantic proof. These signals are local, inspectable heuristics that tell humans and agents where to inspect next. `unbound_commitment_pressure` and broader `semantic_leakage` are part of the semantic pressure vocabulary, but they should only be emitted when local ABH records support a concrete finding.
+
 The health report should degrade gracefully. If drift or memory metadata is not available yet, it should report missing signal depth instead of pretending the project is healthy.
+
+## Semantic Commitment Roadmap
+
+The next Stage 6 queue after the health report should deepen the commitment model in small slices:
+
+- Plan Reference Set: plans declare the owner docs, live code routes, tests, known issues, external contracts, and plan/audit evidence they depend on.
+- Commitment Phase State: plans distinguish stable state now (`q`), active change pressure (`p`), target stable state, proof of conversion, and residual non-blocking pressure.
+- Audit Semantic Conservation: audit bundles ask whether in-scope commitments disappeared, weakened, or moved to non-authoritative artifacts, and distinguish J-flow from R-flow.
+- Owner Doc Stable Commitments: important owner docs separate Stable Commitments, Allowed Variation, Drift / Leakage Signals, and Correction Path.
+- Post-Close Freshness Semantics: closed-plan health reporting should distinguish real product proof drift from expected audit, close, and post-close documentation metadata churn.
 
 ## Agent Navigation
 
