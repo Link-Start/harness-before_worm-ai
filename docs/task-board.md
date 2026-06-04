@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-阶段 6：漂移与记忆质量提升（Doing）；当前计划：`plan-043-plan-reference-set`
+阶段 6：漂移与记忆质量提升（Doing）；当前焦点：`stage6.schema-validation-and-migration`
 
 ## 状态说明
 
@@ -482,11 +482,16 @@
 
 | ID | 任务 | 状态 | 产出 |
 | --- | --- | --- | --- |
-| S6-F01 | Plan Reference Set | Doing | `stage6.plan-reference-set` -> `plan-043-plan-reference-set` |
+| S6-F01 | Plan Reference Set | Deferred | `stage6.plan-reference-set` -> `plan-043-plan-reference-set` |
 | S6-F02 | Commitment Phase State | Todo | `stage6.commitment-phase-state` |
 | S6-F03 | Audit Semantic Conservation | Todo | `stage6.audit-semantic-conservation` |
 | S6-F04 | Owner Doc Stable Commitments | Todo | `stage6.owner-doc-stable-commitments` |
 | S6-F05 | Post-Close Freshness Semantics | Todo | `stage6.post-close-freshness-semantics` |
+| S6-F06 | Command Contract Runtime Registry | Done | `stage6.command-contract-runtime-registry` -> `plan-044-command-contract-runtime-registry` |
+| S6-F07 | Repository Write Transaction Boundary | Done | `stage6.repository-write-transaction-boundary` -> `plan-045-repository-write-transaction-boundary` |
+| S6-F08 | Schema Validation and Migration | Todo | `stage6.schema-validation-and-migration` |
+| S6-F09 | Verification Runner Trust Policy | Todo | `stage6.verification-runner-trust-policy` |
+| S6-F10 | Test Suite Domain Split | Todo | `stage6.test-suite-domain-split` |
 
 ## Sprint 39
 
@@ -501,3 +506,30 @@
 | S39-005 | 接入 CLI、Agent-First command contract 和 MCP create flow | Todo | `abh/cli.py`, `abh/commands.py`, `abh/mcp_server.py` |
 | S39-006 | 同步 README、plan template、quality signals、roadmap、task-board 和 codebase map | Todo | `README.md`, `docs/plans/templates/plan-template.md`, `docs/architecture/quality-signals.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/context/codebase-map.md` |
 | S39-007 | plan-043 验证、独立审计和关闭 | Todo | `.abh/verifications/`, `docs/audits/audit-043-plan-reference-set.md`, `docs/plans/plan-043-plan-reference-set.md` |
+
+## Sprint 40
+
+目标：把架构评审中的首个优化点 dogfood 成 `plan-044-command-contract-runtime-registry`，先降低 command contract / CLI / MCP 的协议事实源分裂风险。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S40-001 | materialize Command Contract Runtime Registry 计划 | Done | `stage6.command-contract-runtime-registry` -> `docs/plans/plan-044-command-contract-runtime-registry.md` |
+| S40-002 | 定义架构硬化详细实施计划 | Done | `docs/superpowers/plans/2026-06-04-command-contract-runtime-registry.md` |
+| S40-003 | 同步 architecture hardening queue | Done | `.abh/roadmap.json`, `docs/development-roadmap.md`, `docs/task-board.md` |
+| S40-004 | 固定 MCP 使用共享 command-layer error payload 的红灯测试 | Done | `tests/test_cli.py` |
+| S40-005 | 下沉 error payload helper 并解除 MCP 对 CLI 协议 helper 的导入 | Done | `abh/commands.py`, `abh/cli.py`, `abh/mcp_server.py` |
+| S40-006 | plan-044 验证、独立审计和关闭 | Done | `.abh/verifications/ver-1a1bbf356998.json`, `docs/audits/audit-044-command-contract-runtime-registry.md`, `docs/plans/plan-044-command-contract-runtime-registry.md` |
+
+## Sprint 41
+
+目标：把 `stage6.repository-write-transaction-boundary` dogfood 成 `plan-045-repository-write-transaction-boundary`，统一 ABH JSON/Markdown 双写边界，降低 split-state 风险。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S41-001 | materialize Repository Write Transaction Boundary 计划 | Done | `stage6.repository-write-transaction-boundary` -> `docs/plans/plan-045-repository-write-transaction-boundary.md` |
+| S41-002 | 定义 repository write transaction boundary 实施计划 | Done | `docs/superpowers/plans/2026-06-04-repository-write-transaction-boundary.md` |
+| S41-003 | 调整 `abh next` 让 blocked/deferred plan 不阻塞 queued roadmap | Done | `abh/navigation.py`, `tests/test_cli.py` |
+| S41-004 | 定义 JSON/Markdown pair write 红灯测试 | Done | `tests/test_cli.py` |
+| S41-005 | 实现 storage pair write boundary 并接入核心 save 路径 | Done | `abh/storage.py`, `abh/plans.py`, `abh/audits.py`, `abh/memory.py`, `abh/drift.py`, `abh/attractors.py` |
+| S41-006 | 同步 roadmap、task-board 和 transaction boundary 文档说明 | Done | `docs/development-roadmap.md`, `docs/task-board.md` |
+| S41-007 | plan-045 验证、独立审计和关闭 | Done | `.abh/verifications/ver-3f470aa8d592.json`, `docs/audits/audit-045-repository-write-transaction-boundary-r2.md`, `docs/plans/plan-045-repository-write-transaction-boundary.md` |

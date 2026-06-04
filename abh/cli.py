@@ -6,7 +6,7 @@ from typing import Any
 
 from .agent_setup import agent_setup_bundle
 from .audit_bundle import audit_bundle
-from .commands import dumps_envelope, make_envelope
+from .commands import abh_error_payload, dumps_envelope, make_envelope
 from .hooks import hook_profile, install_hooks
 from .navigation import onboarding_check, recommend_next_action
 from .models import MEMORY_STATUSES
@@ -79,26 +79,6 @@ def print_json_envelope(
     warnings: list[dict[str, Any]] | None = None,
 ) -> None:
     print(dumps_envelope(ok=ok, command=command, data=data, errors=errors, warnings=warnings))
-
-
-def categorize_abh_error(message: str) -> str:
-    if "not found" in message:
-        return "not_found"
-    if message.startswith("invalid ") or "missing:" in message or "required" in message:
-        return "validation"
-    if message.startswith("cannot ") or "transition" in message:
-        return "business_rule"
-    return "system"
-
-
-def abh_error_payload(exc: AbhError) -> dict[str, Any]:
-    message = str(exc)
-    return {
-        "code": "abh_error",
-        "message": message,
-        "category": categorize_abh_error(message),
-        "details": {},
-    }
 
 
 def build_parser() -> argparse.ArgumentParser:

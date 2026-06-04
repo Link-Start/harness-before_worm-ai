@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .errors import AbhError, validate_identifier
 from .models import MEMORY_STATUSES, MEMORY_TYPES, MemoryRecord, utc_now
-from .storage import ensure_workspace, memory_doc_path, memory_json_path, memory_dir, read_json, write_json, write_text
+from .storage import ensure_workspace, memory_doc_path, memory_json_path, memory_dir, read_json, write_json, write_json_markdown_pair
 
 
 def load_memory(memory_id: str, cwd: Path | None = None) -> MemoryRecord:
@@ -21,8 +21,9 @@ def save_memory(memory: MemoryRecord, cwd: Path | None = None, write_doc: bool =
     if write_doc:
         doc_path = memory.doc_path or str(memory_doc_path(memory.id, cwd))
         memory.doc_path = doc_path
-        write_text(Path(doc_path), render_memory_markdown(memory))
-    write_json(memory_json_path(memory.id, cwd), memory.to_dict())
+        write_json_markdown_pair(memory_json_path(memory.id, cwd), memory.to_dict(), Path(doc_path), render_memory_markdown(memory))
+    else:
+        write_json(memory_json_path(memory.id, cwd), memory.to_dict())
     return memory
 
 

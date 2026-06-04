@@ -8,6 +8,10 @@ from .plans import load_plan, verification_freshness_summary
 from .storage import audit_doc_path, audit_json_path, plan_doc_path, plan_json_path, root_dir, verification_path
 
 
+def evidence_path(path: Path) -> str:
+    return path.as_posix()
+
+
 def audit_bundle(plan_id: str, cwd: Path | None = None) -> dict[str, object]:
     validate_identifier(plan_id, "plan id")
     root = root_dir(cwd)
@@ -15,7 +19,7 @@ def audit_bundle(plan_id: str, cwd: Path | None = None) -> dict[str, object]:
     verification_summary = verification_freshness_summary(plan, cwd)
     latest_verification_id = verification_summary.get("latest_id")
     latest_verification_path = (
-        str(verification_path(str(latest_verification_id), cwd)) if latest_verification_id else None
+        evidence_path(verification_path(str(latest_verification_id), cwd)) if latest_verification_id else None
     )
 
     requested_audits: list[dict[str, object]] = []
@@ -33,14 +37,16 @@ def audit_bundle(plan_id: str, cwd: Path | None = None) -> dict[str, object]:
                 "status": audit.status,
                 "result": audit.result,
                 "evidence": list(audit.evidence),
-                "json_path": str(audit_json_path(audit.id, cwd)),
-                "doc_path": str(audit_doc_path(audit.id, cwd)),
+                "json_path": evidence_path(audit_json_path(audit.id, cwd)),
+                "doc_path": evidence_path(audit_doc_path(audit.id, cwd)),
             }
         )
-        audit_evidence_paths.extend([str(audit_json_path(audit.id, cwd)), str(audit_doc_path(audit.id, cwd))])
+        audit_evidence_paths.extend(
+            [evidence_path(audit_json_path(audit.id, cwd)), evidence_path(audit_doc_path(audit.id, cwd))]
+        )
 
     evidence = {
-        "plan": [str(plan_doc_path(plan.id, cwd)), str(plan_json_path(plan.id, cwd))],
+        "plan": [evidence_path(plan_doc_path(plan.id, cwd)), evidence_path(plan_json_path(plan.id, cwd))],
         "latest_verification": latest_verification_path,
         "audits": audit_evidence_paths,
         "closure_evidence": list(plan.closure_evidence),

@@ -5,8 +5,7 @@ import sys
 from collections.abc import Callable
 from typing import Any, TextIO
 
-from .commands import mcp_tool_definitions, mcp_tool_names
-from .cli import abh_error_payload, make_envelope
+from .commands import abh_error_payload, make_envelope, mcp_tool_definitions, mcp_tool_names
 from .core import (
     AbhError,
     add_memory,

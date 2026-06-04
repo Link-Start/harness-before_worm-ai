@@ -4,7 +4,7 @@ import json
 import os
 import time
 import uuid
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -164,12 +164,58 @@ def file_lock(path: Path):
                 pass
 
 
+@contextmanager
+def file_locks(paths: list[Path]):
+    with ExitStack() as stack:
+        for path in sorted(paths, key=lambda item: str(item)):
+            stack.enter_context(file_lock(path))
+        yield
+
+
 def _cleanup_temp(path: Path, exc_type: type[BaseException] | None) -> None:
     if exc_type is not None:
         try:
             path.unlink()
         except FileNotFoundError:
             pass
+
+
+def _write_temp_bytes(target: Path, content: bytes) -> Path:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = target.with_name(f"{target.name}.{uuid.uuid4().hex}.tmp")
+    temp_file = temp_path.open("wb")
+    exc_type: type[BaseException] | None = None
+    try:
+        with temp_file:
+            temp_file.write(content)
+            temp_file.flush()
+            os.fsync(temp_file.fileno())
+        return temp_path
+    except BaseException as exc:
+        exc_type = type(exc)
+        raise
+    finally:
+        _cleanup_temp(temp_path, exc_type)
+
+
+def _snapshot_target(path: Path) -> tuple[bool, bytes]:
+    if not path.exists():
+        return False, b""
+    return True, path.read_bytes()
+
+
+def _restore_target(path: Path, existed: bool, content: bytes) -> None:
+    if existed:
+        temp_path = _write_temp_bytes(path, content)
+        try:
+            os.replace(temp_path, path)
+        finally:
+            _cleanup_temp(temp_path, BaseException)
+        return
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
 
 
 def write_text(path: Path, content: str) -> None:
@@ -193,6 +239,32 @@ def write_text(path: Path, content: str) -> None:
 
 def write_json(path: Path, data: dict[str, Any]) -> None:
     write_text(path, json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+
+
+def write_json_markdown_pair(json_path: Path, data: dict[str, Any], markdown_path: Path, markdown: str) -> None:
+    json_payload = json.dumps(data, indent=2, ensure_ascii=False).encode("utf-8") + b"\n"
+    markdown_payload = markdown.encode("utf-8")
+    with file_locks([json_path, markdown_path]):
+        snapshots = {
+            markdown_path: _snapshot_target(markdown_path),
+            json_path: _snapshot_target(json_path),
+        }
+        temp_markdown = _write_temp_bytes(markdown_path, markdown_payload)
+        temp_json = _write_temp_bytes(json_path, json_payload)
+        replaced: list[Path] = []
+        try:
+            os.replace(temp_markdown, markdown_path)
+            replaced.append(markdown_path)
+            os.replace(temp_json, json_path)
+            replaced.append(json_path)
+        except BaseException:
+            for path in reversed(replaced):
+                existed, content = snapshots[path]
+                _restore_target(path, existed, content)
+            raise
+        finally:
+            _cleanup_temp(temp_markdown, BaseException)
+            _cleanup_temp(temp_json, BaseException)
 
 
 def read_json(path: Path) -> dict[str, Any]:

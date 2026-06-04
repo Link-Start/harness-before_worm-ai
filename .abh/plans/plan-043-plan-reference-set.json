@@ -5,7 +5,7 @@
   "attractor": "docs/architecture/attractors/abh-core-attractor.md",
   "baseline": "Plans currently declare attractor, baseline, goals, non-goals, exit criteria, validation checklist, and closure evidence, but they do not explicitly name the owner docs, code routes, tests, memory, drift, external contracts, and audit evidence that must be read for the slice.",
   "owner": "platform",
-  "status": "running",
+  "status": "blocked",
   "goals": [
     "Add an optional Reference Set structure to plan JSON and Markdown rendering with backward-compatible defaults.",
     "Expose Reference Set data through plan status JSON, roadmap materialization, and plan update or creation flows without breaking existing plans.",
@@ -48,6 +48,6 @@
   "verification_runs": [],
   "audit_ids": [],
   "created_at": "2026-05-30T12:08:07.774509+00:00",
-  "updated_at": "2026-05-30T12:15:13.263820+00:00",
+  "updated_at": "2026-06-04T10:44:54.387239+00:00",
   "doc_path": "/Users/cc/ai/harness-before/docs/plans/plan-043-plan-reference-set.md"
 }

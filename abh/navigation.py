@@ -39,9 +39,11 @@ def recommend_next_action(*, cwd: Path | None = None) -> dict[str, object]:
     plans = list_plans(cwd)
     open_plans = [plan for plan in plans if plan.status != "closed"]
     open_plans.sort(key=lambda plan: plan.created_at)
+    active_plans = [plan for plan in open_plans if plan.status != "blocked"]
+    blocked_plans = [plan for plan in open_plans if plan.status == "blocked"]
 
-    if open_plans:
-        plan = open_plans[0]
+    if active_plans:
+        plan = active_plans[0]
         if plan.status == "draft":
             return {
                 "next_action": "complete_plan_definition",
@@ -51,7 +53,7 @@ def recommend_next_action(*, cwd: Path | None = None) -> dict[str, object]:
                 "source": {"plan_id": plan.id, "plan_status": plan.status},
                 "alternatives": ["abh plan update <plan-id> --json", "abh plan transition <plan-id> --to ready"],
             }
-        if plan.status in {"ready", "running", "blocked"}:
+        if plan.status in {"ready", "running"}:
             verification = verification_freshness_summary(plan, cwd)
             if verification["result"] == "pass" and not verification["stale"]:
                 latest_verification = str(verification["latest_id"])
@@ -135,13 +137,29 @@ def recommend_next_action(*, cwd: Path | None = None) -> dict[str, object]:
     queued = [item for item in list_roadmap_items(cwd) if item.status == "queued" and item.plan_id is None]
     if queued:
         item = queued[0]
+        source: dict[str, object] = {"roadmap_key": item.key, "stage": item.stage, "title": item.title}
+        rationale = f"no open plans; next queued roadmap item is {item.key}"
+        if blocked_plans:
+            source["blocked_plan_ids"] = [plan.id for plan in blocked_plans]
+            rationale = f"no active open plans; next queued roadmap item is {item.key}"
         return {
             "next_action": "materialize_roadmap_item",
             "recommended_command": f"abh roadmap materialize {item.key} --json",
             "requires_confirmation": False,
-            "rationale": f"no open plans; next queued roadmap item is {item.key}",
-            "source": {"roadmap_key": item.key, "stage": item.stage, "title": item.title},
+            "rationale": rationale,
+            "source": source,
             "alternatives": ["abh roadmap list --json", "abh roadmap next-id --json"],
+        }
+
+    if blocked_plans:
+        plan = blocked_plans[0]
+        return {
+            "next_action": "inspect_blocked_plan",
+            "recommended_command": f"abh plan status {plan.id} --json",
+            "requires_confirmation": False,
+            "rationale": f"blocked plan {plan.id} is deferred until explicitly resumed",
+            "source": {"plan_id": plan.id, "plan_status": plan.status},
+            "alternatives": [f"abh plan transition {plan.id} --to running", "abh roadmap list --json"],
         }
 
     return {

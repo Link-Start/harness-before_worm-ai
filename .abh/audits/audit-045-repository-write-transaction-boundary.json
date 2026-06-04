@@ -1,0 +1,35 @@
+{
+  "schema_version": "1",
+  "id": "audit-045-repository-write-transaction-boundary",
+  "plan_id": "plan-045-repository-write-transaction-boundary",
+  "auditor": "human-independent-review",
+  "scope": "Independent audit of plan-045-repository-write-transaction-boundary",
+  "auditor_context": "user-provided independent audit verdict",
+  "independence": "independent",
+  "verification_id": "ver-60c4c288037e",
+  "status": "complete",
+  "result": "partial",
+  "rationale": "Core implementation matched the transaction-boundary design, but verification did not directly prove all named save paths used the shared boundary and the slice carried an undocumented abh next behavior change.",
+  "evidence": [
+    "docs/plans/plan-045-repository-write-transaction-boundary.md",
+    ".abh/verifications/ver-60c4c288037e.json"
+  ],
+  "findings": [
+    {
+      "severity": "Medium",
+      "finding": "Verification does not directly cover every core save path named by the exit criteria",
+      "evidence": "Focused helper-usage assertion was only for plans while audit, memory, drift, and attractor wiring was only visible in code.",
+      "recommendation": "Add targeted tests for audit, memory, drift, and attractor saves or equivalent integration tests asserting those paths call write_json_markdown_pair()."
+    },
+    {
+      "severity": "Low",
+      "finding": "Plan scope includes an undocumented abh next behavior change",
+      "evidence": "Plan goals covered repository write-boundary work, but task-board and code included blocked/deferred abh next behavior.",
+      "recommendation": "Move the navigation change into its own plan or update the plan goals and closure evidence so the documented scope matches the shipped scope."
+    }
+  ],
+  "follow_ups": [],
+  "created_at": "2026-06-04T11:47:15.709321+00:00",
+  "updated_at": "2026-06-04T12:28:44.466801+00:00",
+  "doc_path": "D:\\work\\ai\\harness-before\\docs\\audits\\audit-045-repository-write-transaction-boundary.md"
+}

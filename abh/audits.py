@@ -5,7 +5,7 @@ from pathlib import Path
 from .errors import AbhError, validate_identifier
 from .models import AUDIT_RESULTS, AuditFinding, AuditRecord, utc_now
 from .plans import load_plan, save_plan
-from .storage import audit_doc_path, audit_json_path, audits_dir, ensure_workspace, read_json, write_json, write_text
+from .storage import audit_doc_path, audit_json_path, audits_dir, ensure_workspace, read_json, write_json, write_json_markdown_pair
 
 
 AUDIT_INDEPENDENCE_VALUES = {"unknown", "independent", "self_review"}
@@ -48,8 +48,9 @@ def save_audit(audit: AuditRecord, cwd: Path | None = None, write_doc: bool = Tr
         doc_path = audit.doc_path or str(audit_doc_path(audit.id, cwd))
         audit.doc_path = doc_path
         doc_file = Path(doc_path)
-        write_text(doc_file, render_audit_markdown(audit))
-    write_json(audit_json_path(audit.id, cwd), audit.to_dict())
+        write_json_markdown_pair(audit_json_path(audit.id, cwd), audit.to_dict(), doc_file, render_audit_markdown(audit))
+    else:
+        write_json(audit_json_path(audit.id, cwd), audit.to_dict())
     return audit
 
 

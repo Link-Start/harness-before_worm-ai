@@ -1,0 +1,89 @@
+{
+  "schema_version": "1",
+  "id": "ver-3f470aa8d592",
+  "plan_id": "plan-045-repository-write-transaction-boundary",
+  "command": "python3 -m unittest tests/test_cli.py -v && python3 -m abh doctor && git diff --check && python3 -m abh roadmap check --json",
+  "result": "pass",
+  "artifacts": [
+    "command='python3 -m unittest tests/test_cli.py -v'; exit_code=0; duration_seconds=11.252; stdout=''; stderr='test_abh_error_json_returns_structured_error (tests.test_cli.CliTests.test_abh_error_json_returns_structured_error) ... ok\\\\ntest_agent_first_command_contract_describes_existing_agent_commands (tests.test_cli.CliTests.test_agent_first_command_contract_describes_existing_agent_commands) ... ok\\\\ntest_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command'",
+    "command='python3 -m abh doctor'; exit_code=0; duration_seconds=0.254; stdout='doctor: ok'; stderr=''",
+    "command='git diff --check'; exit_code=0; duration_seconds=0.090; stdout=''; stderr=\"warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/attractors.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/audit_bundle.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/audits.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/cli.py', LF will be replaced\"",
+    "command='python3 -m abh roadmap check --json'; exit_code=0; duration_seconds=0.335; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "D:\\work\\ai\\harness-before",
+    "git": {
+      "commit": "759cd80d6cc75e792dcb487d9cb8b3d98207ebcf",
+      "dirty": true,
+      "status_hash": "9ee76a56e724c0431e68697e8c98ed3a34cb6802fe611161f8f8dd114504a259",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.15.0a7 (tags/v3.15.0a7:6024d3c, Mar 10 2026, 13:09:10) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "D:\\work\\ai\\harness-before\\.venv\\Scripts\\python.exe"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 4
+    },
+    "commands": [
+      {
+        "command": "python3 -m unittest tests/test_cli.py -v",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests/test_cli.py",
+          "-v"
+        ]
+      },
+      {
+        "command": "python3 -m abh doctor",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "doctor"
+        ]
+      },
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": "python3 -m abh roadmap check --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-06-04T12:26:07.949700+00:00",
+      "content_hash": "8d1413d7acd222350f76f249264b6165f7204578b213294a4cf912408fd31b9e",
+      "validation_checklist": [
+        "python3 -m unittest tests/test_cli.py -v",
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-06-04T12:27:27.250058+00:00"
+}

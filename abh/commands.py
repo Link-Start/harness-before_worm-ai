@@ -4,6 +4,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
+from .errors import AbhError
 from .models import SCHEMA_VERSION
 
 
@@ -72,6 +73,26 @@ def dumps_envelope(
         make_envelope(ok=ok, command=command, data=data, errors=errors, warnings=warnings),
         ensure_ascii=False,
     )
+
+
+def categorize_abh_error(message: str) -> str:
+    if "not found" in message:
+        return "not_found"
+    if message.startswith("invalid ") or "missing:" in message or "required" in message:
+        return "validation"
+    if message.startswith("cannot ") or "transition" in message:
+        return "business_rule"
+    return "system"
+
+
+def abh_error_payload(exc: AbhError) -> dict[str, Any]:
+    message = str(exc)
+    return {
+        "code": "abh_error",
+        "message": message,
+        "category": categorize_abh_error(message),
+        "details": {},
+    }
 
 
 COMMON_FAILURES = ["validation", "not_found", "business_rule", "consistency", "system"]

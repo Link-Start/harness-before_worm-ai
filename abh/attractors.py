@@ -12,7 +12,7 @@ from .storage import (
     ensure_workspace,
     read_json,
     write_json,
-    write_text,
+    write_json_markdown_pair,
 )
 
 
@@ -51,8 +51,9 @@ def save_attractor(attractor: AttractorRecord, cwd: Path | None = None, write_do
         doc_path = attractor.doc_path or attractor.path or str(attractor_doc_path(attractor.id, cwd))
         attractor.doc_path = doc_path
         attractor.path = doc_path
-        write_text(Path(doc_path), render_attractor_markdown(attractor))
-    write_json(attractor_json_path(attractor.id, cwd), attractor.to_dict())
+        write_json_markdown_pair(attractor_json_path(attractor.id, cwd), attractor.to_dict(), Path(doc_path), render_attractor_markdown(attractor))
+    else:
+        write_json(attractor_json_path(attractor.id, cwd), attractor.to_dict())
     return attractor
 
 

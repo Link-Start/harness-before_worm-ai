@@ -6,7 +6,7 @@ from .errors import AbhError, validate_identifier
 from .memory import add_memory
 from .models import DRIFT_TYPES, DriftFinding, DriftReport, utc_now
 from .plans import load_plan
-from .storage import drift_doc_path, drift_json_path, drift_dir, ensure_workspace, read_json, write_json, write_text
+from .storage import drift_doc_path, drift_json_path, drift_dir, ensure_workspace, read_json, write_json, write_json_markdown_pair
 
 
 DRIFT_RULES: dict[str, dict[str, object]] = {
@@ -76,8 +76,9 @@ def save_drift_report(report: DriftReport, cwd: Path | None = None, write_doc: b
     if write_doc:
         doc_path = report.doc_path or str(drift_doc_path(report.id, cwd))
         report.doc_path = doc_path
-        write_text(Path(doc_path), render_drift_markdown(report))
-    write_json(drift_json_path(report.id, cwd), report.to_dict())
+        write_json_markdown_pair(drift_json_path(report.id, cwd), report.to_dict(), Path(doc_path), render_drift_markdown(report))
+    else:
+        write_json(drift_json_path(report.id, cwd), report.to_dict())
     return report
 
 

@@ -14,7 +14,7 @@ from .storage import (
     plans_dir,
     read_json,
     write_json,
-    write_text,
+    write_json_markdown_pair,
 )
 
 ALLOWED_TRANSITIONS: dict[str, set[str]] = {
@@ -64,8 +64,9 @@ def save_plan(plan: PlanRecord, cwd: Path | None = None, write_doc: bool = True)
         plan.doc_path = doc_path
         doc = render_plan_markdown(plan)
         doc_file = Path(doc_path)
-        write_text(doc_file, doc)
-    write_json(plan_json_path(plan.id, cwd), plan.to_dict())
+        write_json_markdown_pair(plan_json_path(plan.id, cwd), plan.to_dict(), doc_file, doc)
+    else:
+        write_json(plan_json_path(plan.id, cwd), plan.to_dict())
     return plan
 
 

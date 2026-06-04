@@ -439,6 +439,65 @@ class CliTests(TestCase):
         self.assertEqual(result["source"]["roadmap_key"], "stage4.abh-next-and-onboarding-check")
         self.assertIn("abh roadmap list --json", result["alternatives"])
 
+    def test_next_json_skips_blocked_plan_for_queued_roadmap_item(self) -> None:
+        self.run_cli("init", "--write", "--confirm", "--json")
+        code, out, err = self.run_cli(
+            "plan",
+            "create",
+            "--id",
+            "plan-201-deferred",
+            "--title",
+            "Deferred Plan",
+            "--attractor",
+            "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline",
+            "baseline",
+            "--status",
+            "ready",
+            "--goal",
+            "defer old work",
+            "--non-goal",
+            "block queued roadmap",
+            "--exit-criterion",
+            "blocked plan is skipped by next",
+            "--validation",
+            "python3 -m abh doctor",
+            "--closure-evidence",
+            "docs/plans/plan-201-deferred.md",
+        )
+        self.assertEqual(code, 0, err)
+        code, out, err = self.run_cli("plan", "transition", "plan-201-deferred", "--to", "blocked")
+        self.assertEqual(code, 0, err)
+        queue = self.root / ".abh" / "roadmap.json"
+        queue.write_text(
+            json.dumps(
+                {
+                    "schema_version": "1",
+                    "items": [
+                        {
+                            "key": "stage6.repository-write-transaction-boundary",
+                            "title": "Repository Write Transaction Boundary",
+                            "stage": "stage6",
+                            "summary": "Unify JSON and Markdown write boundaries.",
+                        }
+                    ],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        code, out, err = self.run_cli("next", "--json")
+
+        self.assertEqual(code, 0, err)
+        result = json.loads(out)["data"]["next"]
+        self.assertEqual(result["next_action"], "materialize_roadmap_item")
+        self.assertEqual(result["recommended_command"], "abh roadmap materialize stage6.repository-write-transaction-boundary --json")
+        self.assertIn("no active open plans", result["rationale"])
+        self.assertEqual(result["source"]["roadmap_key"], "stage6.repository-write-transaction-boundary")
+        self.assertEqual(result["source"]["blocked_plan_ids"], ["plan-201-deferred"])
+
     def test_next_json_prioritizes_existing_draft_plan(self) -> None:
         self.run_cli("init", "--write", "--confirm", "--json")
         code, out, err = self.run_cli(
@@ -1270,7 +1329,7 @@ class CliTests(TestCase):
             "--exit-criterion",
             "failure is recorded",
             "--validation",
-            "python3 -c 'import sys; sys.exit(7)'",
+            "python3 -c \"import sys; sys.exit(7)\"",
             "--closure-evidence",
             "docs/plans/plan-104-runner-fail.md",
         )
@@ -1291,7 +1350,7 @@ class CliTests(TestCase):
         run_path = self.root / ".abh" / "verifications" / f"{plan['verification_runs'][0]}.json"
         run = json.loads(run_path.read_text(encoding="utf-8"))
         self.assertEqual(run["result"], "fail")
-        self.assertEqual(run["failed_checks"], ["python3 -c 'import sys; sys.exit(7)'"])
+        self.assertEqual(run["failed_checks"], ["python3 -c \"import sys; sys.exit(7)\""])
         self.assertTrue(any("exit_code=7" in artifact for artifact in run["artifacts"]))
         self.assertEqual(run["environment"]["runner"]["check_count"], 1)
         self.assertEqual(run["environment"]["commands"][0]["argv"], ["python3", "-c", "import sys; sys.exit(7)"])
@@ -1299,7 +1358,7 @@ class CliTests(TestCase):
             run["failure_classifications"],
             [
                 {
-                    "command": "python3 -c 'import sys; sys.exit(7)'",
+                    "command": "python3 -c \"import sys; sys.exit(7)\"",
                     "category": "validation_failure",
                     "message": "validation command exited with non-zero status",
                     "details": {"exit_code": 7},
@@ -1363,7 +1422,7 @@ class CliTests(TestCase):
             "--exit-criterion",
             "timeout is classified",
             "--validation",
-            "python3 -c 'import time; time.sleep(1)'",
+            "python3 -c \"import time; time.sleep(2)\"",
             "--closure-evidence",
             "docs/plans/plan-114-timeout-classification.md",
         )
@@ -1374,7 +1433,7 @@ class CliTests(TestCase):
         verification = json.loads(out)["data"]["verification"]
         self.assertEqual(verification["result"], "fail")
         self.assertEqual(verification["failure_classifications"][0]["category"], "timeout")
-        self.assertEqual(verification["failure_classifications"][0]["command"], "python3 -c 'import time; time.sleep(1)'")
+        self.assertEqual(verification["failure_classifications"][0]["command"], "python3 -c \"import time; time.sleep(2)\"")
         self.assertEqual(verification["failure_classifications"][0]["details"]["timeout_seconds"], 1)
 
     def test_verify_run_records_environment_metadata(self) -> None:
@@ -2678,8 +2737,51 @@ class CliTests(TestCase):
         self.assertEqual(list(path.parent.glob("*.tmp")), [])
         self.assertFalse(path.with_suffix(path.suffix + ".lock").exists())
 
-    def test_save_plan_markdown_uses_shared_atomic_text_writer(self) -> None:
-        with patch("abh.plans.write_text", wraps=storage.write_text) as text_writer:
+    def test_storage_write_json_markdown_pair_writes_both_targets(self) -> None:
+        json_path = self.root / ".abh" / "plans" / "plan-pair.json"
+        doc_path = self.root / "docs" / "plans" / "plan-pair.md"
+
+        storage.write_json_markdown_pair(json_path, {"schema_version": "1", "id": "plan-pair"}, doc_path, "# Plan\n")
+
+        self.assertEqual(json.loads(json_path.read_text(encoding="utf-8"))["id"], "plan-pair")
+        self.assertEqual(doc_path.read_text(encoding="utf-8"), "# Plan\n")
+
+    def test_storage_write_json_markdown_pair_rolls_back_first_replace_on_second_replace_failure(self) -> None:
+        json_path = self.root / ".abh" / "plans" / "plan-pair.json"
+        doc_path = self.root / "docs" / "plans" / "plan-pair.md"
+        json_path.parent.mkdir(parents=True, exist_ok=True)
+        doc_path.parent.mkdir(parents=True, exist_ok=True)
+        json_path.write_text('{"schema_version": "1", "id": "old"}\n', encoding="utf-8")
+        doc_path.write_text("# Old\n", encoding="utf-8")
+        real_replace = storage.os.replace
+        calls: list[Path] = []
+
+        def replace_then_fail(src: Path, dst: Path) -> None:
+            calls.append(Path(dst))
+            if Path(dst) == json_path:
+                raise OSError("injected json replace failure")
+            real_replace(src, dst)
+
+        with patch.object(storage.os, "replace", side_effect=replace_then_fail):
+            with self.assertRaises(OSError):
+                storage.write_json_markdown_pair(
+                    json_path,
+                    {"schema_version": "1", "id": "new"},
+                    doc_path,
+                    "# New\n",
+                )
+
+        self.assertEqual(json_path.read_text(encoding="utf-8"), '{"schema_version": "1", "id": "old"}\n')
+        self.assertEqual(doc_path.read_text(encoding="utf-8"), "# Old\n")
+        self.assertIn(doc_path, calls)
+        self.assertIn(json_path, calls)
+        self.assertEqual(list(json_path.parent.glob("*.tmp")), [])
+        self.assertEqual(list(doc_path.parent.glob("*.tmp")), [])
+        self.assertFalse(json_path.with_suffix(json_path.suffix + ".lock").exists())
+        self.assertFalse(doc_path.with_suffix(doc_path.suffix + ".lock").exists())
+
+    def test_save_plan_markdown_uses_json_markdown_pair_writer(self) -> None:
+        with patch("abh.plans.write_json_markdown_pair", wraps=storage.write_json_markdown_pair) as pair_writer:
             self.run_cli(
                 "plan",
                 "create",
@@ -2693,8 +2795,133 @@ class CliTests(TestCase):
                 "baseline",
             )
 
-        written_paths = [call.args[0].resolve() for call in text_writer.call_args_list]
-        self.assertIn((self.root / "docs" / "plans" / "plan-atomic-doc.md").resolve(), written_paths)
+        written_pairs = [(call.args[0].resolve(), call.args[2].resolve()) for call in pair_writer.call_args_list]
+        self.assertIn(
+            (
+                (self.root / ".abh" / "plans" / "plan-atomic-doc.json").resolve(),
+                (self.root / "docs" / "plans" / "plan-atomic-doc.md").resolve(),
+            ),
+            written_pairs,
+        )
+
+    def test_save_audit_markdown_uses_json_markdown_pair_writer(self) -> None:
+        self.create_ready_plan("plan-pair-audit")
+
+        with patch("abh.audits.write_json_markdown_pair", wraps=storage.write_json_markdown_pair) as pair_writer:
+            code, out, err = self.run_cli(
+                "audit",
+                "request",
+                "plan-pair-audit",
+                "--id",
+                "audit-pair-writer",
+                "--auditor",
+                "reviewer",
+                "--scope",
+                "pair writer coverage",
+                "--evidence",
+                "tests/test_cli.py",
+            )
+
+        self.assertEqual(code, 0, err)
+        written_pairs = [(call.args[0].resolve(), call.args[2].resolve()) for call in pair_writer.call_args_list]
+        self.assertIn(
+            (
+                (self.root / ".abh" / "audits" / "audit-pair-writer.json").resolve(),
+                (self.root / "docs" / "audits" / "audit-pair-writer.md").resolve(),
+            ),
+            written_pairs,
+        )
+
+    def test_save_memory_markdown_uses_json_markdown_pair_writer(self) -> None:
+        with patch("abh.memory.write_json_markdown_pair", wraps=storage.write_json_markdown_pair) as pair_writer:
+            code, out, err = self.run_cli(
+                "memory",
+                "add",
+                "--id",
+                "mem-pair-writer",
+                "--type",
+                "false_assumption",
+                "--summary",
+                "Pair writer memory",
+                "--context",
+                "Memory save should use pair writer.",
+                "--evidence",
+                "tests/test_cli.py",
+                "--implication",
+                "Audit evidence covers memory save path.",
+            )
+
+        self.assertEqual(code, 0, err)
+        written_pairs = [(call.args[0].resolve(), call.args[2].resolve()) for call in pair_writer.call_args_list]
+        self.assertIn(
+            (
+                (self.root / ".abh" / "memory" / "mem-pair-writer.json").resolve(),
+                (self.root / "docs" / "memory" / "mem-pair-writer.md").resolve(),
+            ),
+            written_pairs,
+        )
+
+    def test_save_drift_markdown_uses_json_markdown_pair_writer(self) -> None:
+        drift_source = self.root / "drift-pair-source.txt"
+        drift_source.write_text("Added a remote database even though the plan forbids external services.", encoding="utf-8")
+
+        with patch("abh.drift.write_json_markdown_pair", wraps=storage.write_json_markdown_pair) as pair_writer:
+            code, out, err = self.run_cli(
+                "drift",
+                "analyze",
+                "--id",
+                "drift-pair-writer",
+                "--source",
+                str(drift_source),
+                "--evidence",
+                "drift-pair-source.txt",
+            )
+
+        self.assertEqual(code, 0, err)
+        written_pairs = [(call.args[0].resolve(), call.args[2].resolve()) for call in pair_writer.call_args_list]
+        self.assertIn(
+            (
+                (self.root / ".abh" / "drift" / "drift-pair-writer.json").resolve(),
+                (self.root / "docs" / "drift" / "drift-pair-writer.md").resolve(),
+            ),
+            written_pairs,
+        )
+
+    def test_save_attractor_markdown_uses_json_markdown_pair_writer(self) -> None:
+        with patch("abh.attractors.write_json_markdown_pair", wraps=storage.write_json_markdown_pair) as pair_writer:
+            code, out, err = self.run_cli(
+                "attractor",
+                "create",
+                "--id",
+                "attractor-pair-writer",
+                "--title",
+                "Pair Writer Attractor",
+                "--version",
+                "0.1.0",
+                "--path",
+                "docs/architecture/attractors/pair-writer.md",
+                "--owner",
+                "architecture",
+                "--intent",
+                "Attractor save should use pair writer.",
+                "--invariant",
+                "Pair writer evidence covers attractor save path.",
+            )
+
+        self.assertEqual(code, 0, err)
+        written_pairs = []
+        for call in pair_writer.call_args_list:
+            json_path = call.args[0]
+            doc_path = call.args[2]
+            resolved_doc_path = doc_path if doc_path.is_absolute() else self.root / doc_path
+            written_pairs.append((json_path.resolve(), resolved_doc_path.resolve()))
+        self.assertIn(
+            (
+                (self.root / ".abh" / "attractors" / "attractor-pair-writer.json").resolve(),
+                (self.root / "docs" / "architecture" / "attractors" / "pair-writer.md").resolve(),
+            ),
+            written_pairs,
+        )
 
     def test_write_json_serializes_concurrent_same_file_writes_and_cleans_locks(self) -> None:
         path = self.root / ".abh" / "plans" / "plan-concurrent.json"
@@ -2939,6 +3166,11 @@ class McpServerTests(TestCase):
         self.assertIsNotNone(response)
         assert response is not None
         return response
+
+    def test_mcp_server_uses_shared_command_error_payload(self) -> None:
+        from abh import commands, mcp_server
+
+        self.assertIs(mcp_server.abh_error_payload, commands.abh_error_payload)
 
     def test_mcp_initialize_and_tools_list_exposes_readonly_tools(self) -> None:
         init_response = self.call_mcp(
