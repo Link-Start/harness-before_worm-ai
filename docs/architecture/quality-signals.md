@@ -95,6 +95,17 @@ Verification and audit records already contain important quality signals:
 
 Stage 6 health reporting should consume these existing fields before inventing new ones.
 
+### Audit Semantic Conservation
+
+Audit Semantic Conservation asks whether in-scope commitments survived the full plan lifecycle. Reviewers should check that commitments did not disappear, weaken, or move to non-authoritative artifacts during implementation, documentation sync, verification, or close preparation.
+
+The audit prompt and audit template should distinguish J-flow-only evidence from R-flow evidence:
+
+- J-flow-only evidence routes, restates, or hands off a commitment without reducing uncertainty.
+- R-flow evidence reduces uncertainty through executable proof, independent audit judgment, explicit owner-doc alignment, or a recorded decision with repository evidence.
+
+This is not automated semantic proof. It is a required reviewer lens that turns semantic leakage into citeable findings.
+
 ## Health Aggregation
 
 Project health is not one score in Stage 6. It is a structured summary:

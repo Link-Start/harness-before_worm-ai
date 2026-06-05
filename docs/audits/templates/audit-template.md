@@ -16,6 +16,12 @@
 
 - 
 
+## Semantic Conservation
+
+- Check whether any in-scope commitments disappeared, weakened, or moved to non-authoritative artifacts.
+- Distinguish J-flow-only evidence that only routes or restates commitments from R-flow evidence that reduces uncertainty through proof, decision, or owner-doc alignment.
+- Cite repository evidence for any semantic conservation gap.
+
 ## Findings
 
 | Severity | Finding | Evidence | Recommendation |

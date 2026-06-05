@@ -909,8 +909,8 @@
         "docs/task-board.md",
         "docs/context/codebase-map.md"
       ],
-      "status": "queued",
-      "plan_id": null
+      "status": "materialized",
+      "plan_id": "plan-050-audit-semantic-conservation"
     },
     {
       "key": "stage6.owner-doc-stable-commitments",
@@ -952,8 +952,8 @@
         "docs/development-roadmap.md",
         "docs/task-board.md"
       ],
-      "status": "queued",
-      "plan_id": null
+      "status": "materialized",
+      "plan_id": "plan-051-owner-doc-stable-commitments"
     },
     {
       "key": "stage6.post-close-freshness-semantics",

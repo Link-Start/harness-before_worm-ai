@@ -1,0 +1,107 @@
+{
+  "schema_version": "1",
+  "id": "ver-850d3e65452b",
+  "plan_id": "plan-050-audit-semantic-conservation",
+  "command": "git diff --check && python -m unittest tests/test_cli.py -v && python -m abh doctor && python -m abh roadmap check --json && python -m unittest tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_bundle_json_returns_prompt_and_structured_evidence tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_docs_document_semantic_conservation_review tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_request_markdown_includes_semantic_conservation_review -v",
+  "result": "pass",
+  "artifacts": [
+    "command='git diff --check'; exit_code=0; duration_seconds=0.095; stdout=''; stderr=\"warning: in the working copy of 'abh/audit_bundle.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/audits.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/architecture/quality-signals.md', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/audits/README.md', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'do\"",
+    "command='python -m unittest tests/test_cli.py -v'; exit_code=0; duration_seconds=1.328; stdout=''; stderr='test_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command (tests.test_cli.CliTests.test_agent_setup_targets_share_shape_and_mcp_includes_server_command) ... ok\\\\ntest_attractor_create_active_show_list_and_supersede_json_flow (tests.test_cli.CliTests.test_attractor_create_active_show_list_and_supersede_json_flow) ... ok\\\\ntest_attractor_create_does_not'",
+    "command='python -m abh doctor'; exit_code=0; duration_seconds=0.234; stdout='doctor: ok'; stderr=''",
+    "command='python -m abh roadmap check --json'; exit_code=0; duration_seconds=0.211; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='python -m unittest tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_bundle_json_returns_prompt_and_structured_evidence tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_docs_document_semantic_conservation_review tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_request_markdown_includes_semantic_conservation_review -v'; exit_code=0; duration_seconds=0.446; stdout=''; stderr='test_audit_bundle_json_returns_prompt_and_structured_evidence (tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_bundle_json_returns_prompt_and_structured_evidence) ... ok\\\\ntest_audit_docs_document_semantic_conservation_review (tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_docs_document_semantic_conservation_review) ... ok\\\\ntest_audit_request_markdown_includes_semantic_conservation_review (tests.test_verifications_and_audits.VerificationAndAuditT'"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "D:\\work\\ai\\harness-before",
+    "git": {
+      "commit": "21bc7ce0e232d801eceb6067988881578ad7ba19",
+      "dirty": true,
+      "status_hash": "ebb6d4c389a867c44abc81b34a9942f9178bf82c340755bf2423b8da092b5e42",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.15.0a7 (tags/v3.15.0a7:6024d3c, Mar 10 2026, 13:09:10) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "D:\\install\\python315\\python.exe"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 5,
+      "execution_policy": "trusted_local_shell",
+      "trust_level": "local_shell",
+      "command_source": "plan_validation_checklist",
+      "isolation": "none"
+    },
+    "commands": [
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": "python -m unittest tests/test_cli.py -v",
+        "argv": [
+          "python",
+          "-m",
+          "unittest",
+          "tests/test_cli.py",
+          "-v"
+        ]
+      },
+      {
+        "command": "python -m abh doctor",
+        "argv": [
+          "python",
+          "-m",
+          "abh",
+          "doctor"
+        ]
+      },
+      {
+        "command": "python -m abh roadmap check --json",
+        "argv": [
+          "python",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": "python -m unittest tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_bundle_json_returns_prompt_and_structured_evidence tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_docs_document_semantic_conservation_review tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_request_markdown_includes_semantic_conservation_review -v",
+        "argv": [
+          "python",
+          "-m",
+          "unittest",
+          "tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_bundle_json_returns_prompt_and_structured_evidence",
+          "tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_docs_document_semantic_conservation_review",
+          "tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_request_markdown_includes_semantic_conservation_review",
+          "-v"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-06-05T10:08:51.284662+00:00",
+      "content_hash": "c12602d39fe2463dcbccda48ff787bea160b100e06a3c51cfcb961c5c3c4cbf7",
+      "validation_checklist": [
+        "git diff --check",
+        "python -m unittest tests/test_cli.py -v",
+        "python -m abh doctor",
+        "python -m abh roadmap check --json",
+        "python -m unittest tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_bundle_json_returns_prompt_and_structured_evidence tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_docs_document_semantic_conservation_review tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_request_markdown_includes_semantic_conservation_review -v"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-06-05T10:09:56.928384+00:00"
+}

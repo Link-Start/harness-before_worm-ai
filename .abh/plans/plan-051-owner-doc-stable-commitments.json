@@ -1,0 +1,54 @@
+{
+  "schema_version": "1",
+  "id": "plan-051-owner-doc-stable-commitments",
+  "title": "Owner Doc Stable Commitments",
+  "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+  "baseline": "ABH has source-of-truth precedence and active attractor invariants, but most owner docs do not yet separate stable commitments, allowed variation, drift/leakage signals, and correction paths.",
+  "owner": "platform",
+  "status": "draft",
+  "goals": [
+    "Update owner-doc templates and key ABH owner docs with Stable Commitments, Allowed Variation, Drift / Leakage Signals, and Correction Path sections.",
+    "Document how these owner-doc sections support plan Reference Sets, audit semantic conservation, health reports, and future drift detection.",
+    "Keep the first slice docs-first so the structure can dogfood before JSON fields or doctor checks are added.",
+    "Align docs/index and source-of-truth guidance with the stable-commitments structure."
+  ],
+  "non_goals": [
+    "Do not add new AttractorRecord fields or doctor consistency gates in the first slice.",
+    "Do not rewrite every historical document.",
+    "Do not introduce team policy, release blockers, or external services."
+  ],
+  "exit_criteria": [
+    "Key owner docs and templates include stable commitments, allowed variation, drift/leakage signals, and correction path sections.",
+    "docs/index and source-of-truth docs explain when agents should consult the stable-commitments sections.",
+    "Quality signal docs explain how owner-doc stable commitments feed future health and drift checks.",
+    "Tests or doctor-compatible checks confirm the updated docs exist and roadmap consistency remains clean."
+  ],
+  "validation_checklist": [
+    "python3 -m unittest tests/test_cli.py -v",
+    "python3 -m abh doctor",
+    "git diff --check",
+    "python3 -m abh roadmap check --json"
+  ],
+  "closure_evidence": [
+    "docs/index.md",
+    "docs/context/source-of-truth.md",
+    "docs/context/project-context.md",
+    "docs/context/codebase-map.md",
+    "docs/architecture/templates/attractor-template.md",
+    "docs/architecture/quality-signals.md",
+    "docs/development-roadmap.md",
+    "docs/task-board.md"
+  ],
+  "commitment_phase_state": {
+    "stable_state_now": [],
+    "active_change_pressure": [],
+    "target_stable_state": [],
+    "conversion_proof": [],
+    "residual_pressure": []
+  },
+  "verification_runs": [],
+  "audit_ids": [],
+  "created_at": "2026-06-05T10:30:13.996764+00:00",
+  "updated_at": "2026-06-05T10:30:13.999274+00:00",
+  "doc_path": "D:\\work\\ai\\harness-before\\docs\\plans\\plan-051-owner-doc-stable-commitments.md"
+}

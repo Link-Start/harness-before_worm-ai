@@ -1,0 +1,64 @@
+{
+  "schema_version": "1",
+  "id": "plan-050-audit-semantic-conservation",
+  "title": "Audit Semantic Conservation",
+  "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+  "baseline": "Audit bundle currently asks independent reviewers to check goals, non-goals, exit criteria, verification freshness, and evidence paths, but it does not explicitly ask whether in-scope commitments disappeared, weakened, or moved to non-authoritative artifacts.",
+  "owner": "platform",
+  "status": "closed",
+  "goals": [
+    "Update audit bundle prompts to ask semantic conservation questions for in-scope commitments.",
+    "Ask reviewers to distinguish J-flow-only routing from R-flow uncertainty reduction using local evidence.",
+    "Document semantic conservation guidance in audit templates and Stage 6 quality signal vocabulary.",
+    "Keep audit execution independent and read-only; ABH still prepares prompts and records results but does not call an auditor model."
+  ],
+  "non_goals": [
+    "Do not add automated semantic proof, LLM scoring, or external audit execution.",
+    "Do not make flow classification mandatory on historical audit records.",
+    "Do not alter independent audit close gates beyond preserving existing freshness and independence rules."
+  ],
+  "exit_criteria": [
+    "abh audit bundle <plan-id> --json includes semantic conservation and J-flow/R-flow review prompts.",
+    "Audit templates and docs include semantic conservation guidance.",
+    "Existing audit records remain readable with no migration.",
+    "Tests cover audit bundle prompt content and JSON envelope output."
+  ],
+  "validation_checklist": [
+    "git diff --check",
+    "python -m unittest tests/test_cli.py -v",
+    "python -m abh doctor",
+    "python -m abh roadmap check --json",
+    "python -m unittest tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_bundle_json_returns_prompt_and_structured_evidence tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_docs_document_semantic_conservation_review tests.test_verifications_and_audits.VerificationAndAuditTests.test_audit_request_markdown_includes_semantic_conservation_review -v"
+  ],
+  "closure_evidence": [
+    "abh/audit_bundle.py",
+    "tests/test_cli.py",
+    "docs/audits/templates/audit-template.md",
+    "docs/audits/README.md",
+    "docs/architecture/quality-signals.md",
+    "docs/development-roadmap.md",
+    "docs/task-board.md",
+    "docs/context/codebase-map.md",
+    "tests/test_verifications_and_audits.py",
+    "audit-050-audit-semantic-conservation-r2"
+  ],
+  "commitment_phase_state": {
+    "stable_state_now": [],
+    "active_change_pressure": [],
+    "target_stable_state": [],
+    "conversion_proof": [],
+    "residual_pressure": []
+  },
+  "verification_runs": [
+    "ver-d86f9957fad1",
+    "ver-ba625b64a0ad",
+    "ver-850d3e65452b"
+  ],
+  "audit_ids": [
+    "audit-050-audit-semantic-conservation",
+    "audit-050-audit-semantic-conservation-r2"
+  ],
+  "created_at": "2026-06-05T09:37:57.860501+00:00",
+  "updated_at": "2026-06-05T10:26:16.075364+00:00",
+  "doc_path": "D:\\work\\ai\\harness-before\\docs\\plans\\plan-050-audit-semantic-conservation.md"
+}

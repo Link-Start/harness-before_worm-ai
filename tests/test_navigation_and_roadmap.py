@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -130,6 +131,7 @@ class NavigationAndRoadmapTests(WorkspaceCliTestCase):
 
     def test_next_json_recommends_audit_after_fresh_passing_verification(self) -> None:
         self.run_cli("init", "--write", "--confirm", "--json")
+        command = f'"{sys.executable}" -c "print(\'verified\')"'
         code, out, err = self.run_cli(
             "plan",
             "create",
@@ -150,7 +152,7 @@ class NavigationAndRoadmapTests(WorkspaceCliTestCase):
             "--exit-criterion",
             "audit recommended",
             "--validation",
-            "python3 -c 'print(\"verified\")'",
+            command,
             "--closure-evidence",
             "docs/plans/plan-202-verified.md",
         )

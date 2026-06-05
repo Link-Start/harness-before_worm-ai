@@ -1,0 +1,22 @@
+{
+  "schema_version": "1",
+  "id": "audit-050-audit-semantic-conservation-r2",
+  "plan_id": "plan-050-audit-semantic-conservation",
+  "auditor": "human-independent-review",
+  "scope": "Independent audit of plan-050-audit-semantic-conservation using latest verification",
+  "auditor_context": "user-provided independent review in separate window",
+  "independence": "independent",
+  "verification_id": "ver-850d3e65452b",
+  "status": "complete",
+  "result": "pass",
+  "rationale": "The reviewed plan, implementation, docs, tests, audit records, and latest verification align with the stated goals and exit criteria. audit bundle --json is read-only and includes semantic conservation plus J-flow/R-flow prompts; generated audit Markdown, templates, README, and quality signals document the reviewer lens; legacy audit loading remains backward-compatible through defaults; tests cover prompt content, JSON envelope output, and generated Markdown. No non-goal overreach or semantic commitment loss was found.",
+  "evidence": [
+    "docs/plans/plan-050-audit-semantic-conservation.md",
+    ".abh/verifications/ver-850d3e65452b.json"
+  ],
+  "findings": [],
+  "follow_ups": [],
+  "created_at": "2026-06-05T10:10:13.840823+00:00",
+  "updated_at": "2026-06-05T10:26:03.909072+00:00",
+  "doc_path": "D:\\work\\ai\\harness-before\\docs\\audits\\audit-050-audit-semantic-conservation-r2.md"
+}

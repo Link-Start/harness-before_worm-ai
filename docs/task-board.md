@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-阶段 6：漂移与记忆质量提升（Doing）；当前焦点：`stage6.commitment-phase-state`
+阶段 6：漂移与记忆质量提升（Doing）；当前焦点：`stage6.owner-doc-stable-commitments`
 
 ## 状态说明
 
@@ -483,8 +483,8 @@
 | ID | 任务 | 状态 | 产出 |
 | --- | --- | --- | --- |
 | S6-F01 | Plan Reference Set | Deferred | `stage6.plan-reference-set` -> `plan-043-plan-reference-set` |
-| S6-F02 | Commitment Phase State | Doing | `stage6.commitment-phase-state` -> `plan-049-commitment-phase-state` |
-| S6-F03 | Audit Semantic Conservation | Todo | `stage6.audit-semantic-conservation` |
+| S6-F02 | Commitment Phase State | Done | `stage6.commitment-phase-state` -> `plan-049-commitment-phase-state` |
+| S6-F03 | Audit Semantic Conservation | Done | `stage6.audit-semantic-conservation` -> `plan-050-audit-semantic-conservation` |
 | S6-F04 | Owner Doc Stable Commitments | Todo | `stage6.owner-doc-stable-commitments` |
 | S6-F05 | Post-Close Freshness Semantics | Todo | `stage6.post-close-freshness-semantics` |
 | S6-F06 | Command Contract Runtime Registry | Done | `stage6.command-contract-runtime-registry` -> `plan-044-command-contract-runtime-registry` |
@@ -585,4 +585,17 @@
 | S45-003 | 定义 legacy/default/json/rendering 红灯测试 | Done | `tests/test_cli.py` |
 | S45-004 | 实现 Commitment Phase State 模型、渲染和 CLI surface | Done | `abh/models.py`, `abh/plans.py`, `abh/cli.py` |
 | S45-005 | 同步 plan template、quality-signals、roadmap、task-board 和 codebase map | Done | `docs/plans/templates/plan-template.md`, `docs/architecture/quality-signals.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/context/codebase-map.md` |
-| S45-006 | plan-049 验证、独立审计和关闭 | Todo | `.abh/verifications/`, `docs/audits/`, `docs/plans/plan-049-commitment-phase-state.md` |
+| S45-006 | plan-049 验证、独立审计和关闭 | Done | `.abh/verifications/`, `docs/audits/audit-049-commitment-phase-state.md`, `docs/plans/plan-049-commitment-phase-state.md` |
+
+## Sprint 46
+
+目标：把 `stage6.audit-semantic-conservation` dogfood 成 `plan-050-audit-semantic-conservation`，让 audit bundle 和审计文档显式检查语义承诺守恒，并区分 J-flow-only 路由证据与 R-flow 不确定性降低证据。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S46-001 | materialize Audit Semantic Conservation 计划 | Done | `stage6.audit-semantic-conservation` -> `docs/plans/plan-050-audit-semantic-conservation.md` |
+| S46-002 | 补齐 plan-050 定义并转入 ready/running | Done | `docs/plans/plan-050-audit-semantic-conservation.md` |
+| S46-003 | 定义 audit bundle prompt 内容红灯测试 | Done | `tests/test_verifications_and_audits.py` |
+| S46-004 | 实现 semantic conservation 与 J-flow/R-flow 审计提示 | Done | `abh/audit_bundle.py` |
+| S46-005 | 同步 audit template、audits README、quality signals、roadmap、task-board 和 codebase map | Done | `docs/audits/templates/audit-template.md`, `docs/audits/README.md`, `docs/architecture/quality-signals.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/context/codebase-map.md` |
+| S46-006 | plan-050 验证、独立审计和关闭 | Done | `.abh/verifications/ver-850d3e65452b.json`, `docs/audits/audit-050-audit-semantic-conservation-r2.md`, `docs/plans/plan-050-audit-semantic-conservation.md` |

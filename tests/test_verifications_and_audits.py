@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -105,6 +106,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         self.assertEqual(summary["reasons"], [])
 
     def test_verify_run_executes_validation_checklist_and_records_pass(self) -> None:
+        command = f'"{sys.executable}" -c "print(\'abh-runner-pass\')"'
         code, out, err = self.run_cli(
             "plan",
             "create",
@@ -125,7 +127,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
             "--exit-criterion",
             "verification run is recorded",
             "--validation",
-            "python3 -c 'print(\"abh-runner-pass\")'",
+            command,
             "--closure-evidence",
             "docs/plans/plan-103-runner-pass.md",
         )
@@ -144,11 +146,12 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         run = json.loads(run_path.read_text(encoding="utf-8"))
         self.assertEqual(run["result"], "pass")
         self.assertEqual(run["failed_checks"], [])
-        self.assertIn("python3 -c", run["command"])
+        self.assertEqual(run["command"], command)
         self.assertTrue(any("exit_code=0" in artifact for artifact in run["artifacts"]))
         self.assertEqual(run["trust_level"], "local_shell")
 
     def test_verify_run_records_failed_check_and_blocks_running_plan(self) -> None:
+        command = f'"{sys.executable}" -c "import sys; sys.exit(7)"'
         code, out, err = self.run_cli(
             "plan",
             "create",
@@ -169,7 +172,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
             "--exit-criterion",
             "failure is recorded",
             "--validation",
-            "python3 -c \"import sys; sys.exit(7)\"",
+            command,
             "--closure-evidence",
             "docs/plans/plan-104-runner-fail.md",
         )
@@ -190,15 +193,15 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         run_path = self.root / ".abh" / "verifications" / f"{plan['verification_runs'][0]}.json"
         run = json.loads(run_path.read_text(encoding="utf-8"))
         self.assertEqual(run["result"], "fail")
-        self.assertEqual(run["failed_checks"], ["python3 -c \"import sys; sys.exit(7)\""])
+        self.assertEqual(run["failed_checks"], [command])
         self.assertTrue(any("exit_code=7" in artifact for artifact in run["artifacts"]))
         self.assertEqual(run["environment"]["runner"]["check_count"], 1)
-        self.assertEqual(run["environment"]["commands"][0]["argv"], ["python3", "-c", "import sys; sys.exit(7)"])
+        self.assertEqual(run["environment"]["commands"][0]["argv"], [sys.executable, "-c", "import sys; sys.exit(7)"])
         self.assertEqual(
             run["failure_classifications"],
             [
                 {
-                    "command": "python3 -c \"import sys; sys.exit(7)\"",
+                    "command": command,
                     "category": "validation_failure",
                     "message": "validation command exited with non-zero status",
                     "details": {"exit_code": 7},
@@ -207,6 +210,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         )
 
     def test_verify_run_json_returns_machine_readable_result(self) -> None:
+        command = f'"{sys.executable}" -c "print(\'abh-json\')"'
         code, out, err = self.run_cli(
             "plan",
             "create",
@@ -227,7 +231,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
             "--exit-criterion",
             "json output is parseable",
             "--validation",
-            "python3 -c 'print(\"abh-json\")'",
+            command,
             "--closure-evidence",
             "docs/plans/plan-105-runner-json.md",
         )
@@ -242,6 +246,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         self.assertEqual(payload["data"]["verification"]["failed_checks"], [])
 
     def test_verify_run_records_timeout_failure_classification(self) -> None:
+        command = f'"{sys.executable}" -c "import time; time.sleep(2)"'
         code, out, err = self.run_cli(
             "plan",
             "create",
@@ -262,7 +267,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
             "--exit-criterion",
             "timeout is classified",
             "--validation",
-            "python3 -c \"import time; time.sleep(2)\"",
+            command,
             "--closure-evidence",
             "docs/plans/plan-114-timeout-classification.md",
         )
@@ -273,10 +278,11 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         verification = json.loads(out)["data"]["verification"]
         self.assertEqual(verification["result"], "fail")
         self.assertEqual(verification["failure_classifications"][0]["category"], "timeout")
-        self.assertEqual(verification["failure_classifications"][0]["command"], "python3 -c \"import time; time.sleep(2)\"")
+        self.assertEqual(verification["failure_classifications"][0]["command"], command)
         self.assertEqual(verification["failure_classifications"][0]["details"]["timeout_seconds"], 1)
 
     def test_verify_run_records_environment_metadata(self) -> None:
+        command = f'"{sys.executable}" -c "print(\'env-ok\')"'
         code, out, err = self.run_cli(
             "plan",
             "create",
@@ -297,7 +303,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
             "--exit-criterion",
             "environment metadata is persisted",
             "--validation",
-            "python3 -c 'print(\"env-ok\")'",
+            command,
             "--closure-evidence",
             "docs/plans/plan-109-runner-environment.md",
         )
@@ -320,8 +326,8 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         self.assertIn("version", environment["abh"])
         self.assertIn("commit", environment["git"])
         self.assertIn("dirty", environment["git"])
-        self.assertEqual(environment["commands"][0]["command"], "python3 -c 'print(\"env-ok\")'")
-        self.assertEqual(environment["commands"][0]["argv"], ["python3", "-c", "print(\"env-ok\")"])
+        self.assertEqual(environment["commands"][0]["command"], command)
+        self.assertEqual(environment["commands"][0]["argv"], [sys.executable, "-c", "print('env-ok')"])
         self.assertIn("environment_variables", environment)
 
     def test_readme_documents_verify_runner_trust_policy_semantics(self) -> None:
@@ -337,6 +343,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         self.assertIn("未审阅的外部命令", readme)
 
     def test_plan_status_json_reports_latest_verification_trust_and_stale_state(self) -> None:
+        command = f'"{sys.executable}" -c "print(\'fresh\')"'
         code, out, err = self.run_cli(
             "plan",
             "create",
@@ -357,7 +364,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
             "--exit-criterion",
             "summary is current after run",
             "--validation",
-            "python3 -c 'print(\"fresh\")'",
+            command,
             "--closure-evidence",
             "docs/plans/plan-112-stale-summary.md",
         )
@@ -380,7 +387,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
             "update",
             "plan-112-stale-summary",
             "--validation",
-            "python3 -c 'print(\"new-check\")'",
+            f'"{sys.executable}" -c "print(\'new-check\')"',
         )
         self.assertEqual(code, 0, err)
 
@@ -393,6 +400,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         self.assertIn("validation_checklist_changed", summary["reasons"])
 
     def test_plan_status_json_marks_latest_verification_stale_when_git_status_changes(self) -> None:
+        command = f'"{sys.executable}" -c "print(\'git-stale\')"'
         subprocess.run(["git", "init"], cwd=self.root, check=True, capture_output=True, text=True)
         subprocess.run(
             ["git", "config", "user.email", "abh@example.test"],
@@ -433,7 +441,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
             "--exit-criterion",
             "git status change is stale",
             "--validation",
-            "python3 -c 'print(\"git-stale\")'",
+            command,
             "--closure-evidence",
             "docs/plans/plan-113-git-stale.md",
         )
@@ -546,6 +554,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         )
 
     def test_verify_run_records_environment_failure_classification_for_runner_exception(self) -> None:
+        command = f'"{sys.executable}" -c "print(\'unused\')"'
         code, out, err = self.run_cli(
             "plan",
             "create",
@@ -566,7 +575,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
             "--exit-criterion",
             "runner exception is classified",
             "--validation",
-            "python3 -c 'print(\"unused\")'",
+            command,
             "--closure-evidence",
             "docs/plans/plan-115-environment-classification.md",
         )
@@ -581,7 +590,7 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         self.assertEqual(code, 1, err)
         verification = json.loads(out)["data"]["verification"]
         self.assertEqual(verification["result"], "fail")
-        self.assertEqual(verification["failed_checks"], ["python3 -c 'print(\"unused\")'"])
+        self.assertEqual(verification["failed_checks"], [command])
         self.assertEqual(verification["failure_classifications"][0]["category"], "environment_failure")
         self.assertEqual(verification["failure_classifications"][0]["details"]["exception_type"], "OSError")
 
@@ -925,6 +934,45 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         self.assertIn("Independent audit only", bundle["prompt"])
         self.assertIn("Do not modify files", bundle["prompt"])
         self.assertIn("Result: pass|fail|partial|need_info", bundle["prompt"])
+        self.assertIn("Semantic conservation", bundle["prompt"])
+        self.assertIn("in-scope commitments disappeared, weakened, or moved", bundle["prompt"])
+        self.assertIn("J-flow-only", bundle["prompt"])
+        self.assertIn("R-flow uncertainty reduction", bundle["prompt"])
+
+    def test_audit_docs_document_semantic_conservation_review(self) -> None:
+        repo = Path(__file__).resolve().parents[1]
+        audit_template = (repo / "docs" / "audits" / "templates" / "audit-template.md").read_text(encoding="utf-8")
+        audits_readme = (repo / "docs" / "audits" / "README.md").read_text(encoding="utf-8")
+        quality_signals = (repo / "docs" / "architecture" / "quality-signals.md").read_text(encoding="utf-8")
+
+        for text in (audit_template, audits_readme, quality_signals):
+            self.assertIn("Semantic Conservation", text)
+            self.assertIn("J-flow-only", text)
+            self.assertIn("R-flow", text)
+
+    def test_audit_request_markdown_includes_semantic_conservation_review(self) -> None:
+        self.create_ready_plan("plan-213-semantic-audit")
+
+        code, out, err = self.run_cli(
+            "audit",
+            "request",
+            "plan-213-semantic-audit",
+            "--id",
+            "audit-213-semantic-audit",
+            "--auditor",
+            "independent-reviewer",
+            "--scope",
+            "Semantic conservation audit",
+            "--evidence",
+            "docs/plans/plan-213-semantic-audit.md",
+        )
+        self.assertEqual(code, 0, err)
+
+        audit_doc = (self.root / "docs" / "audits" / "audit-213-semantic-audit.md").read_text(encoding="utf-8")
+        self.assertIn("## Semantic Conservation", audit_doc)
+        self.assertIn("in-scope commitments disappeared, weakened, or moved", audit_doc)
+        self.assertIn("J-flow-only", audit_doc)
+        self.assertIn("R-flow", audit_doc)
 
     def test_audit_list_returns_all_audits(self) -> None:
         self.create_ready_plan("plan-audit-list")

@@ -1,0 +1,22 @@
+{
+  "schema_version": "1",
+  "id": "audit-050-audit-semantic-conservation",
+  "plan_id": "plan-050-audit-semantic-conservation",
+  "auditor": "human-independent-review",
+  "scope": "Independent audit of plan-050-audit-semantic-conservation",
+  "auditor_context": "",
+  "independence": "unknown",
+  "verification_id": "",
+  "status": "requested",
+  "result": "need_info",
+  "rationale": "",
+  "evidence": [
+    "docs/plans/plan-050-audit-semantic-conservation.md",
+    ".abh/verifications/ver-ba625b64a0ad.json"
+  ],
+  "findings": [],
+  "follow_ups": [],
+  "created_at": "2026-06-05T10:06:39.945506+00:00",
+  "updated_at": "2026-06-05T10:06:39.946988+00:00",
+  "doc_path": "D:\\work\\ai\\harness-before\\docs\\audits\\audit-050-audit-semantic-conservation.md"
+}

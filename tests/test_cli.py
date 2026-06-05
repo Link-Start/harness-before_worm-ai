@@ -4,6 +4,7 @@ import io
 import json
 import shutil
 import subprocess
+import sys
 import tempfile
 import threading
 from contextlib import redirect_stderr, redirect_stdout
@@ -823,7 +824,7 @@ class CliTests(TestCase):
             "--exit-criterion",
             "commitment updates stay non-blocking",
             "--validation",
-            "python3 -c 'print(\"commitment-stale\")'",
+            f'"{sys.executable}" -c "print(\'commitment-stale\')"',
             "--closure-evidence",
             "docs/plans/plan-118-commitment-stale.md",
         )
