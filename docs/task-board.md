@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-阶段 6：漂移与记忆质量提升（Doing）；当前焦点：`stage6.verification-runner-trust-policy`
+阶段 6：漂移与记忆质量提升（Doing）；当前焦点：`stage6.commitment-phase-state`
 
 ## 状态说明
 
@@ -483,15 +483,15 @@
 | ID | 任务 | 状态 | 产出 |
 | --- | --- | --- | --- |
 | S6-F01 | Plan Reference Set | Deferred | `stage6.plan-reference-set` -> `plan-043-plan-reference-set` |
-| S6-F02 | Commitment Phase State | Todo | `stage6.commitment-phase-state` |
+| S6-F02 | Commitment Phase State | Doing | `stage6.commitment-phase-state` -> `plan-049-commitment-phase-state` |
 | S6-F03 | Audit Semantic Conservation | Todo | `stage6.audit-semantic-conservation` |
 | S6-F04 | Owner Doc Stable Commitments | Todo | `stage6.owner-doc-stable-commitments` |
 | S6-F05 | Post-Close Freshness Semantics | Todo | `stage6.post-close-freshness-semantics` |
 | S6-F06 | Command Contract Runtime Registry | Done | `stage6.command-contract-runtime-registry` -> `plan-044-command-contract-runtime-registry` |
 | S6-F07 | Repository Write Transaction Boundary | Done | `stage6.repository-write-transaction-boundary` -> `plan-045-repository-write-transaction-boundary` |
 | S6-F08 | Schema Validation and Migration | Done | `stage6.schema-validation-and-migration` -> `plan-046-schema-validation-and-migration` |
-| S6-F09 | Verification Runner Trust Policy | Doing | `stage6.verification-runner-trust-policy` -> `plan-047-verification-runner-trust-policy` |
-| S6-F10 | Test Suite Domain Split | Todo | `stage6.test-suite-domain-split` |
+| S6-F09 | Verification Runner Trust Policy | Done | `stage6.verification-runner-trust-policy` -> `plan-047-verification-runner-trust-policy` |
+| S6-F10 | Test Suite Domain Split | Done | `stage6.test-suite-domain-split` -> `plan-048-test-suite-domain-split` |
 
 ## Sprint 39
 
@@ -559,4 +559,30 @@
 | S43-003 | 定义 runner policy metadata 和 recursive guard 红灯测试 | Done | `tests/test_cli.py` |
 | S43-004 | 实现 runner policy metadata 与 recursive guard 增强 | Done | `abh/verifications.py` |
 | S43-005 | 同步 README、roadmap 和 task-board trust policy 文档 | Done | `README.md`, `docs/development-roadmap.md`, `docs/task-board.md` |
-| S43-006 | plan-047 验证、独立审计和关闭 | Review | `.abh/verifications/`, `docs/audits/`, `docs/plans/plan-047-verification-runner-trust-policy.md` |
+| S43-006 | plan-047 验证、独立审计和关闭 | Done | `.abh/verifications/`, `docs/audits/`, `docs/plans/plan-047-verification-runner-trust-policy.md` |
+
+## Sprint 44
+
+目标：把 `stage6.test-suite-domain-split` dogfood 成 `plan-048-test-suite-domain-split`，把 monolithic unittest regression suite 拆成聚焦领域模块，并保留薄的端到端 CLI/MCP 覆盖。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S44-001 | materialize Test Suite Domain Split 计划 | Done | `stage6.test-suite-domain-split` -> `docs/plans/plan-048-test-suite-domain-split.md` |
+| S44-002 | 定义 test suite domain split 实施计划 | Done | `docs/superpowers/plans/2026-06-05-test-suite-domain-split.md` |
+| S44-003 | 提取共享测试支撑与 focused module 边界 | Done | `tests/__init__.py`, `tests/support.py`, `tests/test_*.py` |
+| S44-004 | 缩减 `tests/test_cli.py` 为薄 e2e CLI 层 | Done | `tests/test_cli.py` |
+| S44-005 | 同步 codebase map、roadmap 和 task-board 测试面文档 | Done | `docs/context/codebase-map.md`, `docs/development-roadmap.md`, `docs/task-board.md` |
+| S44-006 | plan-048 验证、独立审计和关闭 | Done | `.abh/verifications/`, `docs/audits/`, `docs/plans/plan-048-test-suite-domain-split.md` |
+
+## Sprint 45
+
+目标：把 `stage6.commitment-phase-state` dogfood 成 `plan-049-commitment-phase-state`，为 plan 增加稳定承诺、活跃变化压力、目标稳定态、转换证明和残余压力的显式结构。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S45-001 | materialize Commitment Phase State 计划 | Done | `stage6.commitment-phase-state` -> `docs/plans/plan-049-commitment-phase-state.md` |
+| S45-002 | 定义 commitment phase state 实施计划 | Done | `docs/superpowers/plans/2026-06-05-commitment-phase-state.md` |
+| S45-003 | 定义 legacy/default/json/rendering 红灯测试 | Done | `tests/test_cli.py` |
+| S45-004 | 实现 Commitment Phase State 模型、渲染和 CLI surface | Done | `abh/models.py`, `abh/plans.py`, `abh/cli.py` |
+| S45-005 | 同步 plan template、quality-signals、roadmap、task-board 和 codebase map | Done | `docs/plans/templates/plan-template.md`, `docs/architecture/quality-signals.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/context/codebase-map.md` |
+| S45-006 | plan-049 验证、独立审计和关闭 | Todo | `.abh/verifications/`, `docs/audits/`, `docs/plans/plan-049-commitment-phase-state.md` |

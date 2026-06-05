@@ -23,6 +23,7 @@ RECORD_SCHEMAS: dict[str, dict[str, set[str]]] = {
             "exit_criteria",
             "validation_checklist",
             "closure_evidence",
+            "commitment_phase_state",
             "verification_runs",
             "audit_ids",
             "created_at",
@@ -470,6 +471,59 @@ class DriftReport:
 
 
 @dataclass(slots=True)
+class CommitmentResidualPressure:
+    pressure: str
+    non_blocking_rationale: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "pressure": self.pressure,
+            "non_blocking_rationale": self.non_blocking_rationale,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "CommitmentResidualPressure":
+        return cls(
+            pressure=data.get("pressure", ""),
+            non_blocking_rationale=data.get("non_blocking_rationale", ""),
+        )
+
+
+@dataclass(slots=True)
+class CommitmentPhaseState:
+    stable_state_now: list[str] = field(default_factory=list)
+    active_change_pressure: list[str] = field(default_factory=list)
+    target_stable_state: list[str] = field(default_factory=list)
+    conversion_proof: list[str] = field(default_factory=list)
+    residual_pressure: list[CommitmentResidualPressure] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "stable_state_now": list(self.stable_state_now),
+            "active_change_pressure": list(self.active_change_pressure),
+            "target_stable_state": list(self.target_stable_state),
+            "conversion_proof": list(self.conversion_proof),
+            "residual_pressure": [item.to_dict() for item in self.residual_pressure],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any] | None) -> "CommitmentPhaseState":
+        if not isinstance(data, dict):
+            return cls()
+        return cls(
+            stable_state_now=list(data.get("stable_state_now", [])),
+            active_change_pressure=list(data.get("active_change_pressure", [])),
+            target_stable_state=list(data.get("target_stable_state", [])),
+            conversion_proof=list(data.get("conversion_proof", [])),
+            residual_pressure=[
+                CommitmentResidualPressure.from_dict(item)
+                for item in data.get("residual_pressure", [])
+                if isinstance(item, dict)
+            ],
+        )
+
+
+@dataclass(slots=True)
 class PlanRecord:
     id: str
     title: str
@@ -482,6 +536,7 @@ class PlanRecord:
     exit_criteria: list[str] = field(default_factory=list)
     validation_checklist: list[str] = field(default_factory=list)
     closure_evidence: list[str] = field(default_factory=list)
+    commitment_phase_state: CommitmentPhaseState = field(default_factory=CommitmentPhaseState)
     verification_runs: list[str] = field(default_factory=list)
     audit_ids: list[str] = field(default_factory=list)
     created_at: str = field(default_factory=utc_now)
@@ -502,6 +557,7 @@ class PlanRecord:
             "exit_criteria": list(self.exit_criteria),
             "validation_checklist": list(self.validation_checklist),
             "closure_evidence": list(self.closure_evidence),
+            "commitment_phase_state": self.commitment_phase_state.to_dict(),
             "verification_runs": list(self.verification_runs),
             "audit_ids": list(self.audit_ids),
             "created_at": self.created_at,
@@ -523,6 +579,7 @@ class PlanRecord:
             exit_criteria=list(data.get("exit_criteria", [])),
             validation_checklist=list(data.get("validation_checklist", [])),
             closure_evidence=list(data.get("closure_evidence", [])),
+            commitment_phase_state=CommitmentPhaseState.from_dict(data.get("commitment_phase_state")),
             verification_runs=list(data.get("verification_runs", [])),
             audit_ids=list(data.get("audit_ids", [])),
             created_at=data.get("created_at", utc_now()),

@@ -126,7 +126,7 @@ The health report should degrade gracefully. If drift or memory metadata is not 
 The next Stage 6 queue after the health report should deepen the commitment model in small slices:
 
 - Plan Reference Set: plans declare the owner docs, live code routes, tests, known issues, external contracts, and plan/audit evidence they depend on.
-- Commitment Phase State: plans distinguish stable state now (`q`), active change pressure (`p`), target stable state, proof of conversion, and residual non-blocking pressure.
+- Commitment Phase State: plans distinguish stable state now (`stable_state_now`), active change pressure (`active_change_pressure`), target stable state (`target_stable_state`), proof of conversion (`conversion_proof`), and residual non-blocking pressure (`residual_pressure` with `non_blocking_rationale`).
 - Audit Semantic Conservation: audit bundles ask whether in-scope commitments disappeared, weakened, or moved to non-authoritative artifacts, and distinguish J-flow from R-flow.
 - Owner Doc Stable Commitments: important owner docs separate Stable Commitments, Allowed Variation, Drift / Leakage Signals, and Correction Path.
 - Post-Close Freshness Semantics: closed-plan health reporting should distinguish real product proof drift from expected audit, close, and post-close documentation metadata churn.

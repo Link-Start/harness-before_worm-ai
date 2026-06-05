@@ -10,14 +10,14 @@
 - `abh/navigation.py` — read-only next-action recommendation and onboarding readiness checks.
 - `abh/audit_bundle.py` — read-only audit prompt and evidence bundle generation.
 - `abh/reporting.py` — read-only project health and semantic pressure aggregation over plans, verifications, audits, drift, memory, doctor, and roadmap queue state.
-- `abh/models.py` — schema-versioned records for attractors, plans, verifications, audits, memory, drift, and roadmap queue items.
+- `abh/models.py` — schema-versioned records for attractors, plans, Commitment Phase State, verifications, audits, memory, drift, and roadmap queue items.
 - `abh/storage.py` — path helpers, workspace directories, atomic text/JSON writes, and local file locks.
 - `abh/core.py` — compatibility re-export layer plus workspace doctor.
 
 ## Domain Modules
 
 - `abh/attractors.py` — active attractor registry, creation, supersession, Markdown rendering.
-- `abh/plans.py` — plan creation, update, transition, ready validation, close gate.
+- `abh/plans.py` — plan creation, update, Commitment Phase State rendering, transition, ready validation, close gate.
 - `abh/verifications.py` — manual verification records and local validation runner.
 - `abh/audits.py` — audit request, record, reviewer metadata, rendering, and parsing.
 - `abh/audit_bundle.py` — audit bundle assembly from plan, verification, audit, and closure evidence state.
@@ -31,7 +31,15 @@ Stage 6 quality work starts with `docs/architecture/quality-signals.md`. Runtime
 
 ## Test Surface
 
-- `tests/test_cli.py` is the main regression suite. It covers CLI behavior, JSON envelopes, MCP contracts, roadmap queue behavior, active attractor checks, verification metadata, atomic writes, and doctor checks.
+- `tests/test_cli.py` is now the thin end-to-end CLI regression layer for init/setup/hooks/attractor/plan smoke coverage and representative command-loop checks.
+- `tests/test_mcp_server.py` covers MCP stdio transport, tool metadata, readonly reads, controlled writes, and MCP-specific close-gate flows.
+- `tests/test_navigation_and_roadmap.py` covers `abh next`, onboarding readiness, roadmap numbering/materialization, and queue/blocked-plan navigation behavior.
+- `tests/test_storage_and_doctor.py` covers workspace doctor consistency checks, schema issue reporting, atomic write behavior, and JSON/Markdown pair-writer coverage.
+- `tests/test_models.py` covers schema-version serialization, validation, deprecated-field handling, and legacy record readability.
+- `tests/test_verifications_and_audits.py` covers verification runner behavior, stale/trust metadata, recursive guard, audit record flows, audit bundle generation, and close gates.
+- `tests/test_memory_drift_reporting.py` covers memory indexing, route/drift behavior, and health-report aggregation.
+- `tests/test_command_contracts.py` covers shared command-contract metadata, JSON envelope behavior for read commands, and core re-export boundaries.
+- `tests/support.py` provides the shared temporary-workspace, CLI, and MCP helper base classes used by focused test modules.
 
 ## Onboarding Docs
 

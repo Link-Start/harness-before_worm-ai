@@ -866,8 +866,8 @@
         "docs/task-board.md",
         "docs/context/codebase-map.md"
       ],
-      "status": "queued",
-      "plan_id": null
+      "status": "materialized",
+      "plan_id": "plan-049-commitment-phase-state"
     },
     {
       "key": "stage6.audit-semantic-conservation",

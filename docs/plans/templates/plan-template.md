@@ -19,7 +19,31 @@
 
 ## Exit Criteria
 
+-
+
+## Commitment Phase State
+
+说明：这里明确记录 stable state、active pressure、target state、conversion proof，以及 residual pressure。
+
+### Stable State Now
+
+-
+
+### Active Change Pressure
+
+-
+
+### Target Stable State
+
+-
+
+### Conversion Proof
+
 - 
+
+### Residual Pressure
+
+- <pressure> | Non-blocking rationale: <why this pressure does not block closure in the current slice>
 
 ## Validation Checklist
 

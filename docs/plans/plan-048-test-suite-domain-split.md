@@ -3,12 +3,12 @@
 ## Metadata
 
 - ID: plan-048-test-suite-domain-split
-- Status: draft
+- Status: closed
 - Attractor: docs/architecture/attractors/abh-core-attractor.md
 - Baseline: tests/test_cli.py covers broad CLI, MCP, storage, roadmap, doctor, reporting, and domain behavior. Coverage is strong, but the monolithic file raises review and maintenance cost.
 - Owner: platform
 - Created: 2026-06-05T02:36:46.023921+00:00
-- Updated: 2026-06-05T02:36:46.026737+00:00
+- Updated: 2026-06-05T05:54:50.625934+00:00
 
 ## Goals
 
@@ -43,11 +43,20 @@
 - docs/context/codebase-map.md
 - docs/development-roadmap.md
 - docs/task-board.md
+- docs/superpowers/plans/2026-06-05-test-suite-domain-split.md
+- audit-048-test-suite-domain-split
 
 ## Verification Runs
 
-- 
+- ver-a3307f7c83b9
+- ver-23ac1747f1c0
+- ver-68df01e5269a
+- ver-b22b5a9a6a12
+- ver-3fe3e6c19222
+- ver-93ce51417862
+- ver-f9fab8afe2e2
+- ver-347063451a47
 
 ## Audits
 
-- 
+- audit-048-test-suite-domain-split

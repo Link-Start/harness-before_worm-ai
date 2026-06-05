@@ -248,9 +248,9 @@ Sprint 25 已完成 `plan-029-attractor-registry`。`plan-028-agent-first-comman
 
 `plan-015-controlled-mcp-write-tools` 已关闭。阶段 2 Agent Protocol Foundation 已完整完成：核心只读命令具备显式 JSON 输出和结构化错误格式，MCP stdio Server 同时提供只读工具和受控写工具，写工具必须显式 `confirm=true` 并复用现有 ABH 门禁。
 
-最近关闭计划：`plan-046-schema-validation-and-migration`。这一切片从 queue key `stage6.schema-validation-and-migration` materialize 而来，已经把 core ABH record families 的 schema validation helper、doctor malformed record reporting、legacy readable defaults 和 deprecated-field policy 落入代码与验证。
+最近关闭计划：`plan-048-test-suite-domain-split`。这一切片从 queue key `stage6.test-suite-domain-split` materialize 而来，已经把 monolithic unittest regression suite 拆成 focused modules，并把 `tests/test_cli.py` 收敛为薄的端到端 CLI smoke 层。
 
-当前进行焦点：`stage6.verification-runner-trust-policy`。`plan-039-quality-signal-model` 已关闭并定义 Stage 6 的质量信号模型；`plan-040-drift-quality` 已关闭并把 drift finding 升级为包含 severity、confidence、matched span、source excerpt 和 evidence path 的产品质量信号；`plan-041-memory-index` 已关闭并把 memory 升级为可按 tags、status、plan/audit/drift 关系和 supersession 复用的质量知识；`plan-042-project-health-report` 已关闭并交付 `abh report health --json` 语义压力报告。`plan-043-plan-reference-set` 已重新排期为 blocked/deferred，不再阻塞 stage6 架构硬化队列；`plan-044`、`plan-045` 和 `plan-046` 已关闭，下一步将明确 verification runner 的 trust boundary、recursive guard 和 runner policy。
+当前进行焦点：`stage6.commitment-phase-state`。`plan-039-quality-signal-model` 已关闭并定义 Stage 6 的质量信号模型；`plan-040-drift-quality` 已关闭并把 drift finding 升级为包含 severity、confidence、matched span、source excerpt 和 evidence path 的产品质量信号；`plan-041-memory-index` 已关闭并把 memory 升级为可按 tags、status、plan/audit/drift 关系和 supersession 复用的质量知识；`plan-042-project-health-report` 已关闭并交付 `abh report health --json` 语义压力报告。`plan-043-plan-reference-set` 已重新排期为 blocked/deferred，不再阻塞 stage6 架构硬化队列；`plan-044`、`plan-045`、`plan-046`、`plan-047` 和 `plan-048` 已关闭，下一步将把 stable commitments、active pressure、target stable state、conversion proof 和 residual pressure 落到 plan 结构中。
 
 当前阶段状态：
 
@@ -262,7 +262,7 @@ Sprint 25 已完成 `plan-029-attractor-registry`。`plan-028-agent-first-comman
 - 当前阶段：阶段 3 验证执行器已经具备 v0.3 所需能力，`plan-025-stage-3-finalization` 已留下收尾验证、独立审计和阶段 4 启动证据。
 - 当前阶段 3 判定：完成。v0.3 Verify Runner 里程碑已关闭。
 - 已完成 release-prep：`plan-026-v0-3-release-prep` 已将版本元数据、release notes、验证证据和 tag readiness 对齐到 v0.3.0。
-- 下一阶段焦点：阶段 4 Agent-First 吸引子入口层已从 `plan-027-stage-4-attractor-entry-plan` 启动并完成；`plan-028-agent-first-command-contract`、`plan-029-attractor-registry`、`plan-030-roadmap-queue-and-plan-numbering`、`plan-031-truth-precedence-and-age-docs`、`plan-032-abh-init-active-attractor`、`plan-033-agent-contract-setup`、`plan-034-git-hooks-guardrails`、`plan-035-abh-next-and-onboarding-check` 和 `plan-036-quickstart-recipes-and-distribution` 已完成。Stage 5 已通过 `plan-037-audit-prompt-bundle` 和 `plan-038-independent-audit-gate` 完成；Stage 6 已关闭 quality-signal、drift-quality、memory-index、project-health-report、command-contract-runtime-registry、repository-write-transaction-boundary 和 schema-validation-and-migration，当前焦点是 `stage6.verification-runner-trust-policy`。
+- 下一阶段焦点：阶段 4 Agent-First 吸引子入口层已从 `plan-027-stage-4-attractor-entry-plan` 启动并完成；`plan-028-agent-first-command-contract`、`plan-029-attractor-registry`、`plan-030-roadmap-queue-and-plan-numbering`、`plan-031-truth-precedence-and-age-docs`、`plan-032-abh-init-active-attractor`、`plan-033-agent-contract-setup`、`plan-034-git-hooks-guardrails`、`plan-035-abh-next-and-onboarding-check` 和 `plan-036-quickstart-recipes-and-distribution` 已完成。Stage 5 已通过 `plan-037-audit-prompt-bundle` 和 `plan-038-independent-audit-gate` 完成；Stage 6 已关闭 quality-signal、drift-quality、memory-index、project-health-report、command-contract-runtime-registry、repository-write-transaction-boundary、schema-validation-and-migration、verification-runner-trust-policy 和 test-suite-domain-split，当前焦点是 `stage6.commitment-phase-state`。
 
 ## 5. 长期阶段线
 
@@ -480,8 +480,9 @@ Roadmap queue 规则：
 - `plan-044-command-contract-runtime-registry`（已完成）
 - `plan-045-repository-write-transaction-boundary`（已完成）
 - `plan-046-schema-validation-and-migration`（已完成）
-- `plan-047-verification-runner-trust-policy`（进行中）
-- `stage6.test-suite-domain-split`
+- `plan-047-verification-runner-trust-policy`（已完成）
+- `plan-048-test-suite-domain-split`（已完成）
+- `plan-049-commitment-phase-state`（进行中）
 
 ### 阶段 7：团队可用与生态集成
 
@@ -518,7 +519,7 @@ Roadmap queue 规则：
 
 ## 7. 下一批推荐计划
 
-本节只列下一批仍可切分执行的计划。已关闭的 `plan-012-agent-protocol-foundation`、`plan-013-json-output-and-errors`、`plan-014-readonly-mcp-server`、`plan-015-controlled-mcp-write-tools`、阶段 3 的 `plan-016` 至 `plan-025`、release-prep 的 `plan-026-v0-3-release-prep`、Stage 4 的 `plan-027-stage-4-attractor-entry-plan` 至 `plan-036-quickstart-recipes-and-distribution`，Stage 5 的 `plan-037-audit-prompt-bundle` 和 `plan-038-independent-audit-gate`，以及 Stage 6 的 `plan-039-quality-signal-model`、`plan-040-drift-quality`、`plan-041-memory-index`、`plan-042-project-health-report`、`plan-044-command-contract-runtime-registry`、`plan-045-repository-write-transaction-boundary` 和 `plan-046-schema-validation-and-migration` 已归入第 3 章历史执行线与第 6 章阶段映射。`plan-043-plan-reference-set` 已重新排期为 blocked/deferred；当前进行焦点是 queued item `stage6.verification-runner-trust-policy`。后续 queued roadmap items 是 `stage6.verification-runner-trust-policy`、`stage6.test-suite-domain-split`、`stage6.commitment-phase-state`、`stage6.audit-semantic-conservation`、`stage6.owner-doc-stable-commitments` 和 `stage6.post-close-freshness-semantics`。未来事项的事实来源是 `.abh/roadmap.json`，文档中不再为未 materialize 项预写具体 plan 编号。
+本节只列下一批仍可切分执行的计划。已关闭的 `plan-012-agent-protocol-foundation`、`plan-013-json-output-and-errors`、`plan-014-readonly-mcp-server`、`plan-015-controlled-mcp-write-tools`、阶段 3 的 `plan-016` 至 `plan-025`、release-prep 的 `plan-026-v0-3-release-prep`、Stage 4 的 `plan-027-stage-4-attractor-entry-plan` 至 `plan-036-quickstart-recipes-and-distribution`，Stage 5 的 `plan-037-audit-prompt-bundle` 和 `plan-038-independent-audit-gate`，以及 Stage 6 的 `plan-039-quality-signal-model`、`plan-040-drift-quality`、`plan-041-memory-index`、`plan-042-project-health-report`、`plan-044-command-contract-runtime-registry`、`plan-045-repository-write-transaction-boundary`、`plan-046-schema-validation-and-migration`、`plan-047-verification-runner-trust-policy` 和 `plan-048-test-suite-domain-split` 已归入第 3 章历史执行线与第 6 章阶段映射。`plan-043-plan-reference-set` 已重新排期为 blocked/deferred；当前进行焦点是 materialized plan `plan-049-commitment-phase-state`。后续 queued roadmap items 是 `stage6.commitment-phase-state`、`stage6.audit-semantic-conservation`、`stage6.owner-doc-stable-commitments` 和 `stage6.post-close-freshness-semantics`。未来事项的事实来源是 `.abh/roadmap.json`，文档中不再为未 materialize 项预写具体 plan 编号。
 
 已完成参考：
 

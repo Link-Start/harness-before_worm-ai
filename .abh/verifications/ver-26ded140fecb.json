@@ -1,0 +1,93 @@
+{
+  "schema_version": "1",
+  "id": "ver-26ded140fecb",
+  "plan_id": "plan-049-commitment-phase-state",
+  "command": "python3 -m abh doctor && git diff --check && python3 -m abh roadmap check --json && python3 -m unittest discover -v",
+  "result": "pass",
+  "artifacts": [
+    "command='python3 -m abh doctor'; exit_code=0; duration_seconds=0.383; stdout='doctor: ok'; stderr=''",
+    "command='git diff --check'; exit_code=0; duration_seconds=0.092; stdout=''; stderr=\"warning: in the working copy of '.abh/plans/plan-048-test-suite-domain-split.json', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/cli.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/models.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/plans.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/arc\"",
+    "command='python3 -m abh roadmap check --json'; exit_code=0; duration_seconds=0.296; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='python3 -m unittest discover -v'; exit_code=0; duration_seconds=12.387; stdout=''; stderr='test_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command (tests.test_cli.CliTests.test_agent_setup_targets_share_shape_and_mcp_includes_server_command) ... ok\\\\ntest_attractor_create_active_show_list_and_supersede_json_flow (tests.test_cli.CliTests.test_attractor_create_active_show_list_and_supersede_json_flow) ... ok\\\\ntest_attractor_create_does_not'"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "D:\\work\\ai\\harness-before",
+    "git": {
+      "commit": "dbb4866669dae774f7f6bfbde317b907af946432",
+      "dirty": true,
+      "status_hash": "0cf32036f0b356b4d0ae432c41e1d4d9898a2e17ce769b67ba339697e914d496",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.15.0a7 (tags/v3.15.0a7:6024d3c, Mar 10 2026, 13:09:10) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "D:\\work\\ai\\harness-before\\.venv\\Scripts\\python.exe"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 4,
+      "execution_policy": "trusted_local_shell",
+      "trust_level": "local_shell",
+      "command_source": "plan_validation_checklist",
+      "isolation": "none"
+    },
+    "commands": [
+      {
+        "command": "python3 -m abh doctor",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "doctor"
+        ]
+      },
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": "python3 -m abh roadmap check --json",
+        "argv": [
+          "python3",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": "python3 -m unittest discover -v",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-v"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-06-05T06:21:09.986547+00:00",
+      "content_hash": "d2444eea5da226ec69e8884be69ff845bad1c4bdc357b3f298032416d7e75d9d",
+      "validation_checklist": [
+        "python3 -m abh doctor",
+        "git diff --check",
+        "python3 -m abh roadmap check --json",
+        "python3 -m unittest discover -v"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-06-05T06:36:15.058182+00:00"
+}

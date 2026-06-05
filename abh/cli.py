@@ -9,7 +9,7 @@ from .audit_bundle import audit_bundle
 from .commands import abh_error_payload, dumps_envelope, make_envelope
 from .hooks import hook_profile, install_hooks
 from .navigation import onboarding_check, recommend_next_action
-from .models import MEMORY_STATUSES
+from .models import CommitmentPhaseState, CommitmentResidualPressure, MEMORY_STATUSES
 from .reporting import project_health_report
 from .core import (
     AbhError,
@@ -68,6 +68,49 @@ def command_name(args: argparse.Namespace) -> str:
         if value:
             parts.append(str(value))
     return " ".join(parts)
+
+
+def add_commitment_phase_state_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--stable-state-now", action="append", default=[])
+    parser.add_argument("--active-change-pressure", action="append", default=[])
+    parser.add_argument("--target-stable-state", action="append", default=[])
+    parser.add_argument("--conversion-proof", action="append", default=[])
+    parser.add_argument("--residual-pressure", action="append", default=[])
+
+
+def commitment_phase_state_from_args(args: argparse.Namespace) -> CommitmentPhaseState | None:
+    stable_state_now = list(getattr(args, "stable_state_now", []) or [])
+    active_change_pressure = list(getattr(args, "active_change_pressure", []) or [])
+    target_stable_state = list(getattr(args, "target_stable_state", []) or [])
+    conversion_proof = list(getattr(args, "conversion_proof", []) or [])
+    residual_pressure_args = list(getattr(args, "residual_pressure", []) or [])
+    if not any(
+        (
+            stable_state_now,
+            active_change_pressure,
+            target_stable_state,
+            conversion_proof,
+            residual_pressure_args,
+        )
+    ):
+        return None
+
+    residual_pressure: list[CommitmentResidualPressure] = []
+    for item in residual_pressure_args:
+        pressure, _, rationale = item.partition("|")
+        residual_pressure.append(
+            CommitmentResidualPressure(
+                pressure=pressure.strip(),
+                non_blocking_rationale=rationale.strip(),
+            )
+        )
+    return CommitmentPhaseState(
+        stable_state_now=stable_state_now,
+        active_change_pressure=active_change_pressure,
+        target_stable_state=target_stable_state,
+        conversion_proof=conversion_proof,
+        residual_pressure=residual_pressure,
+    )
 
 
 def print_json_envelope(
@@ -139,6 +182,8 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--exit-criterion", action="append", default=[])
     create.add_argument("--validation", action="append", default=[])
     create.add_argument("--closure-evidence", action="append", default=[])
+    add_commitment_phase_state_arguments(create)
+    add_json_argument(create)
     create.set_defaults(handler=handle_plan_create)
 
     status = plan_sub.add_parser("status", help="show plan status")
@@ -158,6 +203,7 @@ def build_parser() -> argparse.ArgumentParser:
     update.add_argument("--validation", action="append", default=[])
     update.add_argument("--remove-validation", action="append", default=[])
     update.add_argument("--closure-evidence", action="append", default=[])
+    add_commitment_phase_state_arguments(update)
     add_json_argument(update)
     update.set_defaults(handler=handle_plan_update)
 
@@ -404,7 +450,7 @@ def handle_onboarding_check(args: argparse.Namespace) -> int:
 
 
 def handle_plan_create(args: argparse.Namespace) -> int:
-    create_plan(
+    plan = create_plan(
         plan_id=args.id,
         title=args.title,
         attractor=args.attractor,
@@ -416,7 +462,11 @@ def handle_plan_create(args: argparse.Namespace) -> int:
         exit_criteria=args.exit_criterion,
         validation_checklist=args.validation,
         closure_evidence=args.closure_evidence,
+        commitment_phase_state=commitment_phase_state_from_args(args),
     )
+    if args.json:
+        print_json_envelope(ok=True, command=command_name(args), data={"plan": plan.to_dict()})
+        return 0
     print(f"created plan {args.id}")
     return 0
 
@@ -456,6 +506,7 @@ def handle_plan_update(args: argparse.Namespace) -> int:
         validation_checklist=args.validation,
         remove_validation_checklist=args.remove_validation,
         closure_evidence=args.closure_evidence,
+        commitment_phase_state=commitment_phase_state_from_args(args),
     )
     if args.json:
         print_json_envelope(ok=True, command=command_name(args), data={"plan": plan.to_dict()})

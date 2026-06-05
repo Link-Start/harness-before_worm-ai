@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import datetime
 
 from .errors import AbhError, require_existing_path, validate_identifier
-from .models import PLAN_STATUSES, PlanRecord, utc_now
+from .models import CommitmentPhaseState, CommitmentResidualPressure, PLAN_STATUSES, PlanRecord, utc_now
 from .storage import (
     ensure_workspace,
     plan_doc_path,
@@ -83,6 +83,7 @@ def create_plan(
     exit_criteria: list[str] | None = None,
     validation_checklist: list[str] | None = None,
     closure_evidence: list[str] | None = None,
+    commitment_phase_state: CommitmentPhaseState | None = None,
     cwd: Path | None = None,
 ) -> PlanRecord:
     ensure_workspace(cwd)
@@ -111,6 +112,7 @@ def create_plan(
         exit_criteria=list(exit_criteria or []),
         validation_checklist=list(validation_checklist or []),
         closure_evidence=list(closure_evidence or []),
+        commitment_phase_state=commitment_phase_state or CommitmentPhaseState(),
         doc_path=str(plan_doc_path(plan_id, cwd)),
     )
     if status == "ready":
@@ -135,10 +137,21 @@ def update_plan_record(
     validation_checklist: list[str] | None = None,
     remove_validation_checklist: list[str] | None = None,
     closure_evidence: list[str] | None = None,
+    commitment_phase_state: CommitmentPhaseState | None = None,
     cwd: Path | None = None,
 ) -> PlanRecord:
     plan = load_plan(plan_id, cwd)
-    if not any((goals, non_goals, exit_criteria, validation_checklist, remove_validation_checklist, closure_evidence)):
+    if not any(
+        (
+            goals,
+            non_goals,
+            exit_criteria,
+            validation_checklist,
+            remove_validation_checklist,
+            closure_evidence,
+            commitment_phase_state,
+        )
+    ):
         raise AbhError("plan update requires at least one field to append")
     plan.goals = append_unique(plan.goals, goals)
     plan.non_goals = append_unique(plan.non_goals, non_goals)
@@ -147,6 +160,21 @@ def update_plan_record(
     for item in remove_validation_checklist or []:
         plan.validation_checklist = [value for value in plan.validation_checklist if value != item]
     plan.closure_evidence = append_unique(plan.closure_evidence, closure_evidence)
+    if commitment_phase_state is not None:
+        state = plan.commitment_phase_state
+        state.stable_state_now = append_unique(state.stable_state_now, commitment_phase_state.stable_state_now)
+        state.active_change_pressure = append_unique(
+            state.active_change_pressure,
+            commitment_phase_state.active_change_pressure,
+        )
+        state.target_stable_state = append_unique(
+            state.target_stable_state,
+            commitment_phase_state.target_stable_state,
+        )
+        state.conversion_proof = append_unique(state.conversion_proof, commitment_phase_state.conversion_proof)
+        for item in commitment_phase_state.residual_pressure:
+            if item not in state.residual_pressure:
+                state.residual_pressure.append(item)
     return save_plan(plan, cwd=cwd, write_doc=True)
 
 
@@ -246,6 +274,16 @@ def render_plan_markdown(plan: PlanRecord) -> str:
             return "- "
         return "\n".join(f"- {value}" for value in values)
 
+    def residual_lines(values: list[CommitmentResidualPressure]) -> str:
+        if not values:
+            return "- "
+        return "\n".join(
+            f"- {item.pressure} | Non-blocking rationale: {item.non_blocking_rationale}"
+            for item in values
+        )
+
+    commitment = plan.commitment_phase_state
+
     return (
         f"# Plan: {plan.title}\n\n"
         "## Metadata\n\n"
@@ -262,6 +300,17 @@ def render_plan_markdown(plan: PlanRecord) -> str:
         f"{bullet_lines(plan.non_goals)}\n\n"
         "## Exit Criteria\n\n"
         f"{bullet_lines(plan.exit_criteria)}\n\n"
+        "## Commitment Phase State\n\n"
+        "### Stable State Now\n\n"
+        f"{bullet_lines(commitment.stable_state_now)}\n\n"
+        "### Active Change Pressure\n\n"
+        f"{bullet_lines(commitment.active_change_pressure)}\n\n"
+        "### Target Stable State\n\n"
+        f"{bullet_lines(commitment.target_stable_state)}\n\n"
+        "### Conversion Proof\n\n"
+        f"{bullet_lines(commitment.conversion_proof)}\n\n"
+        "### Residual Pressure\n\n"
+        f"{residual_lines(commitment.residual_pressure)}\n\n"
         "## Validation Checklist\n\n"
         f"{bullet_lines(plan.validation_checklist)}\n\n"
         "## Closure Evidence\n\n"
