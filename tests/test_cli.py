@@ -27,6 +27,7 @@ from abh.core import (
 )
 from abh.models import AttractorRecord, AuditRecord, DriftReport, MemoryRecord, PlanRecord, VerificationRun
 from abh.models import RoadmapItem, RoadmapQueue
+from abh.models import validate_record_schema
 from abh.storage import drift_json_path, write_json
 from abh.verifications import normalized_git_status
 
@@ -2627,6 +2628,83 @@ class CliTests(TestCase):
         self.assertEqual(err, "")
         self.assertIn("missing schema_version for plan plan-doctor-schema", out)
 
+    def test_doctor_reports_missing_required_record_fields(self) -> None:
+        self.run_cli(
+            "plan", "create",
+            "--id", "plan-doctor-required",
+            "--title", "Required Field",
+            "--attractor", "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline", "baseline",
+        )
+        plan_path = self.root / ".abh" / "plans" / "plan-doctor-required.json"
+        data = json.loads(plan_path.read_text(encoding="utf-8"))
+        data.pop("title")
+        plan_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+        code, out, err = self.run_cli("doctor")
+
+        self.assertEqual(code, 1)
+        self.assertEqual(err, "")
+        self.assertIn("missing required field for plan plan-doctor-required: title", out)
+
+    def test_doctor_reports_unknown_record_fields(self) -> None:
+        self.run_cli(
+            "plan", "create",
+            "--id", "plan-doctor-unknown",
+            "--title", "Unknown Field",
+            "--attractor", "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline", "baseline",
+        )
+        plan_path = self.root / ".abh" / "plans" / "plan-doctor-unknown.json"
+        data = json.loads(plan_path.read_text(encoding="utf-8"))
+        data["surprise"] = "not in schema"
+        plan_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+        code, out, err = self.run_cli("doctor")
+
+        self.assertEqual(code, 1)
+        self.assertEqual(err, "")
+        self.assertIn("unknown field for plan plan-doctor-unknown: surprise", out)
+
+    def test_doctor_reports_deprecated_record_fields(self) -> None:
+        self.run_cli(
+            "plan", "create",
+            "--id", "plan-doctor-deprecated",
+            "--title", "Deprecated Field",
+            "--attractor", "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline", "baseline",
+        )
+        plan_path = self.root / ".abh" / "plans" / "plan-doctor-deprecated.json"
+        data = json.loads(plan_path.read_text(encoding="utf-8"))
+        data["prepared_at"] = "2026-06-05T00:00:00+00:00"
+        plan_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+        code, out, err = self.run_cli("doctor")
+
+        self.assertEqual(code, 1)
+        self.assertEqual(err, "")
+        self.assertIn("deprecated field for plan plan-doctor-deprecated: prepared_at", out)
+        self.assertNotIn("unknown field for plan plan-doctor-deprecated: prepared_at", out)
+
+    def test_doctor_reports_invalid_schema_version(self) -> None:
+        self.run_cli(
+            "plan", "create",
+            "--id", "plan-doctor-version",
+            "--title", "Version Field",
+            "--attractor", "docs/architecture/attractors/abh-core-attractor.md",
+            "--baseline", "baseline",
+        )
+        plan_path = self.root / ".abh" / "plans" / "plan-doctor-version.json"
+        data = json.loads(plan_path.read_text(encoding="utf-8"))
+        data["schema_version"] = "999"
+        plan_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+        code, out, err = self.run_cli("doctor")
+
+        self.assertEqual(code, 1)
+        self.assertEqual(err, "")
+        self.assertIn("unsupported schema_version for plan plan-doctor-version: 999", out)
+
     def test_doctor_json_reports_consistency_issues(self) -> None:
         self.run_cli(
             "plan", "create",
@@ -3013,6 +3091,44 @@ class CliTests(TestCase):
 
         for record in records:
             self.assertEqual(record.to_dict()["schema_version"], "1")
+
+    def test_model_schema_validation_covers_core_record_families(self) -> None:
+        records = {
+            "plan": PlanRecord(id="plan-schema", title="Schema", attractor="attr", baseline="base").to_dict(),
+            "audit": AuditRecord(id="audit-schema", plan_id="plan-schema", auditor="auditor", scope="scope").to_dict(),
+            "attractor": AttractorRecord(
+                id="attractor-schema",
+                title="Attractor Schema",
+                version="1.0.0",
+                path="docs/architecture/attractors/schema.md",
+                intent="schema",
+            ).to_dict(),
+            "memory": MemoryRecord(
+                id="mem-schema",
+                memory_type="false_assumption",
+                summary="summary",
+                context="context",
+                implication="implication",
+            ).to_dict(),
+            "drift": DriftReport(id="drift-schema", source="source.txt").to_dict(),
+        }
+
+        for record_type, data in records.items():
+            self.assertEqual(validate_record_schema(record_type, data), [])
+            data["unexpected"] = "unknown"
+            self.assertEqual(
+                validate_record_schema(record_type, data),
+                [{"category": "unknown_field", "field": "unexpected", "value": ""}],
+            )
+
+    def test_model_schema_validation_distinguishes_deprecated_fields(self) -> None:
+        data = PlanRecord(id="plan-schema", title="Schema", attractor="attr", baseline="base").to_dict()
+        data["prepared_at"] = "2026-06-05T00:00:00+00:00"
+
+        self.assertEqual(
+            validate_record_schema("plan", data),
+            [{"category": "deprecated_field", "field": "prepared_at", "value": ""}],
+        )
 
     def test_model_deserialization_allows_missing_schema_version(self) -> None:
         verification = VerificationRun.from_dict(

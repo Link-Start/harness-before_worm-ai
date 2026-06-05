@@ -12,6 +12,124 @@ MEMORY_TYPES = ("false_assumption", "rejected_path", "divergent_pattern", "overt
 MEMORY_STATUSES = ("active", "resolved", "superseded", "dismissed")
 DRIFT_TYPES = ("boundary_drift", "dependency_drift", "test_drift", "terminology_drift")
 SCHEMA_VERSION = "1"
+RECORD_SCHEMAS: dict[str, dict[str, set[str]]] = {
+    "plan": {
+        "required": {"schema_version", "id", "title", "attractor", "baseline"},
+        "optional": {
+            "owner",
+            "status",
+            "goals",
+            "non_goals",
+            "exit_criteria",
+            "validation_checklist",
+            "closure_evidence",
+            "verification_runs",
+            "audit_ids",
+            "created_at",
+            "updated_at",
+            "doc_path",
+        },
+        "deprecated": {"prepared_at"},
+    },
+    "audit": {
+        "required": {"schema_version", "id", "plan_id", "auditor", "scope"},
+        "optional": {
+            "auditor_context",
+            "independence",
+            "verification_id",
+            "status",
+            "result",
+            "rationale",
+            "evidence",
+            "findings",
+            "follow_ups",
+            "created_at",
+            "updated_at",
+            "doc_path",
+        },
+        "deprecated": set(),
+    },
+    "attractor": {
+        "required": {"schema_version", "id", "title", "version", "path", "intent"},
+        "optional": {
+            "status",
+            "owner",
+            "supersedes",
+            "reason",
+            "impact",
+            "migration_strategy",
+            "invariants",
+            "created_at",
+            "updated_at",
+            "doc_path",
+        },
+        "deprecated": set(),
+    },
+    "memory": {
+        "required": {"schema_version", "id", "type", "summary", "context", "implication"},
+        "optional": {
+            "status",
+            "related",
+            "evidence",
+            "tags",
+            "related_plan_ids",
+            "related_audit_ids",
+            "related_drift_ids",
+            "superseded_by",
+            "deprecation_policy",
+            "created_at",
+            "updated_at",
+            "doc_path",
+        },
+        "deprecated": set(),
+    },
+    "drift": {
+        "required": {"schema_version", "id", "source"},
+        "optional": {"findings", "evidence", "follow_ups", "created_at", "updated_at", "doc_path"},
+        "deprecated": set(),
+    },
+}
+
+
+def validate_record_schema(record_type: str, data: dict[str, Any]) -> list[dict[str, str]]:
+    schema = RECORD_SCHEMAS.get(record_type)
+    if schema is None:
+        return []
+    required = schema["required"]
+    deprecated = schema["deprecated"]
+    allowed = required | schema["optional"] | deprecated
+    issues: list[dict[str, str]] = []
+    if "schema_version" not in data:
+        issues.append({"category": "missing_schema_version", "field": "schema_version", "value": ""})
+    elif str(data["schema_version"]) != SCHEMA_VERSION:
+        issues.append({"category": "unsupported_schema_version", "field": "schema_version", "value": str(data["schema_version"])})
+    for field_name in sorted(required - set(data)):
+        if field_name == "schema_version":
+            continue
+        issues.append({"category": "missing_required_field", "field": field_name, "value": ""})
+    for field_name in sorted(set(data) & deprecated):
+        issues.append({"category": "deprecated_field", "field": field_name, "value": ""})
+    for field_name in sorted(set(data) - allowed):
+        issues.append({"category": "unknown_field", "field": field_name, "value": ""})
+    return issues
+
+
+def schema_issue_messages(record_type: str, record_id: str, data: dict[str, Any]) -> list[str]:
+    messages: list[str] = []
+    for issue in validate_record_schema(record_type, data):
+        category = issue["category"]
+        field = issue["field"]
+        if category == "missing_schema_version":
+            messages.append(f"missing schema_version for {record_type} {record_id}")
+        elif category == "unsupported_schema_version":
+            messages.append(f"unsupported schema_version for {record_type} {record_id}: {issue['value']}")
+        elif category == "missing_required_field":
+            messages.append(f"missing required field for {record_type} {record_id}: {field}")
+        elif category == "deprecated_field":
+            messages.append(f"deprecated field for {record_type} {record_id}: {field}")
+        elif category == "unknown_field":
+            messages.append(f"unknown field for {record_type} {record_id}: {field}")
+    return messages
 
 
 def utc_now() -> str:

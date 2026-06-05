@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-阶段 6：漂移与记忆质量提升（Doing）；当前焦点：`stage6.schema-validation-and-migration`
+阶段 6：漂移与记忆质量提升（Doing）；当前焦点：`stage6.verification-runner-trust-policy`
 
 ## 状态说明
 
@@ -489,7 +489,7 @@
 | S6-F05 | Post-Close Freshness Semantics | Todo | `stage6.post-close-freshness-semantics` |
 | S6-F06 | Command Contract Runtime Registry | Done | `stage6.command-contract-runtime-registry` -> `plan-044-command-contract-runtime-registry` |
 | S6-F07 | Repository Write Transaction Boundary | Done | `stage6.repository-write-transaction-boundary` -> `plan-045-repository-write-transaction-boundary` |
-| S6-F08 | Schema Validation and Migration | Todo | `stage6.schema-validation-and-migration` |
+| S6-F08 | Schema Validation and Migration | Done | `stage6.schema-validation-and-migration` -> `plan-046-schema-validation-and-migration` |
 | S6-F09 | Verification Runner Trust Policy | Todo | `stage6.verification-runner-trust-policy` |
 | S6-F10 | Test Suite Domain Split | Todo | `stage6.test-suite-domain-split` |
 
@@ -533,3 +533,17 @@
 | S41-005 | 实现 storage pair write boundary 并接入核心 save 路径 | Done | `abh/storage.py`, `abh/plans.py`, `abh/audits.py`, `abh/memory.py`, `abh/drift.py`, `abh/attractors.py` |
 | S41-006 | 同步 roadmap、task-board 和 transaction boundary 文档说明 | Done | `docs/development-roadmap.md`, `docs/task-board.md` |
 | S41-007 | plan-045 验证、独立审计和关闭 | Done | `.abh/verifications/ver-3f470aa8d592.json`, `docs/audits/audit-045-repository-write-transaction-boundary-r2.md`, `docs/plans/plan-045-repository-write-transaction-boundary.md` |
+
+## Sprint 42
+
+目标：把 `stage6.schema-validation-and-migration` dogfood 成 `plan-046-schema-validation-and-migration`，为 `.abh` record 增加结构校验、版本迁移边界和未知字段策略。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S42-001 | materialize Schema Validation and Migration 计划 | Done | `stage6.schema-validation-and-migration` -> `docs/plans/plan-046-schema-validation-and-migration.md` |
+| S42-002 | 定义 schema validation/migration 实施计划 | Done | `docs/superpowers/plans/2026-06-05-schema-validation-and-migration.md` |
+| S42-003 | 定义 missing/unknown/schema_version 红灯测试 | Done | `tests/test_cli.py` |
+| S42-004 | 实现 core record schema validation helpers | Done | `abh/models.py` |
+| S42-005 | 接入 doctor malformed record reporting | Done | `abh/core.py`, `abh/roadmap.py` |
+| S42-006 | 同步 roadmap、task-board 和 schema migration 策略说明 | Done | `docs/development-roadmap.md`, `docs/task-board.md` |
+| S42-007 | plan-046 验证、独立审计和关闭 | Done | `.abh/verifications/ver-d4be20596e20.json`, `docs/audits/audit-046-schema-validation-and-migration-r2.md`, `docs/plans/plan-046-schema-validation-and-migration.md` |

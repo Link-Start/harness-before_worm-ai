@@ -40,6 +40,7 @@ from .memory import (
     save_memory,
     search_memory,
 )
+from .models import schema_issue_messages
 from .plans import (
     ALLOWED_TRANSITIONS,
     append_unique,
@@ -101,8 +102,7 @@ def doctor(cwd: Path | None = None) -> list[str]:
         if json_dir.exists():
             for path in sorted(json_dir.glob("*.json")):
                 data = read_json(path)
-                if data.get("schema_version") != "1":
-                    issues.append(f"missing schema_version for {label} {path.stem}")
+                issues.extend(schema_issue_messages(label, path.stem, data))
                 if label == "attractor":
                     doc_path = data.get("doc_path") or data.get("path")
                     if isinstance(doc_path, str) and doc_path and not Path(doc_path).exists():

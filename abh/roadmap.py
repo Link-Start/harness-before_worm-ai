@@ -6,7 +6,7 @@ from pathlib import Path
 from .errors import AbhError, validate_identifier
 from .models import PlanRecord, RoadmapItem, RoadmapQueue
 from .plans import create_plan, list_plans
-from .storage import abh_dir, ensure_workspace, file_lock, read_json, roadmap_path, write_json
+from .storage import abh_dir, ensure_workspace, file_lock, plans_dir, read_json, roadmap_path, write_json
 
 LEGACY_DUPLICATE_PLAN_SEQUENCES = {"007"}
 PLAN_SEQUENCE_RE = re.compile(r"^plan-(\d+)(?:-|$)")
@@ -100,12 +100,19 @@ def check_roadmap_queue(cwd: Path | None = None) -> list[str]:
 
 def check_plan_numbering(cwd: Path | None = None) -> list[str]:
     seen: dict[str, list[str]] = {}
-    for plan in list_plans(cwd):
-        match = PLAN_SEQUENCE_RE.match(plan.id)
+    directory = plans_dir(cwd)
+    if not directory.exists():
+        return []
+    for path in sorted(directory.glob("*.json")):
+        data = read_json(path)
+        plan_id = data.get("id", path.stem)
+        if not isinstance(plan_id, str):
+            continue
+        match = PLAN_SEQUENCE_RE.match(plan_id)
         if match is None:
             continue
         sequence = match.group(1)
-        seen.setdefault(sequence, []).append(plan.id)
+        seen.setdefault(sequence, []).append(plan_id)
     issues: list[str] = []
     for sequence, plan_ids in sorted(seen.items()):
         if sequence in LEGACY_DUPLICATE_PLAN_SEQUENCES:
