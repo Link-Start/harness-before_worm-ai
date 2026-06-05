@@ -7,10 +7,10 @@
 - Auditor: human-independent-review
 - Auditor Context: unknown
 - Independence: independent
-- Verification ID: ver-26ded140fecb
+- Verification ID: ver-f038c30d2662
 - Status: complete
 - Created: 2026-06-05T06:21:09.969605+00:00
-- Updated: 2026-06-05T06:47:07.315448+00:00
+- Updated: 2026-06-05T09:11:52.232443+00:00
 
 ## Scope
 
@@ -41,7 +41,7 @@ Independent audit of plan-049 commitment phase state: verify legacy defaults, JS
 ## Verdict
 
 - Result: pass
-- Rationale: ver-26ded140fecb materially covers the exit criteria: full unittest discovery passed, and the discovered suite includes direct coverage for legacy defaults in tests/test_cli.py:test_plan_record_legacy_reads_commitment_phase_state_defaults, JSON exposure in tests/test_cli.py:test_plan_status_json_exposes_commitment_phase_state, create/update plus Markdown rendering in tests/test_cli.py:test_plan_update_appends_commitment_phase_state_and_renders_markdown, template documentation in tests/test_cli.py:test_plan_template_documents_commitment_phase_state, and non-goal preservation in tests/test_cli.py:test_plan_status_json_does_not_mark_commitment_phase_state_updates_stale. The code and docs align with the goals: abh/models.py adds an optional backward-compatible structure, abh/cli.py exposes additive create/update arguments and JSON output, abh/plans.py renders the new Markdown section, and the template/quality-signals/roadmap/task-board/codebase-map docs reflect the slice. No non-goals were implemented: ready plans still do not require Commitment Phase State, there is no LLM or external-service inference path, and abh/plans.py no longer includes commitment_phase_state in PLAN_VERIFICATION_FIELDS, so close-gate freshness behavior remains unchanged.
+- Rationale: Latest verification ver-f038c30d2662 is a passing, non-stale local_shell run of the full validation checklist for plan-049-commitment-phase-state, and the checked code/tests materially cover the exit criteria. abh/models.py adds backward-compatible optional commitment_phase_state data with empty legacy defaults via CommitmentPhaseState.from_dict(...) and PlanRecord defaults; abh/plans.py renders the new Markdown section, merges update/create inputs, exposes the state through plan.to_dict(), and intentionally excludes commitment_phase_state from PLAN_VERIFICATION_FIELDS; abh/cli.py adds optional create/update flags and returns the state in plan status --json. tests/test_cli.py directly covers legacy reads, JSON exposure, Markdown rendering/update behavior, template documentation, and the non-goal that commitment-phase-state updates do not make verification stale. The docs listed in closure evidence reflect the new terminology and runtime surface. I found no evidence of non-goals being implemented: Commitment Phase State is not mandatory for ready plans, there is no inference or external-service path, and close/stale gates were not tightened beyond optional reporting/documentation surfaces.
 
 ## Follow-Ups
 

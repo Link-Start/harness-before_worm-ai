@@ -52,12 +52,13 @@
   "verification_runs": [
     "ver-27d8eb073013",
     "ver-f038c30d2662",
-    "ver-26ded140fecb"
+    "ver-26ded140fecb",
+    "ver-0cd1c44d69b4"
   ],
   "audit_ids": [
     "audit-049-commitment-phase-state"
   ],
   "created_at": "2026-06-05T04:26:46.930084+00:00",
-  "updated_at": "2026-06-05T06:47:07.782773+00:00",
+  "updated_at": "2026-06-05T09:12:34.004779+00:00",
   "doc_path": "D:\\work\\ai\\harness-before\\docs\\plans\\plan-049-commitment-phase-state.md"
 }

@@ -8,7 +8,7 @@
 - Baseline: Plans currently express baseline, goals, non-goals, exit criteria, and closure evidence, but they do not explicitly model the difference between stable commitments and active change obligations.
 - Owner: platform
 - Created: 2026-06-05T04:26:46.930084+00:00
-- Updated: 2026-06-05T06:47:07.782773+00:00
+- Updated: 2026-06-05T09:12:34.004779+00:00
 
 ## Goals
 
@@ -78,6 +78,7 @@
 - ver-27d8eb073013
 - ver-f038c30d2662
 - ver-26ded140fecb
+- ver-0cd1c44d69b4
 
 ## Audits
 
