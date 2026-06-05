@@ -490,7 +490,7 @@
 | S6-F06 | Command Contract Runtime Registry | Done | `stage6.command-contract-runtime-registry` -> `plan-044-command-contract-runtime-registry` |
 | S6-F07 | Repository Write Transaction Boundary | Done | `stage6.repository-write-transaction-boundary` -> `plan-045-repository-write-transaction-boundary` |
 | S6-F08 | Schema Validation and Migration | Done | `stage6.schema-validation-and-migration` -> `plan-046-schema-validation-and-migration` |
-| S6-F09 | Verification Runner Trust Policy | Todo | `stage6.verification-runner-trust-policy` |
+| S6-F09 | Verification Runner Trust Policy | Doing | `stage6.verification-runner-trust-policy` -> `plan-047-verification-runner-trust-policy` |
 | S6-F10 | Test Suite Domain Split | Todo | `stage6.test-suite-domain-split` |
 
 ## Sprint 39
@@ -547,3 +547,16 @@
 | S42-005 | 接入 doctor malformed record reporting | Done | `abh/core.py`, `abh/roadmap.py` |
 | S42-006 | 同步 roadmap、task-board 和 schema migration 策略说明 | Done | `docs/development-roadmap.md`, `docs/task-board.md` |
 | S42-007 | plan-046 验证、独立审计和关闭 | Done | `.abh/verifications/ver-d4be20596e20.json`, `docs/audits/audit-046-schema-validation-and-migration-r2.md`, `docs/plans/plan-046-schema-validation-and-migration.md` |
+
+## Sprint 43
+
+目标：把 `stage6.verification-runner-trust-policy` dogfood 成 `plan-047-verification-runner-trust-policy`，明确 verify runner 的本地 shell trust boundary、runner policy metadata 和 recursive guard 覆盖。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S43-001 | materialize Verification Runner Trust Policy 计划 | Done | `stage6.verification-runner-trust-policy` -> `docs/plans/plan-047-verification-runner-trust-policy.md` |
+| S43-002 | 定义 verification runner trust policy 实施计划 | Done | `docs/superpowers/plans/2026-06-05-verification-runner-trust-policy.md` |
+| S43-003 | 定义 runner policy metadata 和 recursive guard 红灯测试 | Done | `tests/test_cli.py` |
+| S43-004 | 实现 runner policy metadata 与 recursive guard 增强 | Done | `abh/verifications.py` |
+| S43-005 | 同步 README、roadmap 和 task-board trust policy 文档 | Done | `README.md`, `docs/development-roadmap.md`, `docs/task-board.md` |
+| S43-006 | plan-047 验证、独立审计和关闭 | Review | `.abh/verifications/`, `docs/audits/`, `docs/plans/plan-047-verification-runner-trust-policy.md` |

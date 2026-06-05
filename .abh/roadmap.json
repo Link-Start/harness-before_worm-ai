@@ -783,8 +783,8 @@
         "docs/development-roadmap.md",
         "docs/task-board.md"
       ],
-      "status": "queued",
-      "plan_id": null
+      "status": "materialized",
+      "plan_id": "plan-047-verification-runner-trust-policy"
     },
     {
       "key": "stage6.test-suite-domain-split",
@@ -822,8 +822,8 @@
         "docs/development-roadmap.md",
         "docs/task-board.md"
       ],
-      "status": "queued",
-      "plan_id": null
+      "status": "materialized",
+      "plan_id": "plan-048-test-suite-domain-split"
     },
     {
       "key": "stage6.commitment-phase-state",

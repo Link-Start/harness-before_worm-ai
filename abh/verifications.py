@@ -25,6 +25,10 @@ GIT_STATUS_HASH_IGNORED_PREFIXES = (
     "docs/plans/",
 )
 
+RUNNER_EXECUTION_POLICY = "trusted_local_shell"
+RUNNER_COMMAND_SOURCE = "plan_validation_checklist"
+RUNNER_ISOLATION = "none"
+
 
 def load_verification(run_id: str, cwd: Path | None = None) -> VerificationRun:
     path = verification_path(run_id, cwd)
@@ -79,13 +83,36 @@ def is_recursive_verify_command(command: str, plan_id: str) -> bool:
         parts = shlex.split(command)
     except ValueError:
         return False
-    if len(parts) < 5:
+    if len(parts) < 4:
         return False
-    for index in range(len(parts) - 4):
-        if parts[index:index + 4] == ["python3", "-m", "abh", "verify"] and "run" in parts[index + 4:]:
-            return plan_id in parts[index + 4:]
-        if parts[index:index + 4] == ["python", "-m", "abh", "verify"] and "run" in parts[index + 4:]:
-            return plan_id in parts[index + 4:]
+
+    for index in range(len(parts)):
+        if _is_abh_executable(parts[index]) and _verify_run_targets_plan(parts[index + 1:], plan_id):
+            return True
+        if (
+            _is_python_executable(parts[index])
+            and parts[index + 1:index + 4] == ["-m", "abh", "verify"]
+            and _verify_run_targets_plan(parts[index + 4:], plan_id)
+        ):
+            return True
+    return False
+
+
+def _is_python_executable(token: str) -> bool:
+    name = token.replace("\\", "/").split("/")[-1].lower()
+    return name in {"py", "python", "python3", "python.exe", "python3.exe"}
+
+
+def _is_abh_executable(token: str) -> bool:
+    name = token.replace("\\", "/").split("/")[-1].lower()
+    return name in {"abh", "abh.exe"}
+
+
+def _verify_run_targets_plan(parts: list[str], plan_id: str) -> bool:
+    if len(parts) >= 3 and parts[0:2] == ["verify", "run"]:
+        return plan_id in parts[2:]
+    if len(parts) >= 2 and parts[0] == "run":
+        return plan_id in parts[1:]
     return False
 
 
@@ -174,6 +201,10 @@ def environment_snapshot(*, root: Path, commands: list[str], timeout_seconds: in
             "timeout_seconds": timeout_seconds,
             "shell": True,
             "check_count": len(commands),
+            "execution_policy": RUNNER_EXECUTION_POLICY,
+            "trust_level": "local_shell",
+            "command_source": RUNNER_COMMAND_SOURCE,
+            "isolation": RUNNER_ISOLATION,
         },
         "commands": [{"command": command, "argv": split_command(command)} for command in commands],
         "environment_variables": env_allowlist,

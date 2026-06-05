@@ -480,7 +480,7 @@ Roadmap queue 规则：
 - `plan-044-command-contract-runtime-registry`（已完成）
 - `plan-045-repository-write-transaction-boundary`（已完成）
 - `plan-046-schema-validation-and-migration`（已完成）
-- `stage6.verification-runner-trust-policy`
+- `plan-047-verification-runner-trust-policy`（进行中）
 - `stage6.test-suite-domain-split`
 
 ### 阶段 7：团队可用与生态集成
