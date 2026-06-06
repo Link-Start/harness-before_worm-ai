@@ -36,3 +36,39 @@ Repository files are the truth surface, but no single file answers every questio
 - `docs/requirements/` for implementation-ready requirements
 - `docs/design/` for application behavior and workflow design
 - `docs/architecture/` for technical structure and attractors
+
+## Stable-Commitments Consultation
+
+Stable-commitments sections are consulted when precedence alone is not enough to decide whether a change preserves or weakens an owner-doc commitment.
+
+- During plan scoping, use the authoritative owner doc's Stable Commitments to define what must survive the slice, Allowed Variation to avoid treating acceptable implementation changes as scope changes, and Correction Path to identify required documentation or evidence updates.
+- During semantic conservation audit, compare the plan, implementation, verification, audit evidence, and closure evidence against Stable Commitments and Drift / Leakage Signals before deciding whether R-flow evidence actually reduced uncertainty.
+- During health or drift review, treat Drift / Leakage Signals as local evidence hints and use Correction Path to route repairs to the correct owner doc, plan, memory, audit, or roadmap item.
+- During owner-doc conflict resolution, first choose the owner artifact by the precedence table, then use its Stable Commitments and Allowed Variation to determine whether the conflict is semantic drift, stale wording, or acceptable variation.
+
+## Stable Commitments
+
+- Repository files are the truth surface; chat context can request changes but does not outrank committed owner docs, records, code, or tests.
+- Authority is chosen by question type, not by recency alone.
+- Plan goals, non-goals, exit criteria, validation, and closure evidence control one materialized slice.
+- Passing verification is execution evidence only; independent audit is the completion judgment for closure.
+- `.abh/roadmap.json` owns future queue intent before a concrete plan id exists.
+
+## Allowed Variation
+
+- New artifact families may be added to the precedence table when ABH gains durable local evidence types.
+- Conflict rules may become more specific as plans, audits, memory, drift, and health records mature.
+- Historical records may remain incomplete if readers treat missing fields as unknown instead of invalid.
+
+## Drift / Leakage Signals
+
+- A plan, doc, or Agent instruction treats verification pass as plan completion.
+- A materialized plan contradicts its roadmap queue item without updating the plan or roadmap.
+- A future queue item is given a concrete `plan-NNN-*` id before materialization.
+- Memory or audit findings are ignored when they conflict with current implementation claims.
+
+## Correction Path
+
+- Classify disagreements by question type, then update the owner doc or executable artifact that owns that question.
+- Preserve historical evidence when superseding memory, audits, or plans; do not delete records to hide disagreement.
+- When precedence itself changes, update this file and route the change through an audited plan.

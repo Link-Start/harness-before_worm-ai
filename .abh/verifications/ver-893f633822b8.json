@@ -1,0 +1,94 @@
+{
+  "schema_version": "1",
+  "id": "ver-893f633822b8",
+  "plan_id": "plan-051-owner-doc-stable-commitments",
+  "command": "git diff --check && .venv\\Scripts\\python.exe -m unittest discover -v && .venv\\Scripts\\python.exe -m abh doctor --json && .venv\\Scripts\\python.exe -m abh roadmap check --json",
+  "result": "pass",
+  "artifacts": [
+    "command='git diff --check'; exit_code=0; duration_seconds=0.088; stdout=''; stderr=\"warning: in the working copy of '.abh/plans/plan-051-owner-doc-stable-commitments.json', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/init.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/architecture/quality-signals.md', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/architecture/templates/attractor-template.md', LF will be replaced by CRLF the n\"",
+    "command='.venv\\\\Scripts\\\\python.exe -m unittest discover -v'; exit_code=0; duration_seconds=10.571; stdout=''; stderr='test_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command (tests.test_cli.CliTests.test_agent_setup_targets_share_shape_and_mcp_includes_server_command) ... ok\\\\ntest_attractor_create_active_show_list_and_supersede_json_flow (tests.test_cli.CliTests.test_attractor_create_active_show_list_and_supersede_json_flow) ... ok\\\\ntest_attractor_create_does_not'",
+    "command='.venv\\\\Scripts\\\\python.exe -m abh doctor --json'; exit_code=0; duration_seconds=0.288; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"doctor\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='.venv\\\\Scripts\\\\python.exe -m abh roadmap check --json'; exit_code=0; duration_seconds=0.245; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "D:\\work\\ai\\harness-before",
+    "git": {
+      "commit": "68e96c2c22a3b869b7bb5b45b3ea3775105b2ff1",
+      "dirty": true,
+      "status_hash": "80fb0ebfec0480a5afcf9d925cad76f1f3f540ad4fbff5288c6f801cba90a43b",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.15.0a7 (tags/v3.15.0a7:6024d3c, Mar 10 2026, 13:09:10) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "D:\\work\\ai\\harness-before\\.venv\\Scripts\\python.exe"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 4,
+      "execution_policy": "trusted_local_shell",
+      "trust_level": "local_shell",
+      "command_source": "plan_validation_checklist",
+      "isolation": "none"
+    },
+    "commands": [
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": ".venv\\Scripts\\python.exe -m unittest discover -v",
+        "argv": [
+          ".venvScriptspython.exe",
+          "-m",
+          "unittest",
+          "discover",
+          "-v"
+        ]
+      },
+      {
+        "command": ".venv\\Scripts\\python.exe -m abh doctor --json",
+        "argv": [
+          ".venvScriptspython.exe",
+          "-m",
+          "abh",
+          "doctor",
+          "--json"
+        ]
+      },
+      {
+        "command": ".venv\\Scripts\\python.exe -m abh roadmap check --json",
+        "argv": [
+          ".venvScriptspython.exe",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-06-06T06:46:01.412911+00:00",
+      "content_hash": "6e58fa6c215d750fcb4bc754cb759c854a1f5e86196f9cd65296d776f8198e33",
+      "validation_checklist": [
+        "git diff --check",
+        ".venv\\Scripts\\python.exe -m unittest discover -v",
+        ".venv\\Scripts\\python.exe -m abh doctor --json",
+        ".venv\\Scripts\\python.exe -m abh roadmap check --json"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-06-06T06:51:35.913396+00:00"
+}

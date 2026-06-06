@@ -61,6 +61,19 @@ def _index_doc() -> str:
         "5. `docs/context/codebase-map.md`\n"
         "6. `docs/development-roadmap.md`\n"
         "7. `docs/architecture/agent-protocol.md`\n"
+        "\n## Stable Commitments\n\n"
+        "- This file is the first owner-doc routing surface after the active attractor.\n"
+        "- Required reading order must keep owner docs discoverable.\n"
+        "- Question routing must point Agents to owner docs and executable evidence.\n"
+        "\n## Allowed Variation\n\n"
+        "- New owner docs may be added when they become durable source-of-truth surfaces.\n"
+        "- Supporting evidence may change as ABH adds local artifacts.\n"
+        "\n## Drift / Leakage Signals\n\n"
+        "- Agents skip the active attractor and this index.\n"
+        "- A route names stale or non-authoritative guidance as primary evidence.\n"
+        "\n## Correction Path\n\n"
+        "- Update this index with any new owner-doc family.\n"
+        "- Resolve routing conflicts with `docs/context/source-of-truth.md`.\n"
     )
 
 
@@ -75,6 +88,19 @@ def _source_of_truth_doc() -> str:
         "- Verification records: commands that actually ran.\n"
         "- Audit records: completion judgment for closure.\n"
         "- Roadmap queue: future intent before a plan is materialized.\n"
+        "\n## Stable Commitments\n\n"
+        "- Repository files are the truth surface.\n"
+        "- Authority is chosen by question type, not recency alone.\n"
+        "- Verification is evidence; independent audit is the closure judgment.\n"
+        "\n## Allowed Variation\n\n"
+        "- New artifact families may be added when ABH gains durable evidence types.\n"
+        "- Conflict rules may become more specific as records mature.\n"
+        "\n## Drift / Leakage Signals\n\n"
+        "- A workflow treats verification pass as completion.\n"
+        "- A future queue item receives a concrete plan id before materialization.\n"
+        "\n## Correction Path\n\n"
+        "- Classify disagreements by question type.\n"
+        "- Update the owner doc or executable artifact that owns the question.\n"
     )
 
 
@@ -87,6 +113,19 @@ def _project_context_doc() -> str:
         "- Materialize or create a plan before implementation.\n"
         "- Verify with recorded commands.\n"
         "- Close only after independent audit.\n"
+        "\n## Stable Commitments\n\n"
+        "- ABH is Git-native, evidence-first, and local-first.\n"
+        "- Plans bind to the active attractor before running.\n"
+        "- Independent audit remains the closure decision layer.\n"
+        "\n## Allowed Variation\n\n"
+        "- Current-stage wording may advance as roadmap items close.\n"
+        "- Agent interfaces may expand if command contracts stay explicit.\n"
+        "\n## Drift / Leakage Signals\n\n"
+        "- ABH is described as a general project management platform.\n"
+        "- Work bypasses plan, verification, or independent audit.\n"
+        "\n## Correction Path\n\n"
+        "- Update this file when project scope, stage, or operating model changes.\n"
+        "- Route scope expansions through roadmap materialization and audit.\n"
     )
 
 
@@ -108,6 +147,19 @@ def _codebase_map_doc() -> str:
         "- `docs/` stores human-readable mirrors and owner docs.\n"
         "- `docs/architecture/attractors/` stores attractor documents.\n"
         "- `docs/plans/`, `docs/audits/`, and `docs/memory/` store control records.\n"
+        "\n## Stable Commitments\n\n"
+        "- `.abh/` stores machine-readable ABH state.\n"
+        "- `docs/` stores Markdown mirrors and owner docs.\n"
+        "- `abh/init.py` owns seeded owner-doc templates.\n"
+        "\n## Allowed Variation\n\n"
+        "- New modules and tests may be added by audited plans.\n"
+        "- Module descriptions may change as responsibilities move.\n"
+        "\n## Drift / Leakage Signals\n\n"
+        "- CLI and MCP behavior diverge from shared command contracts.\n"
+        "- Seeded docs drift from current owner-doc guidance.\n"
+        "\n## Correction Path\n\n"
+        "- Update this map when module ownership changes.\n"
+        "- Update seeded and current owner docs in the same audited slice.\n"
     )
 
 
@@ -136,6 +188,18 @@ def _attractor_doc() -> str:
         "- Work starts from an active attractor.\n"
         "- Implementation slices close through plan, verification, audit, and memory when needed.\n"
         "- Machine-readable state and Markdown records must stay consistent.\n"
+        "\n## Stable Commitments\n\n"
+        "- ABH remains Git-native, evidence-first, and audit-gated.\n"
+        "- Machine-readable and Markdown records stay synchronized.\n"
+        "\n## Allowed Variation\n\n"
+        "- Command families may grow when they preserve the audited workflow.\n"
+        "- Evidence vocabulary may mature through roadmap slices.\n"
+        "\n## Drift / Leakage Signals\n\n"
+        "- Work closes without independent audit.\n"
+        "- Runtime state and Markdown records diverge.\n"
+        "\n## Correction Path\n\n"
+        "- Repair through an explicit plan bound to the active attractor.\n"
+        "- Preserve evidence in verification and audit records.\n"
     )
 
 

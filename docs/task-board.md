@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-阶段 6：漂移与记忆质量提升（Doing）；当前焦点：`stage6.owner-doc-stable-commitments`
+阶段 7：团队可用与生态集成（Ready）；当前焦点：`stage7.ci-templates`
 
 ## 状态说明
 
@@ -485,8 +485,8 @@
 | S6-F01 | Plan Reference Set | Deferred | `stage6.plan-reference-set` -> `plan-043-plan-reference-set` |
 | S6-F02 | Commitment Phase State | Done | `stage6.commitment-phase-state` -> `plan-049-commitment-phase-state` |
 | S6-F03 | Audit Semantic Conservation | Done | `stage6.audit-semantic-conservation` -> `plan-050-audit-semantic-conservation` |
-| S6-F04 | Owner Doc Stable Commitments | Todo | `stage6.owner-doc-stable-commitments` |
-| S6-F05 | Post-Close Freshness Semantics | Todo | `stage6.post-close-freshness-semantics` |
+| S6-F04 | Owner Doc Stable Commitments | Done | `stage6.owner-doc-stable-commitments` -> `plan-051-owner-doc-stable-commitments` |
+| S6-F05 | Post-Close Freshness Semantics | Done | `stage6.post-close-freshness-semantics` -> `plan-052-post-close-freshness-semantics` |
 | S6-F06 | Command Contract Runtime Registry | Done | `stage6.command-contract-runtime-registry` -> `plan-044-command-contract-runtime-registry` |
 | S6-F07 | Repository Write Transaction Boundary | Done | `stage6.repository-write-transaction-boundary` -> `plan-045-repository-write-transaction-boundary` |
 | S6-F08 | Schema Validation and Migration | Done | `stage6.schema-validation-and-migration` -> `plan-046-schema-validation-and-migration` |
@@ -599,3 +599,29 @@
 | S46-004 | 实现 semantic conservation 与 J-flow/R-flow 审计提示 | Done | `abh/audit_bundle.py` |
 | S46-005 | 同步 audit template、audits README、quality signals、roadmap、task-board 和 codebase map | Done | `docs/audits/templates/audit-template.md`, `docs/audits/README.md`, `docs/architecture/quality-signals.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/context/codebase-map.md` |
 | S46-006 | plan-050 验证、独立审计和关闭 | Done | `.abh/verifications/ver-850d3e65452b.json`, `docs/audits/audit-050-audit-semantic-conservation-r2.md`, `docs/plans/plan-050-audit-semantic-conservation.md` |
+
+## Sprint 47
+
+目标：把 `stage6.owner-doc-stable-commitments` dogfood 成 `plan-051-owner-doc-stable-commitments`，让关键 owner docs、attractor 模板和 `abh init` seed 文档显式区分 Stable Commitments、Allowed Variation、Drift / Leakage Signals 和 Correction Path。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S47-001 | materialize Owner Doc Stable Commitments 计划 | Done | `stage6.owner-doc-stable-commitments` -> `docs/plans/plan-051-owner-doc-stable-commitments.md` |
+| S47-002 | 补齐 plan-051 定义并转入 ready/running | Done | `docs/plans/plan-051-owner-doc-stable-commitments.md` |
+| S47-003 | 定义 owner-doc stable commitments 红灯测试 | Done | `tests/test_command_contracts.py` |
+| S47-004 | 更新当前 owner docs、attractor 模板和 init seed 文档 | Done | `docs/index.md`, `docs/context/source-of-truth.md`, `docs/context/project-context.md`, `docs/context/codebase-map.md`, `docs/architecture/templates/attractor-template.md`, `abh/init.py` |
+| S47-005 | 同步 quality signals、roadmap、task-board 和 codebase map | Done | `docs/architecture/quality-signals.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/context/codebase-map.md` |
+| S47-006 | plan-051 验证、独立审计和关闭 | Done | `.abh/verifications/ver-726c18a5135b.json`, `docs/audits/audit-051-owner-doc-stable-commitments.md`, `docs/plans/plan-051-owner-doc-stable-commitments.md` |
+
+## Sprint 48
+
+目标：把 `stage6.post-close-freshness-semantics` dogfood 成 `plan-052-post-close-freshness-semantics`，区分 close-gate freshness 与 post-close health freshness，避免 closed plan 因 audit/close metadata churn 被误报为高危 stale proof。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S48-001 | materialize Post-Close Freshness Semantics 计划 | Done | `stage6.post-close-freshness-semantics` -> `docs/plans/plan-052-post-close-freshness-semantics.md` |
+| S48-002 | 补齐 plan-052 定义并转入 ready/running | Done | `docs/plans/plan-052-post-close-freshness-semantics.md` |
+| S48-003 | 定义 closed-plan stale reason 与 health report 红灯测试 | Done | `tests/test_verifications_and_audits.py`, `tests/test_memory_drift_reporting.py`；覆盖 close audit-id bookkeeping、proof-bearing closure evidence、tracked roadmap/task-board sync 和其他 git drift |
+| S48-004 | 实现 stale reason detail 与 post-close metadata churn health signal | Done | `abh/plans.py`, `abh/reporting.py`；仅 bounded post-close docs sync 与 close bookkeeping 降级为 governance churn |
+| S48-005 | 同步 quality signals、roadmap、task-board 和 codebase map | Done | `docs/architecture/quality-signals.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/context/codebase-map.md` |
+| S48-006 | plan-052 验证、独立审计和关闭 | Done | `.abh/verifications/ver-e55f64471acf.json`, `docs/audits/audit-052-post-close-freshness-semantics.md`, `docs/plans/plan-052-post-close-freshness-semantics.md` |

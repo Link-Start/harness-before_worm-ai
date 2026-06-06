@@ -398,6 +398,127 @@ class VerificationAndAuditTests(WorkspaceCliTestCase):
         self.assertTrue(summary["stale"])
         self.assertIn("plan_updated_after_verification", summary["reasons"])
         self.assertIn("validation_checklist_changed", summary["reasons"])
+        reason_details = {item["reason"]: item for item in summary["reason_details"]}
+        self.assertEqual(reason_details["plan_updated_after_verification"]["category"], "product_proof_drift")
+        self.assertTrue(reason_details["plan_updated_after_verification"]["requires_fresh_verification"])
+        self.assertEqual(summary["freshness_class"], "product_proof_drift")
+
+    def test_closed_plan_status_distinguishes_governance_metadata_churn(self) -> None:
+        self.create_ready_plan("plan-119-closed-freshness")
+        self.run_cli(
+            "verify",
+            "record",
+            "plan-119-closed-freshness",
+            "--command",
+            "unit tests pass",
+            "--result",
+            "pass",
+        )
+        plan = json.loads(self.run_cli("plan", "status", "plan-119-closed-freshness", "--json")[1])["data"]["plan"]
+        verification_id = plan["verification_runs"][-1]
+        self.run_cli(
+            "audit",
+            "request",
+            "plan-119-closed-freshness",
+            "--id",
+            "audit-119-closed-freshness",
+            "--auditor",
+            "independent-reviewer",
+            "--scope",
+            "Independent close audit",
+            "--evidence",
+            "tests/test_verifications_and_audits.py",
+        )
+        self.run_cli(
+            "audit",
+            "record",
+            "audit-119-closed-freshness",
+            "--result",
+            "pass",
+            "--rationale",
+            "fresh independent evidence verified",
+            "--auditor-context",
+            "separate session",
+            "--independence",
+            "independent",
+            "--verification-id",
+            verification_id,
+        )
+        self.run_cli("close", "plan-119-closed-freshness")
+
+        code, out, err = self.run_cli("plan", "status", "plan-119-closed-freshness", "--json")
+
+        self.assertEqual(code, 0, err)
+        summary = json.loads(out)["data"]["verification_summary"]
+        self.assertTrue(summary["stale"])
+        self.assertEqual(summary["freshness_class"], "governance_metadata_churn")
+        self.assertFalse(summary["requires_fresh_verification"])
+        reason_details = {item["reason"]: item for item in summary["reason_details"]}
+        self.assertEqual(reason_details["plan_updated_after_verification"]["category"], "governance_metadata_churn")
+        self.assertEqual(reason_details["plan_updated_after_verification"]["trigger"], "closed_plan_metadata")
+        self.assertEqual(reason_details["plan_updated_after_verification"]["changed_fields"], ["closure_evidence"])
+
+    def test_closed_plan_status_keeps_closure_evidence_changes_as_product_drift(self) -> None:
+        self.create_ready_plan("plan-120-closed-proof-drift")
+        self.run_cli(
+            "verify",
+            "record",
+            "plan-120-closed-proof-drift",
+            "--command",
+            "unit tests pass",
+            "--result",
+            "pass",
+        )
+        plan = json.loads(self.run_cli("plan", "status", "plan-120-closed-proof-drift", "--json")[1])["data"]["plan"]
+        verification_id = plan["verification_runs"][-1]
+        self.run_cli(
+            "audit",
+            "request",
+            "plan-120-closed-proof-drift",
+            "--id",
+            "audit-120-closed-proof-drift",
+            "--auditor",
+            "independent-reviewer",
+            "--scope",
+            "Independent close audit",
+            "--evidence",
+            "tests/test_verifications_and_audits.py",
+        )
+        self.run_cli(
+            "audit",
+            "record",
+            "audit-120-closed-proof-drift",
+            "--result",
+            "pass",
+            "--rationale",
+            "fresh independent evidence verified",
+            "--auditor-context",
+            "separate session",
+            "--independence",
+            "independent",
+            "--verification-id",
+            verification_id,
+        )
+        self.run_cli("close", "plan-120-closed-proof-drift")
+        self.run_cli(
+            "plan",
+            "update",
+            "plan-120-closed-proof-drift",
+            "--closure-evidence",
+            "docs/plans/post-close-proof-change.md",
+        )
+
+        code, out, err = self.run_cli("plan", "status", "plan-120-closed-proof-drift", "--json")
+
+        self.assertEqual(code, 0, err)
+        summary = json.loads(out)["data"]["verification_summary"]
+        self.assertTrue(summary["stale"])
+        self.assertEqual(summary["freshness_class"], "product_proof_drift")
+        self.assertTrue(summary["requires_fresh_verification"])
+        reason_details = {item["reason"]: item for item in summary["reason_details"]}
+        self.assertEqual(reason_details["plan_updated_after_verification"]["category"], "product_proof_drift")
+        self.assertEqual(reason_details["plan_updated_after_verification"]["trigger"], "proof_bearing_plan_fields")
+        self.assertEqual(reason_details["plan_updated_after_verification"]["changed_fields"], ["closure_evidence"])
 
     def test_plan_status_json_marks_latest_verification_stale_when_git_status_changes(self) -> None:
         command = f'"{sys.executable}" -c "print(\'git-stale\')"'

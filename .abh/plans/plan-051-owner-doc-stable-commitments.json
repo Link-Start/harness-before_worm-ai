@@ -5,7 +5,7 @@
   "attractor": "docs/architecture/attractors/abh-core-attractor.md",
   "baseline": "ABH has source-of-truth precedence and active attractor invariants, but most owner docs do not yet separate stable commitments, allowed variation, drift/leakage signals, and correction paths.",
   "owner": "platform",
-  "status": "draft",
+  "status": "closed",
   "goals": [
     "Update owner-doc templates and key ABH owner docs with Stable Commitments, Allowed Variation, Drift / Leakage Signals, and Correction Path sections.",
     "Document how these owner-doc sections support plan Reference Sets, audit semantic conservation, health reports, and future drift detection.",
@@ -24,10 +24,10 @@
     "Tests or doctor-compatible checks confirm the updated docs exist and roadmap consistency remains clean."
   ],
   "validation_checklist": [
-    "python3 -m unittest tests/test_cli.py -v",
-    "python3 -m abh doctor",
     "git diff --check",
-    "python3 -m abh roadmap check --json"
+    ".venv\\Scripts\\python.exe -m unittest discover -v",
+    ".venv\\Scripts\\python.exe -m abh doctor --json",
+    ".venv\\Scripts\\python.exe -m abh roadmap check --json"
   ],
   "closure_evidence": [
     "docs/index.md",
@@ -37,18 +37,37 @@
     "docs/architecture/templates/attractor-template.md",
     "docs/architecture/quality-signals.md",
     "docs/development-roadmap.md",
-    "docs/task-board.md"
+    "docs/task-board.md",
+    "audit-051-owner-doc-stable-commitments"
   ],
   "commitment_phase_state": {
-    "stable_state_now": [],
-    "active_change_pressure": [],
-    "target_stable_state": [],
-    "conversion_proof": [],
-    "residual_pressure": []
+    "stable_state_now": [
+      "ABH already has source-of-truth precedence, owner-doc routing, active attractor invariants, audit semantic conservation, and commitment phase state records."
+    ],
+    "active_change_pressure": [
+      "Key owner docs still mix durable commitments with mutable guidance, making future Agents guess which statements must remain invariant."
+    ],
+    "target_stable_state": [
+      "Important owner docs and templates expose Stable Commitments, Allowed Variation, Drift / Leakage Signals, and Correction Path sections that future audits and health checks can inspect."
+    ],
+    "conversion_proof": [
+      "Tests assert stable commitment sections exist in current owner docs, templates, init seed docs, and quality signal guidance."
+    ],
+    "residual_pressure": [
+      {
+        "pressure": "Doctor gate for owner-doc section completeness",
+        "non_blocking_rationale": "Non-blocking because this first slice is docs-first and explicitly avoids new doctor consistency gates."
+      }
+    ]
   },
-  "verification_runs": [],
-  "audit_ids": [],
+  "verification_runs": [
+    "ver-893f633822b8",
+    "ver-726c18a5135b"
+  ],
+  "audit_ids": [
+    "audit-051-owner-doc-stable-commitments"
+  ],
   "created_at": "2026-06-05T10:30:13.996764+00:00",
-  "updated_at": "2026-06-05T10:30:13.999274+00:00",
+  "updated_at": "2026-06-06T08:00:54.141453+00:00",
   "doc_path": "D:\\work\\ai\\harness-before\\docs\\plans\\plan-051-owner-doc-stable-commitments.md"
 }

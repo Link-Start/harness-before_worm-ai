@@ -1,0 +1,133 @@
+{
+  "schema_version": "1",
+  "id": "ver-736fc2798f6e",
+  "plan_id": "plan-052-post-close-freshness-semantics",
+  "command": "git diff --check && .venv\\Scripts\\python.exe -m unittest discover -v && .venv\\Scripts\\python.exe -m abh doctor --json && .venv\\Scripts\\python.exe -m abh roadmap check --json",
+  "result": "pass",
+  "artifacts": [
+    "command='git diff --check'; exit_code=0; duration_seconds=0.092; stdout=''; stderr=\"warning: in the working copy of '.abh/plans/plan-051-owner-doc-stable-commitments.json', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/init.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/plans.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'abh/reporting.py', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of \"",
+    "command='.venv\\\\Scripts\\\\python.exe -m unittest discover -v'; exit_code=0; duration_seconds=10.769; stdout=''; stderr='test_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command (tests.test_cli.CliTests.test_agent_setup_targets_share_shape_and_mcp_includes_server_command) ... ok\\\\ntest_attractor_create_active_show_list_and_supersede_json_flow (tests.test_cli.CliTests.test_attractor_create_active_show_list_and_supersede_json_flow) ... ok\\\\ntest_attractor_create_does_not'",
+    "command='.venv\\\\Scripts\\\\python.exe -m abh doctor --json'; exit_code=0; duration_seconds=0.256; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"doctor\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='.venv\\\\Scripts\\\\python.exe -m abh roadmap check --json'; exit_code=0; duration_seconds=0.231; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "D:\\work\\ai\\harness-before",
+    "git": {
+      "commit": "68e96c2c22a3b869b7bb5b45b3ea3775105b2ff1",
+      "dirty": true,
+      "status_hash": "a4399ba6338addbbaf062940056c6b93b1dc29bb3d8f0b8e80573327e5153775",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.15.0a7 (tags/v3.15.0a7:6024d3c, Mar 10 2026, 13:09:10) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "D:\\work\\ai\\harness-before\\.venv\\Scripts\\python.exe"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 4,
+      "execution_policy": "trusted_local_shell",
+      "trust_level": "local_shell",
+      "command_source": "plan_validation_checklist",
+      "isolation": "none"
+    },
+    "commands": [
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": ".venv\\Scripts\\python.exe -m unittest discover -v",
+        "argv": [
+          ".venvScriptspython.exe",
+          "-m",
+          "unittest",
+          "discover",
+          "-v"
+        ]
+      },
+      {
+        "command": ".venv\\Scripts\\python.exe -m abh doctor --json",
+        "argv": [
+          ".venvScriptspython.exe",
+          "-m",
+          "abh",
+          "doctor",
+          "--json"
+        ]
+      },
+      {
+        "command": ".venv\\Scripts\\python.exe -m abh roadmap check --json",
+        "argv": [
+          ".venvScriptspython.exe",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-06-06T09:28:05.871885+00:00",
+      "content_hash": "7632639a424a1b8638563d677d44fac6ec415ceeea568520e82cce2d174e9cdf",
+      "payload": {
+        "title": "Post-Close Freshness Semantics",
+        "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+        "baseline": "plan-042 health-report dogfooding showed that close and post-close task-board synchronization can update plan evidence after a fresh independent audit, causing the closed plan to be reported as stale_proof. The signal is technically accurate but too coarse for health posture and recommended inspections.",
+        "goals": [
+          "Classify verification stale reasons so health reports can distinguish product or closure-evidence changes from audit, close, and post-close governance metadata churn.",
+          "Keep plan status transparent about stale reasons while making health-report recommendations more precise for closed plans.",
+          "Document when post-close documentation synchronization should create a follow-up signal instead of invalidating the completed close gate.",
+          "Add tests that cover close-time plan updates, audit record writes, and post-close task-board or roadmap synchronization."
+        ],
+        "non_goals": [
+          "Do not weaken the existing independent audit close gate.",
+          "Do not hide real stale verification caused by product code, validation checklist, closure evidence, or owner-doc changes.",
+          "Do not add automatic re-audit, CI execution, external services, or team policy in this slice."
+        ],
+        "exit_criteria": [
+          "plan status --json exposes enough stale reason detail for consumers to distinguish governance metadata churn from product proof drift.",
+          "abh report health --json does not recommend re-running close-time proof solely because a closed plan recorded its audit or close metadata.",
+          "Docs explain the difference between close-gate freshness and post-close health freshness.",
+          "Tests cover closed-plan freshness after audit/close writes and after post-close documentation synchronization."
+        ],
+        "validation_checklist": [
+          "git diff --check",
+          ".venv\\Scripts\\python.exe -m unittest discover -v",
+          ".venv\\Scripts\\python.exe -m abh doctor --json",
+          ".venv\\Scripts\\python.exe -m abh roadmap check --json"
+        ],
+        "closure_evidence": [
+          "abh/plans.py",
+          "abh/reporting.py",
+          "tests/test_cli.py",
+          "docs/architecture/quality-signals.md",
+          "docs/development-roadmap.md",
+          "docs/task-board.md",
+          "docs/context/codebase-map.md",
+          "tests/test_verifications_and_audits.py",
+          "tests/test_memory_drift_reporting.py"
+        ]
+      },
+      "validation_checklist": [
+        "git diff --check",
+        ".venv\\Scripts\\python.exe -m unittest discover -v",
+        ".venv\\Scripts\\python.exe -m abh doctor --json",
+        ".venv\\Scripts\\python.exe -m abh roadmap check --json"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-06-06T09:29:57.347040+00:00"
+}

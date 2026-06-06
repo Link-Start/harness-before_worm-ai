@@ -85,18 +85,32 @@ def project_health_report(cwd: Path | None = None) -> dict[str, Any]:
             evidence_refs = [plan.id]
             if latest_id:
                 evidence_refs.append(str(latest_id))
-            pressure.append(
-                pressure_signal(
-                    signal_id=f"pressure-stale-proof-{plan.id}",
-                    signal_type="stale_proof",
-                    severity="high",
-                    confidence="high",
-                    summary=f"{plan.id} latest verification is stale.",
-                    evidence_refs=evidence_refs,
-                    related_plan_ids=[plan.id],
-                    recommendation="Run fresh verification before audit or close.",
+            if summary.get("freshness_class") == "governance_metadata_churn":
+                pressure.append(
+                    pressure_signal(
+                        signal_id=f"pressure-post-close-metadata-{plan.id}",
+                        signal_type="post_close_metadata_churn",
+                        severity="low",
+                        confidence="high",
+                        summary=f"{plan.id} latest verification is stale only because closed-plan governance metadata changed.",
+                        evidence_refs=evidence_refs,
+                        related_plan_ids=[plan.id],
+                        recommendation="Review post-close documentation sync and record a follow-up if product proof changed.",
+                    )
                 )
-            )
+            else:
+                pressure.append(
+                    pressure_signal(
+                        signal_id=f"pressure-stale-proof-{plan.id}",
+                        signal_type="stale_proof",
+                        severity="high",
+                        confidence="high",
+                        summary=f"{plan.id} latest verification is stale.",
+                        evidence_refs=evidence_refs,
+                        related_plan_ids=[plan.id],
+                        recommendation="Run fresh verification before audit or close.",
+                    )
+                )
         if latest_id:
             run = load_verification(str(latest_id), cwd)
             for item in run.failure_classifications:

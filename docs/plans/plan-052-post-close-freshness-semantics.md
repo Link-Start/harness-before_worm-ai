@@ -1,0 +1,83 @@
+# Plan: Post-Close Freshness Semantics
+
+## Metadata
+
+- ID: plan-052-post-close-freshness-semantics
+- Status: closed
+- Attractor: docs/architecture/attractors/abh-core-attractor.md
+- Baseline: plan-042 health-report dogfooding showed that close and post-close task-board synchronization can update plan evidence after a fresh independent audit, causing the closed plan to be reported as stale_proof. The signal is technically accurate but too coarse for health posture and recommended inspections.
+- Owner: platform
+- Created: 2026-06-06T08:07:03.641785+00:00
+- Updated: 2026-06-06T09:55:35.659615+00:00
+
+## Goals
+
+- Classify verification stale reasons so health reports can distinguish product or closure-evidence changes from audit, close, and post-close governance metadata churn.
+- Keep plan status transparent about stale reasons while making health-report recommendations more precise for closed plans.
+- Document when post-close documentation synchronization should create a follow-up signal instead of invalidating the completed close gate.
+- Add tests that cover close-time plan updates, audit record writes, and post-close task-board or roadmap synchronization.
+
+## Non-Goals
+
+- Do not weaken the existing independent audit close gate.
+- Do not hide real stale verification caused by product code, validation checklist, closure evidence, or owner-doc changes.
+- Do not add automatic re-audit, CI execution, external services, or team policy in this slice.
+
+## Exit Criteria
+
+- plan status --json exposes enough stale reason detail for consumers to distinguish governance metadata churn from product proof drift.
+- abh report health --json does not recommend re-running close-time proof solely because a closed plan recorded its audit or close metadata.
+- Docs explain the difference between close-gate freshness and post-close health freshness.
+- Tests cover closed-plan freshness after audit/close writes and after post-close documentation synchronization.
+
+## Commitment Phase State
+
+### Stable State Now
+
+- Close gate freshness requires a fresh passing verification and an independent audit tied to that verification.
+
+### Active Change Pressure
+
+- Closed plans can become technically stale when audit, close, or post-close owner-doc synchronization writes governance metadata after verification.
+
+### Target Stable State
+
+- Plan status remains transparent about stale reasons while health reporting separates product proof drift from expected closed-plan governance metadata churn.
+
+### Conversion Proof
+
+- Tests cover closed-plan verification freshness detail and health-report handling for audit/close writes and post-close documentation synchronization.
+
+### Residual Pressure
+
+- Automatic re-audit policy | Non-blocking rationale: Non-blocking because this slice only classifies local freshness semantics and does not add automation or policy gates.
+
+## Validation Checklist
+
+- git diff --check
+- .venv\Scripts\python.exe -m unittest discover -v
+- .venv\Scripts\python.exe -m abh doctor --json
+- .venv\Scripts\python.exe -m abh roadmap check --json
+
+## Closure Evidence
+
+- abh/plans.py
+- abh/reporting.py
+- tests/test_cli.py
+- docs/architecture/quality-signals.md
+- docs/development-roadmap.md
+- docs/task-board.md
+- docs/context/codebase-map.md
+- tests/test_verifications_and_audits.py
+- tests/test_memory_drift_reporting.py
+- audit-052-post-close-freshness-semantics
+
+## Verification Runs
+
+- ver-90d00bba229a
+- ver-736fc2798f6e
+- ver-e55f64471acf
+
+## Audits
+
+- audit-052-post-close-freshness-semantics

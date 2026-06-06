@@ -33,3 +33,30 @@ Stage 4 makes ABH agent-first:
 - Do not replace independent audit with local verification.
 - Do not weaken the plan close audit gate for convenience.
 - Do not build a Web UI before the CLI, JSON, MCP, and init/onboarding path are stable.
+
+## Stable Commitments
+
+- ABH is a Git-native, evidence-first governance layer for AI-assisted development.
+- ABH is local-first and stores machine-readable state under `.abh/` with Markdown mirrors under `docs/`.
+- Every executable plan must bind to the active attractor before it can become ready.
+- Verification records are evidence, while independent audit remains the closure decision layer.
+- Stage 6 remains product-quality-first and agent-navigation-second.
+
+## Allowed Variation
+
+- The current stage description may advance as roadmap items close.
+- Release-line wording may change when release preparation or packaging plans complete.
+- Agent interfaces may expand if new commands preserve explicit JSON envelopes and audited write boundaries.
+
+## Drift / Leakage Signals
+
+- ABH is described as a general project management platform or Web UI-first product.
+- A workflow bypasses plan, verification, or independent audit for convenience.
+- Agent navigation starts optimizing recommendations before product-quality signals are locally inspectable.
+- Current-stage text lags behind closed plans enough to misroute new work.
+
+## Correction Path
+
+- Update this file when a plan changes project scope, stage, release posture, or operating model.
+- If implementation contradicts this context, classify the gap as stale docs or implementation drift before closing.
+- Route scope expansions through roadmap materialization and independent audit rather than ad hoc doc edits.

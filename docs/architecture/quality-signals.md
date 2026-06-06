@@ -123,6 +123,7 @@ Project health is not one score in Stage 6. It is a structured summary:
 
 - `unbound_commitment_pressure`: accepted work or findings that are not yet bound to owner docs, verification, audit, memory, or roadmap follow-up evidence.
 - `stale_proof`: verification or audit evidence that no longer matches the latest plan or repository state.
+- `post_close_metadata_churn`: closed-plan governance metadata changed after verification, but the change is audit, close-time audit-id bookkeeping, or post-close documentation bookkeeping rather than product proof drift.
 - `semantic_leakage`: closed or materialized state that is not reflected in the expected owner docs, roadmap, task board, or protocol docs.
 - `j_flow_only_evidence`: evidence that primarily routes or restates commitments without reducing uncertainty through decision, proof, or owner-doc alignment.
 - `orphaned_memory`: active memory that lacks tags, typed relationships, or evidence strong enough for future reuse.
@@ -141,6 +142,29 @@ The next Stage 6 queue after the health report should deepen the commitment mode
 - Audit Semantic Conservation: audit bundles ask whether in-scope commitments disappeared, weakened, or moved to non-authoritative artifacts, and distinguish J-flow from R-flow.
 - Owner Doc Stable Commitments: important owner docs separate Stable Commitments, Allowed Variation, Drift / Leakage Signals, and Correction Path.
 - Post-Close Freshness Semantics: closed-plan health reporting should distinguish real product proof drift from expected audit, close, and post-close documentation metadata churn.
+
+### Post-Close Freshness Semantics
+
+Close-gate freshness is strict: a plan can close only when the latest verification is passing, fresh, and tied to an independent passing audit. That gate should continue to treat stale verification as blocking before close.
+
+Post-close health freshness is diagnostic: after a plan is already closed, audit recording, close metadata, or owner-doc/task-board synchronization can update plan records after the verified proof. `plan status --json` should still expose the stale reasons, but `abh report health --json` should classify closed-plan governance metadata churn separately from product proof drift.
+
+- Product proof drift means code, tests, validation checklist, closure evidence, owner docs, git commit, or working tree evidence changed in a way that should normally require fresh verification before audit or close. Post-close additions to proof-bearing closure evidence stay in this bucket.
+- Governance metadata churn means a closed plan changed because audit ids, close-time audit-id bookkeeping, or bounded post-close documentation bookkeeping were written after the close gate already had fresh proof.
+- Bounded post-close documentation bookkeeping is limited to tracked `docs/development-roadmap.md` and `docs/task-board.md` synchronization for a closed plan; other tracked git changes remain product proof drift.
+- Health reports should emit `stale_proof` for product proof drift and `post_close_metadata_churn` for closed-plan governance churn.
+- Post-close documentation synchronization should create a low-severity follow-up inspection when needed, not a high-severity recommendation to rerun close-time proof by default.
+
+### Owner Doc Stable Commitments
+
+Owner Doc Stable Commitments turn durable owner-doc guidance into inspectable structure for future health and drift checks. Important owner docs should expose:
+
+- Stable Commitments: semantic commitments that should not disappear or weaken without an audited owner-doc update.
+- Allowed Variation: implementation, wording, sequencing, or evidence-shape changes that are acceptable without changing the commitment.
+- Drift / Leakage Signals: local signals that suggest an Agent, plan, audit, memory, or implementation is moving the commitment into a weaker or non-authoritative place.
+- Correction Path: the owner doc, plan, verification, audit, memory, or roadmap action that should repair the drift.
+
+This remains docs-first in the first slice. Future health and drift checks may consume these sections, but the first slice does not add AttractorRecord fields or doctor consistency gates.
 
 ## Agent Navigation
 

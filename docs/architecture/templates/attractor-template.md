@@ -40,3 +40,19 @@
 ## Evidence
 
 - 
+
+## Stable Commitments
+
+- 列出该吸引子必须长期保持的语义承诺。
+
+## Allowed Variation
+
+- 列出实现、命名、组织方式或执行路径中允许变化的部分。
+
+## Drift / Leakage Signals
+
+- 列出哪些信号表明计划、代码、文档或审计正在偏离该吸引子。
+
+## Correction Path
+
+- 说明发现偏离后应更新哪个 owner doc、计划、验证或审计证据。

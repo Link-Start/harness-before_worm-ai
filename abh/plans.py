@@ -346,9 +346,13 @@ def plan_verification_hash(plan: PlanRecord) -> str:
 
 
 def plan_verification_snapshot(plan: PlanRecord) -> dict[str, object]:
+    payload = plan_verification_payload(plan)
     return {
         "updated_at": plan.updated_at,
-        "content_hash": plan_verification_hash(plan),
+        "content_hash": hashlib.sha256(
+            json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest(),
+        "payload": payload,
         "validation_checklist": list(plan.validation_checklist),
     }
 
@@ -394,14 +398,137 @@ def append_git_stale_reasons(reasons: list[str], run, cwd: Path | None = None) -
         reasons.append("git_status_changed")
 
 
+def changed_git_status_paths(run, cwd: Path | None = None) -> list[str] | None:
+    recorded_git = run.environment.get("git")
+    if not isinstance(recorded_git, dict) or not recorded_git.get("available"):
+        return None
+
+    from .verifications import git_metadata, normalized_git_status
+
+    root = Path.cwd() if cwd is None else Path(cwd)
+    current_git = git_metadata(root)
+    if not current_git.get("available"):
+        return None
+    if recorded_git.get("commit") != current_git.get("commit"):
+        return None
+    if recorded_git.get("status_hash") == current_git.get("status_hash"):
+        return []
+
+    import subprocess
+
+    status = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        timeout=5,
+        check=False,
+    )
+    if status.returncode != 0:
+        return None
+    paths: list[str] = []
+    for line in normalized_git_status(status.stdout).splitlines():
+        if len(line) < 4:
+            continue
+        raw_path = line[3:]
+        paths.extend(part.strip().replace("\\", "/") for part in raw_path.split(" -> ") if part.strip())
+    return sorted(set(paths))
+
+
+POST_CLOSE_DOC_SYNC_PATHS = {
+    "docs/development-roadmap.md",
+    "docs/task-board.md",
+}
+
+
+def changed_verification_fields(snapshot: dict[str, object], plan: PlanRecord) -> list[str] | None:
+    payload = snapshot.get("payload")
+    if not isinstance(payload, dict):
+        return None
+    current = plan_verification_payload(plan)
+    return [field for field in PLAN_VERIFICATION_FIELDS if payload.get(field) != current.get(field)]
+
+
+def close_bookkeeping_only(snapshot: dict[str, object], plan: PlanRecord, changed_fields: list[str] | None) -> bool:
+    if plan.status != "closed" or changed_fields != ["closure_evidence"]:
+        return False
+    payload = snapshot.get("payload")
+    if not isinstance(payload, dict):
+        return False
+    previous = payload.get("closure_evidence")
+    if not isinstance(previous, list):
+        return False
+    prior_values = [str(item) for item in previous]
+    current_values = [str(item) for item in plan.closure_evidence]
+    added = [item for item in current_values if item not in prior_values]
+    return bool(added) and all(item in plan.audit_ids for item in added)
+
+
+def stale_reason_detail(
+    reason: str,
+    plan: PlanRecord,
+    *,
+    snapshot: dict[str, object] | None = None,
+    git_status_paths: list[str] | None = None,
+) -> dict[str, object]:
+    category = "product_proof_drift"
+    trigger = "product_or_validation_state"
+    requires_fresh_verification = True
+    changed_fields = changed_verification_fields(snapshot or {}, plan)
+    if plan.status == "closed" and reason == "plan_updated_after_verification":
+        if close_bookkeeping_only(snapshot or {}, plan, changed_fields):
+            category = "governance_metadata_churn"
+            trigger = "closed_plan_metadata"
+            requires_fresh_verification = False
+        else:
+            trigger = "proof_bearing_plan_fields"
+    elif reason == "git_status_changed":
+        trigger = "repository_state"
+        if plan.status == "closed" and git_status_paths and set(git_status_paths) <= POST_CLOSE_DOC_SYNC_PATHS:
+            category = "governance_metadata_churn"
+            trigger = "post_close_documentation_sync"
+            requires_fresh_verification = False
+    elif reason == "git_commit_changed":
+        trigger = "repository_commit"
+    elif reason == "validation_checklist_changed":
+        trigger = "validation_checklist"
+    elif reason == "no_verification_runs":
+        trigger = "missing_verification"
+    detail = {
+        "reason": reason,
+        "category": category,
+        "trigger": trigger,
+        "requires_fresh_verification": requires_fresh_verification,
+    }
+    if changed_fields is not None:
+        detail["changed_fields"] = changed_fields
+    if git_status_paths is not None and reason == "git_status_changed":
+        detail["changed_paths"] = git_status_paths
+    return detail
+
+
+def freshness_class_for(details: list[dict[str, object]]) -> str:
+    if not details:
+        return "fresh"
+    if any(item.get("category") == "product_proof_drift" for item in details):
+        return "product_proof_drift"
+    if any(item.get("category") == "governance_metadata_churn" for item in details):
+        return "governance_metadata_churn"
+    return "unknown_stale"
+
+
 def verification_freshness_summary(plan: PlanRecord, cwd: Path | None = None) -> dict[str, object]:
     if not plan.verification_runs:
+        details = [stale_reason_detail("no_verification_runs", plan)]
         return {
             "latest_id": None,
             "result": None,
             "trust_level": "unknown",
             "stale": True,
             "reasons": ["no_verification_runs"],
+            "reason_details": details,
+            "freshness_class": freshness_class_for(details),
+            "requires_fresh_verification": True,
         }
 
     from .verifications import load_verification
@@ -420,6 +547,16 @@ def verification_freshness_summary(plan: PlanRecord, cwd: Path | None = None) ->
     if verification_commands(latest) != list(plan.validation_checklist):
         reasons.append("validation_checklist_changed")
     append_git_stale_reasons(reasons, latest, cwd)
+    git_status_paths = changed_git_status_paths(latest, cwd) if "git_status_changed" in reasons else None
+    details = [
+        stale_reason_detail(
+            reason,
+            plan,
+            snapshot=snapshot,
+            git_status_paths=git_status_paths if reason == "git_status_changed" else None,
+        )
+        for reason in reasons
+    ]
 
     return {
         "latest_id": latest.id,
@@ -427,4 +564,7 @@ def verification_freshness_summary(plan: PlanRecord, cwd: Path | None = None) ->
         "trust_level": latest.trust_level,
         "stale": bool(reasons),
         "reasons": reasons,
+        "reason_details": details,
+        "freshness_class": freshness_class_for(details),
+        "requires_fresh_verification": any(bool(item.get("requires_fresh_verification")) for item in details),
     }

@@ -36,8 +36,8 @@ Stage 6 quality work starts with `docs/architecture/quality-signals.md`. Runtime
 - `tests/test_navigation_and_roadmap.py` covers `abh next`, onboarding readiness, roadmap numbering/materialization, and queue/blocked-plan navigation behavior.
 - `tests/test_storage_and_doctor.py` covers workspace doctor consistency checks, schema issue reporting, atomic write behavior, and JSON/Markdown pair-writer coverage.
 - `tests/test_models.py` covers schema-version serialization, validation, deprecated-field handling, and legacy record readability.
-- `tests/test_verifications_and_audits.py` covers verification runner behavior, stale/trust metadata, recursive guard, audit record flows, audit bundle generation, and close gates.
-- `tests/test_memory_drift_reporting.py` covers memory indexing, route/drift behavior, and health-report aggregation.
+- `tests/test_verifications_and_audits.py` covers verification runner behavior, stale/trust metadata, recursive guard, audit record flows, audit bundle generation, close gates, and closed-plan stale field classification.
+- `tests/test_memory_drift_reporting.py` covers memory indexing, route/drift behavior, and health-report aggregation, including post-close freshness health classification.
 - `tests/test_command_contracts.py` covers shared command-contract metadata, JSON envelope behavior for read commands, and core re-export boundaries.
 - `tests/support.py` provides the shared temporary-workspace, CLI, and MCP helper base classes used by focused test modules.
 
@@ -65,4 +65,31 @@ Stage 6 quality work starts with `docs/architecture/quality-signals.md`. Runtime
 - `abh route ...`
 - `abh doctor`
 
-Future agent-facing command families should extend `abh.commands` before or alongside their CLI/MCP adapters. Stage 4 command families are complete: `agent setup` is a read-only export surface; write/install behavior for agent config files remains a later confirmed-write slice. `hooks install` is the first local hook write surface and requires `--write --confirm`; it only manages `.git/hooks/pre-commit` files containing the ABH managed marker. `next` and `onboarding check` are read-only navigation surfaces and must not install hooks or write Agent config. Quickstart and recipes are documentation-only adoption surfaces; PyPI publication and release automation remain future work. `audit bundle` is a Stage 5 read-only audit preparation surface; it must not call models, record verdicts, transition plans, or close plans. Stage 6 extends audit bundle prompts with semantic conservation and J-flow/R-flow reviewer guidance while preserving the read-only boundary. `audit record` now carries declared reviewer context, independence, and verification basis metadata; `close` enforces an independent passing audit tied to the current fresh passing verification. Stage 6 should stay product-quality-first and agent-navigation-second: drift findings now carry quality signal metadata, memory records now carry tags, status, typed relationships, and supersession fields, and health reports should surface semantic pressure before route or `abh next` consume those signals conservatively. Completed Stage 6 semantic follow-ups include `stage6.commitment-phase-state` and `stage6.audit-semantic-conservation`; remaining queue focus starts with `stage6.owner-doc-stable-commitments`.
+Future agent-facing command families should extend `abh.commands` before or alongside their CLI/MCP adapters. Stage 4 command families are complete: `agent setup` is a read-only export surface; write/install behavior for agent config files remains a later confirmed-write slice. `hooks install` is the first local hook write surface and requires `--write --confirm`; it only manages `.git/hooks/pre-commit` files containing the ABH managed marker. `next` and `onboarding check` are read-only navigation surfaces and must not install hooks or write Agent config. Quickstart and recipes are documentation-only adoption surfaces; PyPI publication and release automation remain future work. `audit bundle` is a Stage 5 read-only audit preparation surface; it must not call models, record verdicts, transition plans, or close plans. Stage 6 extends audit bundle prompts with semantic conservation and J-flow/R-flow reviewer guidance while preserving the read-only boundary. `audit record` now carries declared reviewer context, independence, and verification basis metadata; `close` enforces an independent passing audit tied to the current fresh passing verification. Stage 6 should stay product-quality-first and agent-navigation-second: drift findings now carry quality signal metadata, memory records now carry tags, status, typed relationships, and supersession fields, health reports should surface semantic pressure before route or `abh next` consume those signals conservatively, owner docs now expose stable commitments before future doctor gates inspect them, and `plan-052-post-close-freshness-semantics` is refining `abh/plans.py` stale reason detail with verification-payload field diffs plus `abh/reporting.py` health classification for closed-plan metadata churn. Completed Stage 6 semantic follow-ups include `stage6.commitment-phase-state`, `stage6.audit-semantic-conservation`, and `stage6.owner-doc-stable-commitments`; the active slice is `stage6.post-close-freshness-semantics`.
+
+## Stable Commitments
+
+- Runtime command metadata lives in `abh.commands` and should be extended before CLI or MCP adapters diverge.
+- `.abh/` stores machine-readable state; `docs/` stores human-readable mirrors and owner docs.
+- `abh/init.py` owns seeded AGE owner-doc templates and default active attractor content for new workspaces.
+- `abh/audit_bundle.py` stays read-only and must not record verdicts, transition plans, or close plans.
+- `abh/reporting.py` reports semantic pressure without claiming automated semantic proof.
+
+## Allowed Variation
+
+- New modules and tests may be added when a plan introduces a durable command family or evidence type.
+- Module descriptions may be refined as responsibilities move, provided command and evidence ownership remains clear.
+- Test surface descriptions may change when behavior moves between focused test modules.
+
+## Drift / Leakage Signals
+
+- CLI and MCP behavior diverge from shared command contracts.
+- A write surface bypasses confirmation or atomic JSON/Markdown pair writers.
+- A runtime module consumes quality signals before `docs/architecture/quality-signals.md` defines the vocabulary.
+- A new seeded owner doc changes in `abh/init.py` without matching current owner-doc guidance.
+
+## Correction Path
+
+- Update this map in the same plan that adds, removes, or reassigns module ownership.
+- If a command contract changes, update `abh.commands`, adapters, tests, and this map together.
+- If seeded owner docs drift from current owner docs, update `abh/init.py` and the current docs in the same audited slice.

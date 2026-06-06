@@ -35,3 +35,38 @@ ABH adopts the AGE distinction between stable attractors and control mechanisms:
 - Control records: `docs/plans/`, `docs/audits/`, `docs/memory/`, `docs/drift/`, future `docs/logs/`.
 
 `abh init` seeds this index in new workspaces. `abh agent setup` consumes it when exporting setup bundles. `abh next` and `abh onboarding check` help Agents stay inside this reading order rather than inventing separate workflow rules.
+
+## Stable-Commitments Consultation
+
+Agents should consult the Stable Commitments, Allowed Variation, Drift / Leakage Signals, and Correction Path sections when work depends on durable owner-doc meaning rather than ordinary progress evidence.
+
+- During plan scoping, read Stable Commitments to preserve the invariant, Allowed Variation to avoid over-scoping harmless changes, and Correction Path to choose the owner doc or plan evidence that must be updated.
+- During semantic conservation audit, compare plan goals, non-goals, implementation, verification, and closure evidence against Stable Commitments and Drift / Leakage Signals to detect commitments that disappeared, weakened, or moved to non-authoritative artifacts.
+- During health or drift review, use Drift / Leakage Signals as inspection triggers and Correction Path as the recommended repair route before routing Agents to new work.
+- During owner-doc conflict resolution, use Stable Commitments to identify the commitment at risk, Allowed Variation to separate acceptable wording or implementation change from semantic drift, and `docs/context/source-of-truth.md` to decide which artifact owns the correction.
+
+## Stable Commitments
+
+- This file is the first owner-doc routing surface after the active attractor.
+- Required reading order must keep active attractor, project context, source-of-truth, conventions, codebase map, roadmap, agent protocol, and quickstart discoverable.
+- Question routing must point Agents to owner docs and executable evidence rather than asking them to infer authority from chat history.
+- Future roadmap intent stays in `.abh/roadmap.json`; concrete plan ids only appear after materialization.
+
+## Allowed Variation
+
+- New owner docs may be added to the reading order when they become durable source-of-truth surfaces.
+- Supporting evidence columns may change as ABH adds new local artifacts.
+- Control-record directories may expand as long as stable owner docs remain distinguishable from per-plan evidence.
+
+## Drift / Leakage Signals
+
+- Agents start from roadmap, task-board, or chat context without reading the active attractor and this index.
+- A question route names a stale or non-authoritative file as the primary owner doc.
+- Future queue items are documented with preassigned plan ids before materialization.
+- New owner-doc families are added elsewhere but not routed here.
+
+## Correction Path
+
+- Update this index in the same plan that introduces or changes an owner-doc family.
+- If routing conflicts with source-of-truth precedence, update `docs/context/source-of-truth.md` and this file together.
+- If a control record becomes durable guidance, promote the durable guidance into an owner doc and route it here.

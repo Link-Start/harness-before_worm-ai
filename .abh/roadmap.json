@@ -994,8 +994,8 @@
         "docs/task-board.md",
         "docs/context/codebase-map.md"
       ],
-      "status": "queued",
-      "plan_id": null
+      "status": "materialized",
+      "plan_id": "plan-052-post-close-freshness-semantics"
     },
     {
       "key": "stage7.ci-templates",

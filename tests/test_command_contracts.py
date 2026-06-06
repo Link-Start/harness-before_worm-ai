@@ -17,6 +17,69 @@ from tests.support import WorkspaceCliTestCase
 
 
 class CommandContractTests(WorkspaceCliTestCase):
+    def test_owner_docs_expose_stable_commitment_sections(self) -> None:
+        repo = Path(__file__).resolve().parents[1]
+        required_sections = (
+            "## Stable Commitments",
+            "## Allowed Variation",
+            "## Drift / Leakage Signals",
+            "## Correction Path",
+        )
+        owner_docs = (
+            repo / "docs" / "index.md",
+            repo / "docs" / "context" / "source-of-truth.md",
+            repo / "docs" / "context" / "project-context.md",
+            repo / "docs" / "context" / "codebase-map.md",
+            repo / "docs" / "architecture" / "templates" / "attractor-template.md",
+        )
+
+        for path in owner_docs:
+            with self.subTest(path=path):
+                text = path.read_text(encoding="utf-8")
+                for section in required_sections:
+                    self.assertIn(section, text)
+
+        index = (repo / "docs" / "index.md").read_text(encoding="utf-8")
+        source_of_truth = (repo / "docs" / "context" / "source-of-truth.md").read_text(encoding="utf-8")
+        for phrase in (
+            "plan scoping",
+            "semantic conservation audit",
+            "health or drift review",
+            "owner-doc conflict resolution",
+        ):
+            self.assertIn(phrase, index)
+            self.assertIn(phrase, source_of_truth)
+
+        quality_signals = (repo / "docs" / "architecture" / "quality-signals.md").read_text(encoding="utf-8")
+        self.assertIn("Owner Doc Stable Commitments", quality_signals)
+        self.assertIn("future health and drift checks", quality_signals)
+        for section in required_sections:
+            self.assertIn(section.removeprefix("## "), quality_signals)
+
+    def test_init_seed_owner_docs_expose_stable_commitment_sections(self) -> None:
+        from abh.init import planned_init_actions
+
+        required_sections = (
+            "## Stable Commitments",
+            "## Allowed Variation",
+            "## Drift / Leakage Signals",
+            "## Correction Path",
+        )
+        action_content = {action.path: action.content for action in planned_init_actions(self.root)}
+        seed_docs = (
+            "docs/index.md",
+            "docs/context/source-of-truth.md",
+            "docs/context/project-context.md",
+            "docs/context/codebase-map.md",
+            "docs/architecture/attractors/abh-core-attractor.md",
+        )
+
+        for path in seed_docs:
+            with self.subTest(path=path):
+                text = action_content[path]
+                for section in required_sections:
+                    self.assertIn(section, text)
+
     def test_codebase_map_describes_split_test_surface(self) -> None:
         codebase_map = (Path(__file__).resolve().parents[1] / "docs" / "context" / "codebase-map.md").read_text(
             encoding="utf-8"

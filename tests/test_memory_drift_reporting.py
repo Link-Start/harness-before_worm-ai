@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 
 from abh.models import DriftReport
 from abh.storage import drift_json_path, write_json
@@ -203,6 +205,272 @@ class MemoryDriftReportingTests(WorkspaceCliTestCase):
         self.assertEqual(stale[0]["severity"], "high")
         self.assertIn("Run fresh verification", stale[0]["recommendation"])
         self.assertEqual(report["posture"], "at_risk")
+
+    def test_report_health_treats_closed_plan_metadata_churn_as_follow_up(self) -> None:
+        self.create_ready_plan("plan-health-closed-churn")
+        self.run_cli(
+            "verify",
+            "record",
+            "plan-health-closed-churn",
+            "--command",
+            "unit tests pass",
+            "--result",
+            "pass",
+        )
+        plan = json.loads(self.run_cli("plan", "status", "plan-health-closed-churn", "--json")[1])["data"]["plan"]
+        verification_id = plan["verification_runs"][-1]
+        self.run_cli(
+            "audit",
+            "request",
+            "plan-health-closed-churn",
+            "--id",
+            "audit-health-closed-churn",
+            "--auditor",
+            "independent-reviewer",
+            "--scope",
+            "Independent close audit",
+            "--evidence",
+            "tests/test_memory_drift_reporting.py",
+        )
+        self.run_cli(
+            "audit",
+            "record",
+            "audit-health-closed-churn",
+            "--result",
+            "pass",
+            "--rationale",
+            "fresh independent evidence verified",
+            "--auditor-context",
+            "separate session",
+            "--independence",
+            "independent",
+            "--verification-id",
+            verification_id,
+        )
+        self.run_cli("close", "plan-health-closed-churn")
+
+        code, out, err = self.run_cli("report", "health", "--json")
+
+        self.assertEqual(code, 0, err)
+        report = json.loads(out)["data"]["health_report"]
+        stale_proof = [item for item in report["semantic_pressure"] if item["type"] == "stale_proof"]
+        self.assertEqual(stale_proof, [])
+        churn = [item for item in report["semantic_pressure"] if item["type"] == "post_close_metadata_churn"]
+        self.assertEqual(len(churn), 1)
+        self.assertEqual(churn[0]["related_plan_ids"], ["plan-health-closed-churn"])
+        self.assertEqual(churn[0]["severity"], "low")
+        self.assertIn("post-close", churn[0]["recommendation"])
+        self.assertNotIn("Run fresh verification", churn[0]["recommendation"])
+        self.assertEqual(report["posture"], "watch")
+
+    def test_report_health_keeps_post_close_documentation_sync_as_follow_up(self) -> None:
+        command = f'"{sys.executable}" -c "print(\'doc-sync-ok\')"'
+        subprocess.run(["git", "init"], cwd=self.root, check=True, capture_output=True, text=True)
+        subprocess.run(["git", "config", "user.email", "abh@example.invalid"], cwd=self.root, check=True)
+        subprocess.run(["git", "config", "user.name", "ABH Test"], cwd=self.root, check=True)
+        (self.root / "docs" / "development-roadmap.md").write_text("# Roadmap\n\n- Baseline stage focus.\n", encoding="utf-8")
+        (self.root / "docs" / "task-board.md").write_text("# Task Board\n\n- Baseline task state.\n", encoding="utf-8")
+        self.create_ready_plan(
+            "plan-health-doc-sync",
+            validation=command,
+            closure_evidence="docs/plans/plan-health-doc-sync.md",
+        )
+        subprocess.run(["git", "add", "."], cwd=self.root, check=True, capture_output=True, text=True)
+        subprocess.run(["git", "commit", "-m", "seed"], cwd=self.root, check=True, capture_output=True, text=True)
+
+        code, out, err = self.run_cli("verify", "run", "plan-health-doc-sync", "--json")
+        self.assertEqual(code, 0, err)
+        verification_id = json.loads(out)["data"]["verification"]["id"]
+        plan = json.loads(self.run_cli("plan", "status", "plan-health-doc-sync", "--json")[1])["data"]["plan"]
+        self.assertEqual(plan["verification_runs"][-1], verification_id)
+        self.run_cli(
+            "audit",
+            "request",
+            "plan-health-doc-sync",
+            "--id",
+            "audit-health-doc-sync",
+            "--auditor",
+            "independent-reviewer",
+            "--scope",
+            "Independent close audit",
+            "--evidence",
+            "tests/test_memory_drift_reporting.py",
+        )
+        self.run_cli(
+            "audit",
+            "record",
+            "audit-health-doc-sync",
+            "--result",
+            "pass",
+            "--rationale",
+            "fresh independent evidence verified",
+            "--auditor-context",
+            "separate session",
+            "--independence",
+            "independent",
+            "--verification-id",
+            verification_id,
+        )
+        self.run_cli("close", "plan-health-doc-sync")
+        (self.root / "docs" / "development-roadmap.md").write_text(
+            "# Roadmap\n\n- Closed plan-health-doc-sync and synced stage focus.\n",
+            encoding="utf-8",
+        )
+        (self.root / "docs" / "task-board.md").write_text(
+            "# Task Board\n\n- Closed plan-health-doc-sync and prepared next ABH action.\n",
+            encoding="utf-8",
+        )
+
+        status = json.loads(self.run_cli("plan", "status", "plan-health-doc-sync", "--json")[1])["data"][
+            "verification_summary"
+        ]
+        code, out, err = self.run_cli("report", "health", "--json")
+
+        self.assertTrue(status["stale"])
+        self.assertIn("git_status_changed", status["reasons"])
+        self.assertEqual(status["freshness_class"], "governance_metadata_churn")
+        self.assertFalse(status["requires_fresh_verification"])
+        reason_details = {item["reason"]: item for item in status["reason_details"]}
+        self.assertEqual(reason_details["git_status_changed"]["category"], "governance_metadata_churn")
+        self.assertEqual(reason_details["git_status_changed"]["trigger"], "post_close_documentation_sync")
+        self.assertEqual(code, 0, err)
+        report = json.loads(out)["data"]["health_report"]
+        stale_proof = [item for item in report["semantic_pressure"] if item["type"] == "stale_proof"]
+        self.assertEqual(stale_proof, [])
+        churn = [item for item in report["semantic_pressure"] if item["type"] == "post_close_metadata_churn"]
+        self.assertEqual(len(churn), 1)
+        self.assertEqual(churn[0]["related_plan_ids"], ["plan-health-doc-sync"])
+        self.assertEqual(churn[0]["severity"], "low")
+        self.assertEqual(report["posture"], "watch")
+
+    def test_report_health_treats_closed_plan_proof_drift_as_stale_proof(self) -> None:
+        self.create_ready_plan("plan-health-proof-drift")
+        self.run_cli(
+            "verify",
+            "record",
+            "plan-health-proof-drift",
+            "--command",
+            "unit tests pass",
+            "--result",
+            "pass",
+        )
+        plan = json.loads(self.run_cli("plan", "status", "plan-health-proof-drift", "--json")[1])["data"]["plan"]
+        verification_id = plan["verification_runs"][-1]
+        self.run_cli(
+            "audit",
+            "request",
+            "plan-health-proof-drift",
+            "--id",
+            "audit-health-proof-drift",
+            "--auditor",
+            "independent-reviewer",
+            "--scope",
+            "Independent close audit",
+            "--evidence",
+            "tests/test_memory_drift_reporting.py",
+        )
+        self.run_cli(
+            "audit",
+            "record",
+            "audit-health-proof-drift",
+            "--result",
+            "pass",
+            "--rationale",
+            "fresh independent evidence verified",
+            "--auditor-context",
+            "separate session",
+            "--independence",
+            "independent",
+            "--verification-id",
+            verification_id,
+        )
+        self.run_cli("close", "plan-health-proof-drift")
+        self.run_cli(
+            "plan",
+            "update",
+            "plan-health-proof-drift",
+            "--closure-evidence",
+            "docs/plans/post-close-proof-change.md",
+        )
+
+        code, out, err = self.run_cli("report", "health", "--json")
+
+        self.assertEqual(code, 0, err)
+        report = json.loads(out)["data"]["health_report"]
+        stale_proof = [item for item in report["semantic_pressure"] if item["type"] == "stale_proof"]
+        self.assertEqual(len(stale_proof), 1)
+        self.assertEqual(stale_proof[0]["related_plan_ids"], ["plan-health-proof-drift"])
+        self.assertEqual(stale_proof[0]["severity"], "high")
+        churn = [item for item in report["semantic_pressure"] if item["type"] == "post_close_metadata_churn"]
+        self.assertEqual(churn, [])
+        self.assertEqual(report["posture"], "at_risk")
+
+    def test_report_health_keeps_other_closed_plan_git_changes_as_stale_proof(self) -> None:
+        command = f'"{sys.executable}" -c "print(\'product-sync-ok\')"'
+        subprocess.run(["git", "init"], cwd=self.root, check=True, capture_output=True, text=True)
+        subprocess.run(["git", "config", "user.email", "abh@example.invalid"], cwd=self.root, check=True)
+        subprocess.run(["git", "config", "user.name", "ABH Test"], cwd=self.root, check=True)
+        product_file = self.root / "abh" / "product.py"
+        product_file.parent.mkdir(parents=True, exist_ok=True)
+        product_file.write_text("VALUE = 'before'\n", encoding="utf-8")
+        self.create_ready_plan(
+            "plan-health-product-git-drift",
+            validation=command,
+            closure_evidence="docs/plans/plan-health-product-git-drift.md",
+        )
+        subprocess.run(["git", "add", "."], cwd=self.root, check=True, capture_output=True, text=True)
+        subprocess.run(["git", "commit", "-m", "seed"], cwd=self.root, check=True, capture_output=True, text=True)
+
+        code, out, err = self.run_cli("verify", "run", "plan-health-product-git-drift", "--json")
+        self.assertEqual(code, 0, err)
+        verification_id = json.loads(out)["data"]["verification"]["id"]
+        self.run_cli(
+            "audit",
+            "request",
+            "plan-health-product-git-drift",
+            "--id",
+            "audit-health-product-git-drift",
+            "--auditor",
+            "independent-reviewer",
+            "--scope",
+            "Independent close audit",
+            "--evidence",
+            "tests/test_memory_drift_reporting.py",
+        )
+        self.run_cli(
+            "audit",
+            "record",
+            "audit-health-product-git-drift",
+            "--result",
+            "pass",
+            "--rationale",
+            "fresh independent evidence verified",
+            "--auditor-context",
+            "separate session",
+            "--independence",
+            "independent",
+            "--verification-id",
+            verification_id,
+        )
+        self.run_cli("close", "plan-health-product-git-drift")
+        product_file.write_text("VALUE = 'after'\n", encoding="utf-8")
+
+        status = json.loads(self.run_cli("plan", "status", "plan-health-product-git-drift", "--json")[1])["data"][
+            "verification_summary"
+        ]
+        code, out, err = self.run_cli("report", "health", "--json")
+
+        self.assertEqual(status["freshness_class"], "product_proof_drift")
+        reason_details = {item["reason"]: item for item in status["reason_details"]}
+        self.assertEqual(reason_details["git_status_changed"]["category"], "product_proof_drift")
+        self.assertEqual(reason_details["git_status_changed"]["changed_paths"], ["abh/product.py"])
+        self.assertEqual(code, 0, err)
+        report = json.loads(out)["data"]["health_report"]
+        stale_proof = [item for item in report["semantic_pressure"] if item["type"] == "stale_proof"]
+        self.assertEqual(len(stale_proof), 1)
+        self.assertEqual(stale_proof[0]["related_plan_ids"], ["plan-health-product-git-drift"])
+        churn = [item for item in report["semantic_pressure"] if item["type"] == "post_close_metadata_churn"]
+        self.assertEqual(churn, [])
 
     def test_report_health_aggregates_drift_memory_and_semantic_pressure(self) -> None:
         drift_source_a = self.root / "drift-a.txt"

@@ -3,12 +3,12 @@
 ## Metadata
 
 - ID: plan-051-owner-doc-stable-commitments
-- Status: draft
+- Status: closed
 - Attractor: docs/architecture/attractors/abh-core-attractor.md
 - Baseline: ABH has source-of-truth precedence and active attractor invariants, but most owner docs do not yet separate stable commitments, allowed variation, drift/leakage signals, and correction paths.
 - Owner: platform
 - Created: 2026-06-05T10:30:13.996764+00:00
-- Updated: 2026-06-05T10:30:13.999274+00:00
+- Updated: 2026-06-06T08:00:54.141453+00:00
 
 ## Goals
 
@@ -34,30 +34,30 @@
 
 ### Stable State Now
 
-- 
+- ABH already has source-of-truth precedence, owner-doc routing, active attractor invariants, audit semantic conservation, and commitment phase state records.
 
 ### Active Change Pressure
 
-- 
+- Key owner docs still mix durable commitments with mutable guidance, making future Agents guess which statements must remain invariant.
 
 ### Target Stable State
 
-- 
+- Important owner docs and templates expose Stable Commitments, Allowed Variation, Drift / Leakage Signals, and Correction Path sections that future audits and health checks can inspect.
 
 ### Conversion Proof
 
-- 
+- Tests assert stable commitment sections exist in current owner docs, templates, init seed docs, and quality signal guidance.
 
 ### Residual Pressure
 
-- 
+- Doctor gate for owner-doc section completeness | Non-blocking rationale: Non-blocking because this first slice is docs-first and explicitly avoids new doctor consistency gates.
 
 ## Validation Checklist
 
-- python3 -m unittest tests/test_cli.py -v
-- python3 -m abh doctor
 - git diff --check
-- python3 -m abh roadmap check --json
+- .venv\Scripts\python.exe -m unittest discover -v
+- .venv\Scripts\python.exe -m abh doctor --json
+- .venv\Scripts\python.exe -m abh roadmap check --json
 
 ## Closure Evidence
 
@@ -69,11 +69,13 @@
 - docs/architecture/quality-signals.md
 - docs/development-roadmap.md
 - docs/task-board.md
+- audit-051-owner-doc-stable-commitments
 
 ## Verification Runs
 
-- 
+- ver-893f633822b8
+- ver-726c18a5135b
 
 ## Audits
 
-- 
+- audit-051-owner-doc-stable-commitments
