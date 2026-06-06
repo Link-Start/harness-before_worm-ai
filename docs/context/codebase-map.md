@@ -13,6 +13,8 @@
 - `abh/models.py` — schema-versioned records for attractors, plans, Commitment Phase State, verifications, audits, memory, drift, and roadmap queue items.
 - `abh/storage.py` — path helpers, workspace directories, atomic text/JSON writes, and local file locks.
 - `abh/core.py` — compatibility re-export layer plus workspace doctor.
+- `.github/workflows/ci.yml` — reusable GitHub Actions CI template for ABH pull-request checks.
+- Stage 7 completed slice: `plan-053-ci-templates` owns the current CI template and CI recipe. Its drift boundary is roadmap consistency, whitespace drift, and read-only health posture; it does not run standalone `abh drift analyze`, release automation, branch protection, or team policy. The next queued Stage 7 focus is `stage7.multi-repo-sharing`.
 
 ## Domain Modules
 
@@ -38,13 +40,13 @@ Stage 6 quality work starts with `docs/architecture/quality-signals.md`. Runtime
 - `tests/test_models.py` covers schema-version serialization, validation, deprecated-field handling, and legacy record readability.
 - `tests/test_verifications_and_audits.py` covers verification runner behavior, stale/trust metadata, recursive guard, audit record flows, audit bundle generation, close gates, and closed-plan stale field classification.
 - `tests/test_memory_drift_reporting.py` covers memory indexing, route/drift behavior, and health-report aggregation, including post-close freshness health classification.
-- `tests/test_command_contracts.py` covers shared command-contract metadata, JSON envelope behavior for read commands, and core re-export boundaries.
+- `tests/test_command_contracts.py` covers shared command-contract metadata, JSON envelope behavior for read commands, CI workflow command coverage, and core re-export boundaries.
 - `tests/support.py` provides the shared temporary-workspace, CLI, and MCP helper base classes used by focused test modules.
 
 ## Onboarding Docs
 
 - `docs/quickstart.md` — five-minute Agent-First entry path.
-- `docs/recipes/` — Codex, Claude Code, MCP, hooks, first-loop, and distribution recipes.
+- `docs/recipes/` — Codex, Claude Code, MCP, hooks, CI, first-loop, and distribution recipes.
 
 ## Primary Command Families
 
@@ -65,7 +67,7 @@ Stage 6 quality work starts with `docs/architecture/quality-signals.md`. Runtime
 - `abh route ...`
 - `abh doctor`
 
-Future agent-facing command families should extend `abh.commands` before or alongside their CLI/MCP adapters. Stage 4 command families are complete: `agent setup` is a read-only export surface; write/install behavior for agent config files remains a later confirmed-write slice. `hooks install` is the first local hook write surface and requires `--write --confirm`; it only manages `.git/hooks/pre-commit` files containing the ABH managed marker. `next` and `onboarding check` are read-only navigation surfaces and must not install hooks or write Agent config. Quickstart and recipes are documentation-only adoption surfaces; PyPI publication and release automation remain future work. `audit bundle` is a Stage 5 read-only audit preparation surface; it must not call models, record verdicts, transition plans, or close plans. Stage 6 extends audit bundle prompts with semantic conservation and J-flow/R-flow reviewer guidance while preserving the read-only boundary. `audit record` now carries declared reviewer context, independence, and verification basis metadata; `close` enforces an independent passing audit tied to the current fresh passing verification. Stage 6 should stay product-quality-first and agent-navigation-second: drift findings now carry quality signal metadata, memory records now carry tags, status, typed relationships, and supersession fields, health reports should surface semantic pressure before route or `abh next` consume those signals conservatively, owner docs now expose stable commitments before future doctor gates inspect them, and `plan-052-post-close-freshness-semantics` is refining `abh/plans.py` stale reason detail with verification-payload field diffs plus `abh/reporting.py` health classification for closed-plan metadata churn. Completed Stage 6 semantic follow-ups include `stage6.commitment-phase-state`, `stage6.audit-semantic-conservation`, and `stage6.owner-doc-stable-commitments`; the active slice is `stage6.post-close-freshness-semantics`.
+Future agent-facing command families should extend `abh.commands` before or alongside their CLI/MCP adapters. Stage 4 command families are complete: `agent setup` is a read-only export surface; write/install behavior for agent config files remains a later confirmed-write slice. `hooks install` is the first local hook write surface and requires `--write --confirm`; it only manages `.git/hooks/pre-commit` files containing the ABH managed marker. `next` and `onboarding check` are read-only navigation surfaces and must not install hooks or write Agent config. Quickstart and recipes are documentation-only adoption surfaces; PyPI publication and release automation remain future work. `audit bundle` is a Stage 5 read-only audit preparation surface; it must not call models, record verdicts, transition plans, or close plans. Stage 6 extends audit bundle prompts with semantic conservation and J-flow/R-flow reviewer guidance while preserving the read-only boundary. `audit record` now carries declared reviewer context, independence, and verification basis metadata; `close` enforces an independent passing audit tied to the current fresh passing verification. Stage 6 should stay product-quality-first and agent-navigation-second: drift findings now carry quality signal metadata, memory records now carry tags, status, typed relationships, and supersession fields, health reports should surface semantic pressure before route or `abh next` consume those signals conservatively, owner docs now expose stable commitments before future doctor gates inspect them, and `plan-052-post-close-freshness-semantics` closed with bounded post-close freshness semantics. Stage 7 started with closed `plan-053-ci-templates`, which owns the reusable CI template and CI recipe while leaving multi-repo sharing, release automation, and team policy to later Stage 7 slices.
 
 ## Stable Commitments
 

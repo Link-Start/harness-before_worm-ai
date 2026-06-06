@@ -128,11 +128,16 @@ python3 -m unittest tests/test_cli.py
 仓库 CI 执行以下基础检查：
 
 ```bash
-python3 -m unittest tests/test_cli.py -v
-python3 -m abh doctor
-python3 -m abh --help
-python3 -m abh plan list
+python3 -m unittest discover -v
+python3 -m abh doctor --json
+python3 -m abh roadmap check --json
+git diff --check
+python3 -m abh report health --json
 ```
+
+Gating checks: `unittest`、`doctor`、`roadmap check` 和 `git diff --check` 是当前 CI 模板的 gating 检查；失败表示代码、ABH 对象、roadmap 或 whitespace drift 不满足本地验证契约。
+
+Informational checks: `python3 -m abh report health --json` is informational. 它是只读姿态证据，用于在 PR 中暴露 drift、memory 和 semantic pressure；the workflow does not fail solely because historical semantic pressure exists，也不把历史 health pressure 自动升级为 release blocker 或团队策略。复用模板见 `docs/recipes/ci.md`。
 
 关闭 plan 前也应运行这些命令，并检查 roadmap、task-board、README 等当前状态文档是否需要同步更新。该要求来自 `mem-post-close-doc-sync-001`，用于避免计划关闭后文档仍停留在旧阶段。
 
@@ -503,6 +508,7 @@ python3 -m abh.mcp_server
 - 阶段 5 独立审计支持已完成：`plan-037-audit-prompt-bundle` 已交付只读 `abh audit bundle <plan> --json`，用于生成审计提示词和证据清单；`plan-038-independent-audit-gate` 已把 audit context/source、independence 和 fresh verification basis 纳入 `abh audit record` 与 `abh close` 门禁。自动执行审计和真实身份校验仍属后续切片
 - 阶段 6 已启动：`plan-039-quality-signal-model` 定义 product-quality-first / agent-navigation-second 的质量信号模型；`plan-040-drift-quality` 已把 drift finding 提升为带 severity、matched span、source excerpt 和 confidence 的质量信号；`plan-041-memory-index` 已把 memory 提升为带 tags、status、关系索引和 supersession 的可复用质量知识；`plan-042-project-health-report` 正在把 health report 收敛为语义压力报告，优先暴露 unbound commitment pressure、stale proof、semantic leakage、J-flow-only evidence、orphaned memory 和 repeated leakage
 - Stage 6 后续 queue 已固化 Plan Reference Set、Commitment Phase State、Audit Semantic Conservation 和 Owner Doc Stable Commitments，避免后续实现遗忘 AGE/PHS 文章提出的语义承诺守恒方向
+- Stage 7 已启动：`plan-053-ci-templates` 正在把 GitHub Actions workflow 升级为可复用 ABH CI 模板，覆盖完整 unittest、doctor、roadmap、diff 和 health posture 检查，同时不实现发布自动化或团队策略
 - 未来路线图不再为未创建计划预写 `plan-033` 这类具体编号；未 materialize 的事项使用 `.abh/roadmap.json` 中的稳定 key，真实 plan id 只在 `abh roadmap materialize <key>` 时分配
 - 阶段 4 的目标不是普通 onboarding，而是让 Codex、Claude Code 和 MCP 客户端默认通过 JSON/非交互命令进入 active attractor -> plan -> verification -> audit -> memory 的轨迹控制回路；人类主要负责定义吸引子、批准写入和执行独立审计
 - 后续提升漂移分析精度：从关键词匹配升级到更高质量的证据提取

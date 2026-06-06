@@ -1001,16 +1001,46 @@
       "key": "stage7.ci-templates",
       "title": "CI Templates",
       "stage": "stage7",
-      "summary": "Provide CI templates that run doctor, tests, and drift checks in pull requests.",
-      "attractor": "",
-      "baseline": "",
-      "goals": [],
-      "non_goals": [],
-      "exit_criteria": [],
-      "validation_checklist": [],
-      "closure_evidence": [],
-      "status": "queued",
-      "plan_id": null
+      "summary": "Provide reusable GitHub Actions CI templates that run ABH doctor, full tests, roadmap checks, diff checks, and health/drift reporting in pull requests.",
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "Stage 7 starts with reusable CI entry points. The repository already has a basic GitHub Actions workflow from earlier governance hardening, but it only runs the thin CLI test module, doctor, help, and plan list. ABH now has full unittest discovery, roadmap checks, diff whitespace checks, and health/drift reporting that should be represented in PR-oriented CI templates without introducing release automation or remote runner policy.",
+      "goals": [
+        "Upgrade the GitHub Actions CI workflow so pull requests run editable install, full unittest discovery, ABH doctor, roadmap consistency, git diff whitespace checks, and a read-only health report.",
+        "Document the CI template boundary for other repositories, including which checks are gating and which are informational.",
+        "Keep CI templates aligned with ABH local validation semantics and trusted local verification policy.",
+        "Synchronize README, development roadmap, task board, and codebase map with the Stage 7 CI template slice."
+      ],
+      "non_goals": [
+        "Do not implement release automation, publishing, signing, deployment, or package registry workflows.",
+        "Do not introduce team policy, required status checks, GitHub branch protection, or remote runner governance.",
+        "Do not add external services, third-party CI actions beyond existing GitHub setup actions, or network-dependent tests beyond package installation.",
+        "Do not make historical health-report semantic pressure block this CI template slice."
+      ],
+      "exit_criteria": [
+        ".github/workflows/ci.yml runs full unittest discovery instead of only the thin CLI smoke module.",
+        "CI runs python -m abh doctor, python -m abh roadmap check --json, git diff --check, and python -m abh report health --json.",
+        "Docs explain how to reuse the CI template and distinguish gating checks from informational health/drift reporting.",
+        "Roadmap, task-board, README, and codebase map reflect plan-053 as the active Stage 7 CI template slice.",
+        "Tests or contract checks cover the CI workflow command list so future edits do not silently drop ABH gates."
+      ],
+      "validation_checklist": [
+        "git diff --check",
+        ".venv\\Scripts\\python.exe -m unittest discover -v",
+        ".venv\\Scripts\\python.exe -m abh doctor --json",
+        ".venv\\Scripts\\python.exe -m abh roadmap check --json",
+        ".venv\\Scripts\\python.exe -m abh report health --json"
+      ],
+      "closure_evidence": [
+        ".github/workflows/ci.yml",
+        "tests/test_command_contracts.py",
+        "README.md",
+        "docs/recipes/ci.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/context/codebase-map.md"
+      ],
+      "status": "materialized",
+      "plan_id": "plan-053-ci-templates"
     },
     {
       "key": "stage7.multi-repo-sharing",
@@ -1024,8 +1054,8 @@
       "exit_criteria": [],
       "validation_checklist": [],
       "closure_evidence": [],
-      "status": "queued",
-      "plan_id": null
+      "status": "materialized",
+      "plan_id": "plan-054-multi-repo-sharing"
     },
     {
       "key": "stage7.team-policy-and-release-automation",

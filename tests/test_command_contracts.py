@@ -104,6 +104,45 @@ class CommandContractTests(WorkspaceCliTestCase):
         self.assertNotIn("def test_route_recommends_reading_order_for_close_question", cli_tests)
         self.assertNotIn("def test_report_health_json_empty_workspace", cli_tests)
 
+    def test_ci_workflow_runs_full_abh_pull_request_checks(self) -> None:
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "ci.yml").read_text(
+            encoding="utf-8"
+        )
+
+        for command in (
+            "python3 -m pip install -e .",
+            "python3 -m unittest discover -v",
+            "python3 -m abh doctor --json",
+            "python3 -m abh roadmap check --json",
+            "git diff --check",
+            "python3 -m abh report health --json",
+        ):
+            self.assertIn(command, workflow)
+        self.assertNotIn("python3 -m unittest tests/test_cli.py -v", workflow)
+
+    def test_ci_docs_define_gating_and_informational_boundary(self) -> None:
+        repo = Path(__file__).resolve().parents[1]
+        readme = (repo / "README.md").read_text(encoding="utf-8")
+        recipe = (repo / "docs" / "recipes" / "ci.md").read_text(encoding="utf-8")
+
+        for text in (readme, recipe):
+            self.assertIn("Gating checks", text)
+            self.assertIn("Informational checks", text)
+            self.assertIn("`python3 -m abh report health --json` is informational", text)
+            self.assertIn("does not fail solely because historical semantic pressure exists", text)
+
+    def test_stage7_docs_reconcile_ci_drift_boundary_and_active_slice(self) -> None:
+        repo = Path(__file__).resolve().parents[1]
+        roadmap = (repo / "docs" / "development-roadmap.md").read_text(encoding="utf-8")
+        task_board = (repo / "docs" / "task-board.md").read_text(encoding="utf-8")
+        codebase_map = (repo / "docs" / "context" / "codebase-map.md").read_text(encoding="utf-8")
+
+        self.assertIn("Stage 7 CI drift boundary", roadmap)
+        self.assertIn("roadmap consistency, whitespace drift, and read-only health posture", roadmap)
+        self.assertIn("does not run standalone `abh drift analyze`", roadmap)
+        self.assertIn("Current focus: `stage7.multi-repo-sharing`", task_board)
+        self.assertIn("Stage 7 completed slice: `plan-053-ci-templates`", codebase_map)
+
     def test_core_reexports_plan_audit_and_verification_module_functions(self) -> None:
         self.assertIs(create_plan, plans.create_plan)
         self.assertIs(update_plan_record, plans.update_plan_record)
