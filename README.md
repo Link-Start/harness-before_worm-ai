@@ -2,6 +2,61 @@
 
 `Attractor Before Harness` 是一个面向 AI 协作开发的收敛框架与 CLI 工具集。项目核心思想来自"先定义系统要收敛到哪里，再用 harness 持续纠偏"的方法论：先把吸引子、基线、计划、验证、审计和记忆显式化，再让开发过程围绕这些对象运行。
 
+## 零基础使用：不装 Python
+
+适合第一次使用、不了解 Python 环境的用户。你只需要先装 `uv`，它会自动下载和管理 Python；不需要自己安装 Python、pip 或虚拟环境。
+
+### 1. 安装 uv
+
+Windows PowerShell：
+
+```powershell
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+macOS / Linux：
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+安装后关闭并重新打开终端。如果想确认是否成功：
+
+```bash
+uv --version
+```
+
+### 2. 运行或安装 abh
+
+只试用一次：
+
+```bash
+uvx --from git+https://github.com/worm-ai/harness-before.git abh --help
+```
+
+长期使用，安装到本机命令行：
+
+```bash
+uv tool install --from git+https://github.com/worm-ai/harness-before.git abh
+abh --help
+```
+
+### 3. 在 Codex 里用傻瓜式 skill
+
+如果你是在本仓库里使用 Codex，直接发这句：
+
+```text
+Use the skill at `skills/abh-workflow` to manage this repository task through ABH. I am a beginner; tell me only the next safe action and run the ABH checks for me.
+```
+
+中文也可以：
+
+```text
+使用 `skills/abh-workflow` 这个 skill 帮我处理当前仓库任务。我是小白，只告诉我下一步安全动作，并替我运行 ABH 检查。
+```
+
+这个 skill 会引导 Codex 调用 `abh onboarding check --json`、`abh next --json`、`abh doctor --json`、`abh roadmap check --json`，再按需要创建或补齐 plan、运行 verification、生成独立审计提示词、记录审计结果并关闭 plan。你不需要自己写 plan、verification、audit 命令；但独立审计仍必须在单独上下文或由独立 reviewer 完成，不能由同一个实现会话自签。
+
 ## 项目来源
 [Attractor Before Harness: AI 大规模开发的方法论](https://mp.weixin.qq.com/s/TwMkUDLNo2-bIrXrfvPqIw)
 
@@ -47,6 +102,8 @@
 对于需要持续迭代、又希望保持结构稳定的工程团队，这种方式比临时性的聊天上下文更可靠。
 
 ## 安装
+
+如果你没有 Python 环境，优先看上面的“零基础使用：不装 Python”。本节保留详细安装方式，供需要手动选择运行路径的用户使用。
 
 ### 首选方式：uvx（无需安装 Python）
 

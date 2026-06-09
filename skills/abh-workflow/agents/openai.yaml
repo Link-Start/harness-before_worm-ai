@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABH Workflow"
+  short_description: "Guide agents through ABH workflow gates"
+  default_prompt: "Use $abh-workflow to manage this repository task through ABH planning, verification, audit, and close gates."

@@ -1,0 +1,52 @@
+{
+  "schema_version": "1",
+  "id": "plan-056-readme-zero-python-skill-onboarding",
+  "title": "README Zero Python Skill Onboarding",
+  "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+  "baseline": "README currently documents uvx installation but the beginner path and abh-workflow skill usage are not prominent enough for users without Python.",
+  "owner": "platform",
+  "status": "closed",
+  "goals": [
+    "Add a prominent README quickstart for zero-Python users that starts with installing uv, running or installing abh, and using the abh-workflow skill from Codex.",
+    "Provide copy/paste commands for Windows PowerShell, macOS, and Linux users without requiring prior Python knowledge.",
+    "Document the simplest Codex prompt that points to skills/abh-workflow and explains what the skill will do."
+  ],
+  "non_goals": [
+    "Do not change ABH CLI runtime behavior, package publishing, PyPI status, or multi-repo sharing.",
+    "Do not claim uvx abh works as a bare package name before package publication."
+  ],
+  "exit_criteria": [
+    "README top section contains a zero-Python beginner path before the detailed feature list.",
+    "README includes copy/paste uv install, uvx run, uv tool install, and Codex abh-workflow usage prompts.",
+    "Tests assert the README keeps the beginner install and skill usage entry visible."
+  ],
+  "validation_checklist": [
+    "git diff --check",
+    ".venv\\\\Scripts\\\\python.exe -m unittest tests.test_command_contracts.CommandContractTests.test_readme_exposes_zero_python_skill_onboarding -v",
+    ".venv\\\\Scripts\\\\python.exe -m unittest discover -v",
+    ".venv\\\\Scripts\\\\python.exe -m abh doctor --json",
+    ".venv\\\\Scripts\\\\python.exe -m abh roadmap check --json",
+    ".venv\\\\Scripts\\\\python.exe -m abh next --json"
+  ],
+  "closure_evidence": [
+    "README.md",
+    "tests/test_command_contracts.py",
+    "audit-056-readme-zero-python-skill-onboarding"
+  ],
+  "commitment_phase_state": {
+    "stable_state_now": [],
+    "active_change_pressure": [],
+    "target_stable_state": [],
+    "conversion_proof": [],
+    "residual_pressure": []
+  },
+  "verification_runs": [
+    "ver-1e3ba21f383c"
+  ],
+  "audit_ids": [
+    "audit-056-readme-zero-python-skill-onboarding"
+  ],
+  "created_at": "2026-06-08T07:39:29.390387+00:00",
+  "updated_at": "2026-06-08T07:47:03.151868+00:00",
+  "doc_path": "D:\\work\\ai\\harness-before\\docs\\plans\\plan-056-readme-zero-python-skill-onboarding.md"
+}

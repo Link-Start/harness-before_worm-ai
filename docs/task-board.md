@@ -2,9 +2,9 @@
 
 ## 当前阶段
 
-阶段 7：团队可用与生态集成（Doing）；当前焦点：`stage7.multi-repo-sharing`
+阶段 7：团队可用与生态集成（Doing）；当前焦点：无 open plan；下一队列：`stage7.team-policy-and-release-automation`
 
-Current focus: `stage7.multi-repo-sharing`
+Current focus: none; next queue: `stage7.team-policy-and-release-automation`
 
 ## 状态说明
 
@@ -12,6 +12,7 @@ Current focus: `stage7.multi-repo-sharing`
 - Doing：正在进行。
 - Review：等待审查或验收。
 - Done：已完成。
+- Blocked：已确认暂不推进，需后续新证据或新计划解除阻塞。
 
 ## Sprint 1
 
@@ -496,8 +497,9 @@ Current focus: `stage7.multi-repo-sharing`
 | S6-F10 | Test Suite Domain Split | Done | `stage6.test-suite-domain-split` -> `plan-048-test-suite-domain-split` |
 
 | S7-F01 | CI Templates | Done | `stage7.ci-templates` -> `plan-053-ci-templates` |
-| S7-F02 | Multi Repo Sharing | Todo | `stage7.multi-repo-sharing` |
+| S7-F02 | Multi Repo Sharing | Blocked | `stage7.multi-repo-sharing` -> `plan-054-multi-repo-sharing`（blocked/deferred） |
 | S7-F03 | Team Policy and Release Automation | Todo | `stage7.team-policy-and-release-automation` |
+| ADOPT-F01 | ABH Workflow Skill Packaging | Done | `adoption.abh-workflow-skill` -> `plan-055-abh-workflow-skill`（closed） |
 
 ## Sprint 39
 
