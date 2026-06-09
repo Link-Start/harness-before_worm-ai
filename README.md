@@ -2,6 +2,61 @@
 
 `Attractor Before Harness` 是一个面向 AI 协作开发的收敛框架与 CLI 工具集。项目核心思想来自"先定义系统要收敛到哪里，再用 harness 持续纠偏"的方法论：先把吸引子、基线、计划、验证、审计和记忆显式化，再让开发过程围绕这些对象运行。
 
+## 零基础使用：不装 Python
+
+适合第一次使用、不了解 Python 环境的用户。你只需要先装 `uv`，它会自动下载和管理 Python；不需要自己安装 Python、pip 或虚拟环境。
+
+### 1. 安装 uv
+
+Windows PowerShell：
+
+```powershell
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+macOS / Linux：
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+安装后关闭并重新打开终端。如果想确认是否成功：
+
+```bash
+uv --version
+```
+
+### 2. 运行或安装 abh
+
+只试用一次：
+
+```bash
+uvx --from git+https://github.com/worm-ai/harness-before.git abh --help
+```
+
+长期使用，安装到本机命令行：
+
+```bash
+uv tool install --from git+https://github.com/worm-ai/harness-before.git abh
+abh --help
+```
+
+### 3. 在 Codex 里用傻瓜式 skill
+
+如果你是在本仓库里使用 Codex，直接发这句：
+
+```text
+Use the skill at `skills/abh-workflow` to manage this repository task through ABH. I am a beginner; tell me only the next safe action and run the ABH checks for me.
+```
+
+中文也可以：
+
+```text
+使用 `skills/abh-workflow` 这个 skill 帮我处理当前仓库任务。我是小白，只告诉我下一步安全动作，并替我运行 ABH 检查。
+```
+
+这个 skill 会引导 Codex 调用 `abh onboarding check --json`、`abh next --json`、`abh doctor --json`、`abh roadmap check --json`，再按需要创建或补齐 plan、运行 verification、生成独立审计提示词、记录审计结果并关闭 plan。你不需要自己写 plan、verification、audit 命令；但独立审计仍必须在单独上下文或由独立 reviewer 完成，不能由同一个实现会话自签。
+
 ## 项目来源
 [Attractor Before Harness: AI 大规模开发的方法论](https://mp.weixin.qq.com/s/TwMkUDLNo2-bIrXrfvPqIw)
 
@@ -47,6 +102,8 @@
 对于需要持续迭代、又希望保持结构稳定的工程团队，这种方式比临时性的聊天上下文更可靠。
 
 ## 安装
+
+如果你没有 Python 环境，优先看上面的“零基础使用：不装 Python”。本节保留详细安装方式，供需要手动选择运行路径的用户使用。
 
 ### 首选方式：uvx（无需安装 Python）
 
@@ -128,11 +185,16 @@ python3 -m unittest tests/test_cli.py
 仓库 CI 执行以下基础检查：
 
 ```bash
-python3 -m unittest tests/test_cli.py -v
-python3 -m abh doctor
-python3 -m abh --help
-python3 -m abh plan list
+python3 -m unittest discover -v
+python3 -m abh doctor --json
+python3 -m abh roadmap check --json
+git diff --check
+python3 -m abh report health --json
 ```
+
+Gating checks: `unittest`、`doctor`、`roadmap check` 和 `git diff --check` 是当前 CI 模板的 gating 检查；失败表示代码、ABH 对象、roadmap 或 whitespace drift 不满足本地验证契约。
+
+Informational checks: `python3 -m abh report health --json` is informational. 它是只读姿态证据，用于在 PR 中暴露 drift、memory 和 semantic pressure；the workflow does not fail solely because historical semantic pressure exists，也不把历史 health pressure 自动升级为 release blocker 或团队策略。复用模板见 `docs/recipes/ci.md`。
 
 关闭 plan 前也应运行这些命令，并检查 roadmap、task-board、README 等当前状态文档是否需要同步更新。该要求来自 `mem-post-close-doc-sync-001`，用于避免计划关闭后文档仍停留在旧阶段。
 
@@ -503,6 +565,7 @@ python3 -m abh.mcp_server
 - 阶段 5 独立审计支持已完成：`plan-037-audit-prompt-bundle` 已交付只读 `abh audit bundle <plan> --json`，用于生成审计提示词和证据清单；`plan-038-independent-audit-gate` 已把 audit context/source、independence 和 fresh verification basis 纳入 `abh audit record` 与 `abh close` 门禁。自动执行审计和真实身份校验仍属后续切片
 - 阶段 6 已启动：`plan-039-quality-signal-model` 定义 product-quality-first / agent-navigation-second 的质量信号模型；`plan-040-drift-quality` 已把 drift finding 提升为带 severity、matched span、source excerpt 和 confidence 的质量信号；`plan-041-memory-index` 已把 memory 提升为带 tags、status、关系索引和 supersession 的可复用质量知识；`plan-042-project-health-report` 正在把 health report 收敛为语义压力报告，优先暴露 unbound commitment pressure、stale proof、semantic leakage、J-flow-only evidence、orphaned memory 和 repeated leakage
 - Stage 6 后续 queue 已固化 Plan Reference Set、Commitment Phase State、Audit Semantic Conservation 和 Owner Doc Stable Commitments，避免后续实现遗忘 AGE/PHS 文章提出的语义承诺守恒方向
+- Stage 7 已启动：`plan-053-ci-templates` 正在把 GitHub Actions workflow 升级为可复用 ABH CI 模板，覆盖完整 unittest、doctor、roadmap、diff 和 health posture 检查，同时不实现发布自动化或团队策略
 - 未来路线图不再为未创建计划预写 `plan-033` 这类具体编号；未 materialize 的事项使用 `.abh/roadmap.json` 中的稳定 key，真实 plan id 只在 `abh roadmap materialize <key>` 时分配
 - 阶段 4 的目标不是普通 onboarding，而是让 Codex、Claude Code 和 MCP 客户端默认通过 JSON/非交互命令进入 active attractor -> plan -> verification -> audit -> memory 的轨迹控制回路；人类主要负责定义吸引子、批准写入和执行独立审计
 - 后续提升漂移分析精度：从关键词匹配升级到更高质量的证据提取

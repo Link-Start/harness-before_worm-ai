@@ -1,0 +1,147 @@
+{
+  "schema_version": "1",
+  "id": "ver-bea39c230f77",
+  "plan_id": "plan-053-ci-templates",
+  "command": "git diff --check && .venv\\Scripts\\python.exe -m unittest discover -v && .venv\\Scripts\\python.exe -m abh doctor --json && .venv\\Scripts\\python.exe -m abh roadmap check --json && .venv\\Scripts\\python.exe -m abh report health --json",
+  "result": "pass",
+  "artifacts": [
+    "command='git diff --check'; exit_code=0; duration_seconds=0.079; stdout=''; stderr=\"warning: in the working copy of '.abh/roadmap.json', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of '.github/workflows/ci.yml', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/context/codebase-map.md', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/developm\"",
+    "command='.venv\\\\Scripts\\\\python.exe -m unittest discover -v'; exit_code=0; duration_seconds=14.942; stdout=''; stderr='test_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command (tests.test_cli.CliTests.test_agent_setup_targets_share_shape_and_mcp_includes_server_command) ... ok\\\\ntest_attractor_create_active_show_list_and_supersede_json_flow (tests.test_cli.CliTests.test_attractor_create_active_show_list_and_supersede_json_flow) ... ok\\\\ntest_attractor_create_does_not'",
+    "command='.venv\\\\Scripts\\\\python.exe -m abh doctor --json'; exit_code=0; duration_seconds=0.254; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"doctor\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='.venv\\\\Scripts\\\\python.exe -m abh roadmap check --json'; exit_code=0; duration_seconds=0.227; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='.venv\\\\Scripts\\\\python.exe -m abh report health --json'; exit_code=0; duration_seconds=7.156; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"report health\", \"data\": {\"health_report\": {\"schema_version\": \"1\", \"posture\": \"at_risk\", \"summary\": \"69 unresolved semantic pressure signal(s).\", \"metrics\": {\"plans\": {\"total\": 54, \"open\": 2, \"closed\": 52, \"close_rate\": 0.9629629629629629, \"stale_latest_verifications\": 54}, \"verification\": {\"latest_pass\": 52, \"latest_fail_or_partial\": 0, \"stale_latest\": 54, \"failure_classifications\": {}}, \"audit\": {\"total\": 57, \"pass\": 53, \"fail\": 0, \"partial\": 2, \"'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "D:\\work\\ai\\harness-before",
+    "git": {
+      "commit": "75941ec812bcc39b08e0de9ce8d0543ffe481837",
+      "dirty": true,
+      "status_hash": "634f50d820bf05715969e34239a17a1b30614e1303e353c569205d642ce04c8f",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.15.0a7 (tags/v3.15.0a7:6024d3c, Mar 10 2026, 13:09:10) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "D:\\work\\ai\\harness-before\\.venv\\Scripts\\python.exe"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 5,
+      "execution_policy": "trusted_local_shell",
+      "trust_level": "local_shell",
+      "command_source": "plan_validation_checklist",
+      "isolation": "none"
+    },
+    "commands": [
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": ".venv\\Scripts\\python.exe -m unittest discover -v",
+        "argv": [
+          ".venvScriptspython.exe",
+          "-m",
+          "unittest",
+          "discover",
+          "-v"
+        ]
+      },
+      {
+        "command": ".venv\\Scripts\\python.exe -m abh doctor --json",
+        "argv": [
+          ".venvScriptspython.exe",
+          "-m",
+          "abh",
+          "doctor",
+          "--json"
+        ]
+      },
+      {
+        "command": ".venv\\Scripts\\python.exe -m abh roadmap check --json",
+        "argv": [
+          ".venvScriptspython.exe",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": ".venv\\Scripts\\python.exe -m abh report health --json",
+        "argv": [
+          ".venvScriptspython.exe",
+          "-m",
+          "abh",
+          "report",
+          "health",
+          "--json"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-06-06T10:08:29.989541+00:00",
+      "content_hash": "e97ea5f4d164de3015888dcf5ba474212419734f76e75feb2517a5e937ab946d",
+      "payload": {
+        "title": "CI Templates",
+        "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+        "baseline": "Stage 7 starts with reusable CI entry points. The repository already has a basic GitHub Actions workflow from earlier governance hardening, but it only runs the thin CLI test module, doctor, help, and plan list. ABH now has full unittest discovery, roadmap checks, diff whitespace checks, and health/drift reporting that should be represented in PR-oriented CI templates without introducing release automation or remote runner policy.",
+        "goals": [
+          "Upgrade the GitHub Actions CI workflow so pull requests run editable install, full unittest discovery, ABH doctor, roadmap consistency, git diff whitespace checks, and a read-only health report.",
+          "Document the CI template boundary for other repositories, including which checks are gating and which are informational.",
+          "Keep CI templates aligned with ABH local validation semantics and trusted local verification policy.",
+          "Synchronize README, development roadmap, task board, and codebase map with the Stage 7 CI template slice."
+        ],
+        "non_goals": [
+          "Do not implement release automation, publishing, signing, deployment, or package registry workflows.",
+          "Do not introduce team policy, required status checks, GitHub branch protection, or remote runner governance.",
+          "Do not add external services, third-party CI actions beyond existing GitHub setup actions, or network-dependent tests beyond package installation.",
+          "Do not make historical health-report semantic pressure block this CI template slice."
+        ],
+        "exit_criteria": [
+          ".github/workflows/ci.yml runs full unittest discovery instead of only the thin CLI smoke module.",
+          "CI runs python -m abh doctor, python -m abh roadmap check --json, git diff --check, and python -m abh report health --json.",
+          "Docs explain how to reuse the CI template and distinguish gating checks from informational health/drift reporting.",
+          "Roadmap, task-board, README, and codebase map reflect plan-053 as the active Stage 7 CI template slice.",
+          "Tests or contract checks cover the CI workflow command list so future edits do not silently drop ABH gates."
+        ],
+        "validation_checklist": [
+          "git diff --check",
+          ".venv\\Scripts\\python.exe -m unittest discover -v",
+          ".venv\\Scripts\\python.exe -m abh doctor --json",
+          ".venv\\Scripts\\python.exe -m abh roadmap check --json",
+          ".venv\\Scripts\\python.exe -m abh report health --json"
+        ],
+        "closure_evidence": [
+          ".github/workflows/ci.yml",
+          "tests/test_command_contracts.py",
+          "README.md",
+          "docs/recipes/ci.md",
+          "docs/development-roadmap.md",
+          "docs/task-board.md",
+          "docs/context/codebase-map.md"
+        ]
+      },
+      "validation_checklist": [
+        "git diff --check",
+        ".venv\\Scripts\\python.exe -m unittest discover -v",
+        ".venv\\Scripts\\python.exe -m abh doctor --json",
+        ".venv\\Scripts\\python.exe -m abh roadmap check --json",
+        ".venv\\Scripts\\python.exe -m abh report health --json"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-06-06T10:15:04.912186+00:00"
+}

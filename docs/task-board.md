@@ -2,7 +2,9 @@
 
 ## 当前阶段
 
-阶段 7：团队可用与生态集成（Ready）；当前焦点：`stage7.ci-templates`
+阶段 7：团队可用与生态集成（Doing）；当前焦点：无 open plan；下一队列：`stage7.team-policy-and-release-automation`
+
+Current focus: none; next queue: `stage7.team-policy-and-release-automation`
 
 ## 状态说明
 
@@ -10,6 +12,7 @@
 - Doing：正在进行。
 - Review：等待审查或验收。
 - Done：已完成。
+- Blocked：已确认暂不推进，需后续新证据或新计划解除阻塞。
 
 ## Sprint 1
 
@@ -493,6 +496,11 @@
 | S6-F09 | Verification Runner Trust Policy | Done | `stage6.verification-runner-trust-policy` -> `plan-047-verification-runner-trust-policy` |
 | S6-F10 | Test Suite Domain Split | Done | `stage6.test-suite-domain-split` -> `plan-048-test-suite-domain-split` |
 
+| S7-F01 | CI Templates | Done | `stage7.ci-templates` -> `plan-053-ci-templates` |
+| S7-F02 | Multi Repo Sharing | Blocked | `stage7.multi-repo-sharing` -> `plan-054-multi-repo-sharing`（blocked/deferred） |
+| S7-F03 | Team Policy and Release Automation | Todo | `stage7.team-policy-and-release-automation` |
+| ADOPT-F01 | ABH Workflow Skill Packaging | Done | `adoption.abh-workflow-skill` -> `plan-055-abh-workflow-skill`（closed） |
+
 ## Sprint 39
 
 目标：把 `stage6.plan-reference-set` dogfood 成 `plan-043-plan-reference-set`，让 plan 明确声明本轮工作必须参考的事实星座。
@@ -625,3 +633,17 @@
 | S48-004 | 实现 stale reason detail 与 post-close metadata churn health signal | Done | `abh/plans.py`, `abh/reporting.py`；仅 bounded post-close docs sync 与 close bookkeeping 降级为 governance churn |
 | S48-005 | 同步 quality signals、roadmap、task-board 和 codebase map | Done | `docs/architecture/quality-signals.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/context/codebase-map.md` |
 | S48-006 | plan-052 验证、独立审计和关闭 | Done | `.abh/verifications/ver-e55f64471acf.json`, `docs/audits/audit-052-post-close-freshness-semantics.md`, `docs/plans/plan-052-post-close-freshness-semantics.md` |
+
+## Sprint 49
+
+目标：把 `stage7.ci-templates` dogfood 成 `plan-053-ci-templates`，把现有 GitHub Actions 基础 CI 升级为可复用 ABH PR 检查模板，运行完整 unittest、doctor、roadmap、diff 和 health posture 检查，同时不实现发布自动化或团队策略。
+
+| ID | 任务 | 状态 | 产出 |
+| --- | --- | --- | --- |
+| S49-001 | materialize CI Templates 计划 | Done | `stage7.ci-templates` -> `docs/plans/plan-053-ci-templates.md` |
+| S49-002 | 补齐 plan-053 定义并转入 running | Done | `docs/plans/plan-053-ci-templates.md`, `.abh/roadmap.json` |
+| S49-003 | 定义 CI workflow command contract 红灯测试 | Done | `tests/test_command_contracts.py` |
+| S49-004 | 升级 GitHub Actions CI workflow | Done | `.github/workflows/ci.yml` |
+| S49-005 | 同步 CI recipe、README、roadmap、task-board 和 codebase map | Done | `docs/recipes/ci.md`, `README.md`, `docs/development-roadmap.md`, `docs/task-board.md`, `docs/context/codebase-map.md` |
+| S49-006 | plan-053 验证、独立审计和关闭 | Done | `.abh/verifications/ver-f07a468169c6.json`, `docs/audits/audit-053-ci-templates.md`, `docs/plans/plan-053-ci-templates.md` |
+| S49-007 | 关闭后同步下一步焦点 | Done | `stage7.multi-repo-sharing`, `docs/development-roadmap.md`, `docs/task-board.md` |

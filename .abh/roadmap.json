@@ -1001,31 +1001,136 @@
       "key": "stage7.ci-templates",
       "title": "CI Templates",
       "stage": "stage7",
-      "summary": "Provide CI templates that run doctor, tests, and drift checks in pull requests.",
-      "attractor": "",
-      "baseline": "",
-      "goals": [],
-      "non_goals": [],
-      "exit_criteria": [],
-      "validation_checklist": [],
-      "closure_evidence": [],
-      "status": "queued",
-      "plan_id": null
+      "summary": "Provide reusable GitHub Actions CI templates that run ABH doctor, full tests, roadmap checks, diff checks, and health/drift reporting in pull requests.",
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "Stage 7 starts with reusable CI entry points. The repository already has a basic GitHub Actions workflow from earlier governance hardening, but it only runs the thin CLI test module, doctor, help, and plan list. ABH now has full unittest discovery, roadmap checks, diff whitespace checks, and health/drift reporting that should be represented in PR-oriented CI templates without introducing release automation or remote runner policy.",
+      "goals": [
+        "Upgrade the GitHub Actions CI workflow so pull requests run editable install, full unittest discovery, ABH doctor, roadmap consistency, git diff whitespace checks, and a read-only health report.",
+        "Document the CI template boundary for other repositories, including which checks are gating and which are informational.",
+        "Keep CI templates aligned with ABH local validation semantics and trusted local verification policy.",
+        "Synchronize README, development roadmap, task board, and codebase map with the Stage 7 CI template slice."
+      ],
+      "non_goals": [
+        "Do not implement release automation, publishing, signing, deployment, or package registry workflows.",
+        "Do not introduce team policy, required status checks, GitHub branch protection, or remote runner governance.",
+        "Do not add external services, third-party CI actions beyond existing GitHub setup actions, or network-dependent tests beyond package installation.",
+        "Do not make historical health-report semantic pressure block this CI template slice."
+      ],
+      "exit_criteria": [
+        ".github/workflows/ci.yml runs full unittest discovery instead of only the thin CLI smoke module.",
+        "CI runs python -m abh doctor, python -m abh roadmap check --json, git diff --check, and python -m abh report health --json.",
+        "Docs explain how to reuse the CI template and distinguish gating checks from informational health/drift reporting.",
+        "Roadmap, task-board, README, and codebase map reflect plan-053 as the active Stage 7 CI template slice.",
+        "Tests or contract checks cover the CI workflow command list so future edits do not silently drop ABH gates."
+      ],
+      "validation_checklist": [
+        "git diff --check",
+        ".venv\\Scripts\\python.exe -m unittest discover -v",
+        ".venv\\Scripts\\python.exe -m abh doctor --json",
+        ".venv\\Scripts\\python.exe -m abh roadmap check --json",
+        ".venv\\Scripts\\python.exe -m abh report health --json"
+      ],
+      "closure_evidence": [
+        ".github/workflows/ci.yml",
+        "tests/test_command_contracts.py",
+        "README.md",
+        "docs/recipes/ci.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/context/codebase-map.md"
+      ],
+      "status": "materialized",
+      "plan_id": "plan-053-ci-templates"
     },
     {
       "key": "stage7.multi-repo-sharing",
       "title": "Multi Repo Sharing",
       "stage": "stage7",
       "summary": "Support importing and exporting attractor and memory context across repositories.",
-      "attractor": "",
-      "baseline": "",
-      "goals": [],
-      "non_goals": [],
-      "exit_criteria": [],
-      "validation_checklist": [],
-      "closure_evidence": [],
-      "status": "queued",
-      "plan_id": null
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "Support importing and exporting attractor and memory context across repositories.",
+      "goals": [
+        "Add a local-first import/export surface for sharing ABH attractor and memory context between repositories.",
+        "Represent exported context as repository-owned artifacts that can be inspected before import.",
+        "Preserve active attractor, memory relationship metadata, and source-of-truth boundaries when context moves across repositories.",
+        "Expose the sharing workflow through Agent-First command contracts and non-interactive JSON output."
+      ],
+      "non_goals": [
+        "Do not build cloud sync, remote services, external databases, or background daemons in this slice.",
+        "Do not implement team policy, release automation, package publishing, or branch protection.",
+        "Do not silently overwrite local active attractors, memory records, or owner docs during import.",
+        "Do not claim imported context is automatically trusted without local review and ABH evidence."
+      ],
+      "exit_criteria": [
+        "A user can export the active attractor and selected active memory context into a local bundle artifact.",
+        "A user can preview importing a bundle in another repository and see conflicts, planned writes, and required confirmation.",
+        "Confirmed imports preserve source repository metadata and avoid silent overwrite of existing local records.",
+        "Command contracts, CLI JSON output, docs, and tests describe the local-first sharing boundary."
+      ],
+      "validation_checklist": [
+        "git diff --check",
+        ".venv\\Scripts\\python.exe -m unittest discover -v",
+        ".venv\\Scripts\\python.exe -m abh doctor --json",
+        ".venv\\Scripts\\python.exe -m abh roadmap check --json",
+        ".venv\\Scripts\\python.exe -m abh next --json"
+      ],
+      "closure_evidence": [
+        "abh/commands.py",
+        "abh/cli.py",
+        "abh/models.py",
+        "abh/storage.py",
+        "tests/",
+        "README.md",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/context/codebase-map.md"
+      ],
+      "status": "blocked",
+      "plan_id": "plan-054-multi-repo-sharing"
+    },
+    {
+      "key": "adoption.abh-workflow-skill",
+      "title": "ABH Workflow Skill Packaging",
+      "stage": "adoption",
+      "summary": "Package existing ABH CLI workflow into a simple Codex skill without implementing Stage 7 multi-repo sharing.",
+      "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+      "baseline": "ABH already provides the CLI, MCP, verification, audit, next, onboarding, doctor, and health surfaces needed for a workflow skill.",
+      "goals": [
+        "Create a concise Codex skill that guides agents through the existing ABH workflow.",
+        "Keep the skill as command orchestration and decision rules over existing ABH CLI behavior.",
+        "Document installation and fallback assumptions for using ABH from this repository or a git-based uvx/uv tool install path.",
+        "Validate that the skill content is small, triggerable, and preserves independent audit separation."
+      ],
+      "non_goals": [
+        "Do not implement multi-repo sharing, import/export bundles, team policy, release automation, or package publishing in this slice.",
+        "Do not change ABH CLI/MCP runtime behavior unless a packaging-specific blocker is found and separately justified.",
+        "Do not embed the full ABH repository docs into the skill.",
+        "Do not allow the skill to bypass verification, independent audit, close gates, or doctor/roadmap consistency checks."
+      ],
+      "exit_criteria": [
+        "A skill directory exists with SKILL.md frontmatter that triggers for ABH workflow requests.",
+        "The skill body provides a short deterministic command flow for first use, daily use, blocked plans, verification failures, audit handoff, and close readiness.",
+        "The skill explicitly states that independent audit must be performed in a separate context and cannot be self-signed by the implementation session.",
+        "Skill validation or equivalent structural checks pass and repository ABH checks remain clean."
+      ],
+      "validation_checklist": [
+        "git diff --check",
+        ".venv\\Scripts\\python.exe -m unittest discover -v",
+        ".venv\\Scripts\\python.exe -m abh doctor --json",
+        ".venv\\Scripts\\python.exe -m abh roadmap check --json",
+        ".venv\\Scripts\\python.exe -m abh next --json"
+      ],
+      "closure_evidence": [
+        "skills/abh-workflow/SKILL.md",
+        "skills/abh-workflow/references/command-flow.md",
+        "skills/abh-workflow/agents/openai.yaml",
+        "docs/development-roadmap.md",
+        "docs/task-board.md",
+        "docs/context/codebase-map.md",
+        "tests/test_command_contracts.py"
+      ],
+      "status": "materialized",
+      "plan_id": "plan-055-abh-workflow-skill"
     },
     {
       "key": "stage7.team-policy-and-release-automation",

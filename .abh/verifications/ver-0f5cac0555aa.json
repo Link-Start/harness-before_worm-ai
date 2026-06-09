@@ -1,0 +1,158 @@
+{
+  "schema_version": "1",
+  "id": "ver-0f5cac0555aa",
+  "plan_id": "plan-054-multi-repo-sharing",
+  "command": "git diff --check && .venv\\\\Scripts\\\\python.exe -m unittest discover -v && .venv\\\\Scripts\\\\python.exe -m abh doctor --json && .venv\\\\Scripts\\\\python.exe -m abh roadmap check --json && .venv\\\\Scripts\\\\python.exe -m abh next --json",
+  "result": "fail",
+  "artifacts": [
+    "command='git diff --check'; exit_code=0; duration_seconds=0.087; stdout=''; stderr=\"warning: in the working copy of '.abh/plans/plan-054-multi-repo-sharing.json', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/context/codebase-map.md', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/development-roadmap.md', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/plans/plan-054-multi-repo-sharing.md', LF will be replaced by CRLF the next time G\"",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m unittest discover -v'; exit_code=1; duration_seconds=15.996; stdout=''; stderr='test_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command (tests.test_cli.CliTests.test_agent_setup_targets_share_shape_and_mcp_includes_server_command) ... ok\\\\ntest_attractor_create_active_show_list_and_supersede_json_flow (tests.test_cli.CliTests.test_attractor_create_active_show_list_and_supersede_json_flow) ... ok\\\\ntest_attractor_create_does_not'",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m abh doctor --json'; exit_code=0; duration_seconds=0.324; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"doctor\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m abh roadmap check --json'; exit_code=0; duration_seconds=0.278; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m abh next --json'; exit_code=0; duration_seconds=0.272; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"next\", \"data\": {\"next\": {\"next_action\": \"run_verification\", \"recommended_command\": \"abh verify run plan-054-multi-repo-sharing --json\", \"requires_confirmation\": false, \"rationale\": \"open ready plan plan-054-multi-repo-sharing should gather fresh local verification evidence\", \"source\": {\"plan_id\": \"plan-054-multi-repo-sharing\", \"plan_status\": \"ready\"}, \"alternatives\": [\"abh plan status plan-054-multi-repo-sharing --json\", \"abh audit request <plan-id'; stderr=''"
+  ],
+  "failed_checks": [
+    ".venv\\\\Scripts\\\\python.exe -m unittest discover -v"
+  ],
+  "failure_classifications": [
+    {
+      "command": ".venv\\\\Scripts\\\\python.exe -m unittest discover -v",
+      "category": "validation_failure",
+      "message": "validation command exited with non-zero status",
+      "details": {
+        "exit_code": 1
+      }
+    }
+  ],
+  "environment": {
+    "cwd": "D:\\work\\ai\\harness-before",
+    "git": {
+      "commit": "6bd4d59ea5fb64c845a2eb4ae6b68d8398c3dbe8",
+      "dirty": true,
+      "status_hash": "6587f03359171176fd720f63894aae597ade0d7d4ab7b8bf8b66283a41c6a43f",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.15.0a7 (tags/v3.15.0a7:6024d3c, Mar 10 2026, 13:09:10) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "D:\\work\\ai\\harness-before\\.venv\\Scripts\\python.exe"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 5,
+      "execution_policy": "trusted_local_shell",
+      "trust_level": "local_shell",
+      "command_source": "plan_validation_checklist",
+      "isolation": "none"
+    },
+    "commands": [
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m unittest discover -v",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "unittest",
+          "discover",
+          "-v"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m abh doctor --json",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "abh",
+          "doctor",
+          "--json"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m abh roadmap check --json",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m abh next --json",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "abh",
+          "next",
+          "--json"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-06-08T01:57:56.860040+00:00",
+      "content_hash": "355ad58d4d8e6b44c1c4e919627dc8e1706fd01d261e096da06ed8c6d0d97aae",
+      "payload": {
+        "title": "Multi Repo Sharing",
+        "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+        "baseline": "Support importing and exporting attractor and memory context across repositories.",
+        "goals": [
+          "Add a local-first import/export surface for sharing ABH attractor and memory context between repositories.",
+          "Represent exported context as repository-owned artifacts that can be inspected before import.",
+          "Preserve active attractor, memory relationship metadata, and source-of-truth boundaries when context moves across repositories.",
+          "Expose the sharing workflow through Agent-First command contracts and non-interactive JSON output."
+        ],
+        "non_goals": [
+          "Do not build cloud sync, remote services, external databases, or background daemons in this slice.",
+          "Do not implement team policy, release automation, package publishing, or branch protection.",
+          "Do not silently overwrite local active attractors, memory records, or owner docs during import.",
+          "Do not claim imported context is automatically trusted without local review and ABH evidence."
+        ],
+        "exit_criteria": [
+          "A user can export the active attractor and selected active memory context into a local bundle artifact.",
+          "A user can preview importing a bundle in another repository and see conflicts, planned writes, and required confirmation.",
+          "Confirmed imports preserve source repository metadata and avoid silent overwrite of existing local records.",
+          "Command contracts, CLI JSON output, docs, and tests describe the local-first sharing boundary."
+        ],
+        "validation_checklist": [
+          "git diff --check",
+          ".venv\\\\Scripts\\\\python.exe -m unittest discover -v",
+          ".venv\\\\Scripts\\\\python.exe -m abh doctor --json",
+          ".venv\\\\Scripts\\\\python.exe -m abh roadmap check --json",
+          ".venv\\\\Scripts\\\\python.exe -m abh next --json"
+        ],
+        "closure_evidence": [
+          "abh/commands.py",
+          "abh/cli.py",
+          "abh/models.py",
+          "abh/storage.py",
+          "tests/",
+          "README.md",
+          "docs/development-roadmap.md",
+          "docs/task-board.md",
+          "docs/context/codebase-map.md"
+        ]
+      },
+      "validation_checklist": [
+        "git diff --check",
+        ".venv\\\\Scripts\\\\python.exe -m unittest discover -v",
+        ".venv\\\\Scripts\\\\python.exe -m abh doctor --json",
+        ".venv\\\\Scripts\\\\python.exe -m abh roadmap check --json",
+        ".venv\\\\Scripts\\\\python.exe -m abh next --json"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-06-08T02:22:05.649158+00:00"
+}

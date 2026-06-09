@@ -1,0 +1,158 @@
+{
+  "schema_version": "1",
+  "id": "ver-11a517ed7312",
+  "plan_id": "plan-055-abh-workflow-skill",
+  "command": "git diff --check && .venv\\\\Scripts\\\\python.exe -m unittest discover -v && .venv\\\\Scripts\\\\python.exe -m abh doctor --json && .venv\\\\Scripts\\\\python.exe -m abh roadmap check --json && .venv\\\\Scripts\\\\python.exe -m abh next --json && .venv\\Scripts\\python.exe C:/Users/1003584/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/abh-workflow",
+  "result": "pass",
+  "artifacts": [
+    "command='git diff --check'; exit_code=0; duration_seconds=0.116; stdout=''; stderr=\"warning: in the working copy of '.abh/plans/plan-054-multi-repo-sharing.json', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of '.abh/roadmap.json', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/context/codebase-map.md', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/development-roadmap.md', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: \"",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m unittest discover -v'; exit_code=0; duration_seconds=16.794; stdout=''; stderr='test_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command (tests.test_cli.CliTests.test_agent_setup_targets_share_shape_and_mcp_includes_server_command) ... ok\\\\ntest_attractor_create_active_show_list_and_supersede_json_flow (tests.test_cli.CliTests.test_attractor_create_active_show_list_and_supersede_json_flow) ... ok\\\\ntest_attractor_create_does_not'",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m abh doctor --json'; exit_code=0; duration_seconds=0.272; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"doctor\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m abh roadmap check --json'; exit_code=0; duration_seconds=0.254; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m abh next --json'; exit_code=0; duration_seconds=0.257; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"next\", \"data\": {\"next\": {\"next_action\": \"run_verification\", \"recommended_command\": \"abh verify run plan-055-abh-workflow-skill --json\", \"requires_confirmation\": false, \"rationale\": \"open ready plan plan-055-abh-workflow-skill should gather fresh local verification evidence\", \"source\": {\"plan_id\": \"plan-055-abh-workflow-skill\", \"plan_status\": \"ready\"}, \"alternatives\": [\"abh plan status plan-055-abh-workflow-skill --json\", \"abh audit request <plan-id'; stderr=''",
+    "command='.venv\\\\Scripts\\\\python.exe C:/Users/1003584/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/abh-workflow'; exit_code=0; duration_seconds=0.171; stdout='Skill is valid!'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "D:\\work\\ai\\harness-before",
+    "git": {
+      "commit": "6bd4d59ea5fb64c845a2eb4ae6b68d8398c3dbe8",
+      "dirty": true,
+      "status_hash": "010f80df2690353ff2eacb80e22e4ed64c4665808255524f478eed55fe6579d1",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.15.0a7 (tags/v3.15.0a7:6024d3c, Mar 10 2026, 13:09:10) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "D:\\work\\ai\\harness-before\\.venv\\Scripts\\python.exe"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 6,
+      "execution_policy": "trusted_local_shell",
+      "trust_level": "local_shell",
+      "command_source": "plan_validation_checklist",
+      "isolation": "none"
+    },
+    "commands": [
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m unittest discover -v",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "unittest",
+          "discover",
+          "-v"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m abh doctor --json",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "abh",
+          "doctor",
+          "--json"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m abh roadmap check --json",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m abh next --json",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "abh",
+          "next",
+          "--json"
+        ]
+      },
+      {
+        "command": ".venv\\Scripts\\python.exe C:/Users/1003584/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/abh-workflow",
+        "argv": [
+          ".venvScriptspython.exe",
+          "C:/Users/1003584/.codex/skills/.system/skill-creator/scripts/quick_validate.py",
+          "skills/abh-workflow"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-06-08T02:49:17.938316+00:00",
+      "content_hash": "8d884ef0f9575bba0c0ee8bd8c0f5237ff23b9d0ab32fc1645e954fe556fbe82",
+      "payload": {
+        "title": "ABH Workflow Skill Packaging MVP",
+        "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+        "baseline": "Package existing ABH CLI workflow into a dumb/simple Codex skill without implementing Stage 7 multi-repo sharing.",
+        "goals": [
+          "Create a concise Codex skill that guides agents through the existing ABH workflow: onboarding check, next, plan definition, verification, audit bundle, audit record, close, doctor, and health reporting.",
+          "Keep the skill as command orchestration and decision rules over existing ABH CLI behavior, not a replacement for ABH state machines or evidence gates.",
+          "Document installation and fallback assumptions for using ABH from this repository or a git-based uvx/uv tool install path.",
+          "Validate that the skill content is small, triggerable, and does not claim independent audit or completion on behalf of the implementation session."
+        ],
+        "non_goals": [
+          "Do not implement multi-repo sharing, import/export bundles, team policy, release automation, or package publishing in this slice.",
+          "Do not change ABH CLI/MCP runtime behavior unless a packaging-specific blocker is found and separately justified.",
+          "Do not embed the full ABH repository docs into the skill; keep detailed references external and loaded only when needed.",
+          "Do not allow the skill to bypass verification, independent audit, close gates, or doctor/roadmap consistency checks."
+        ],
+        "exit_criteria": [
+          "A skill directory exists with SKILL.md frontmatter that triggers for ABH workflow, plan, verification, audit, close, and onboarding requests.",
+          "The skill body provides a short deterministic command flow for first use, daily use, blocked plans, verification failures, audit handoff, and close readiness.",
+          "The skill explicitly states that independent audit must be performed in a separate context and cannot be self-signed by the implementation session.",
+          "Skill validation passes and repository ABH checks remain clean."
+        ],
+        "validation_checklist": [
+          "git diff --check",
+          ".venv\\\\Scripts\\\\python.exe -m unittest discover -v",
+          ".venv\\\\Scripts\\\\python.exe -m abh doctor --json",
+          ".venv\\\\Scripts\\\\python.exe -m abh roadmap check --json",
+          ".venv\\\\Scripts\\\\python.exe -m abh next --json",
+          ".venv\\Scripts\\python.exe C:/Users/1003584/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/abh-workflow"
+        ],
+        "closure_evidence": [
+          "skills or .codex skill directory for abh-workflow",
+          "docs/development-roadmap.md",
+          "docs/task-board.md",
+          "docs/context/codebase-map.md",
+          "tests/ or validation transcript",
+          "skills/abh-workflow/SKILL.md",
+          "skills/abh-workflow/references/command-flow.md",
+          "skills/abh-workflow/agents/openai.yaml",
+          "tests/test_command_contracts.py"
+        ]
+      },
+      "validation_checklist": [
+        "git diff --check",
+        ".venv\\\\Scripts\\\\python.exe -m unittest discover -v",
+        ".venv\\\\Scripts\\\\python.exe -m abh doctor --json",
+        ".venv\\\\Scripts\\\\python.exe -m abh roadmap check --json",
+        ".venv\\\\Scripts\\\\python.exe -m abh next --json",
+        ".venv\\Scripts\\python.exe C:/Users/1003584/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/abh-workflow"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-06-08T02:50:04.914373+00:00"
+}

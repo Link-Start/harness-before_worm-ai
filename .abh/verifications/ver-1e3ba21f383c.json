@@ -1,0 +1,149 @@
+{
+  "schema_version": "1",
+  "id": "ver-1e3ba21f383c",
+  "plan_id": "plan-056-readme-zero-python-skill-onboarding",
+  "command": "git diff --check && .venv\\\\Scripts\\\\python.exe -m unittest tests.test_command_contracts.CommandContractTests.test_readme_exposes_zero_python_skill_onboarding -v && .venv\\\\Scripts\\\\python.exe -m unittest discover -v && .venv\\\\Scripts\\\\python.exe -m abh doctor --json && .venv\\\\Scripts\\\\python.exe -m abh roadmap check --json && .venv\\\\Scripts\\\\python.exe -m abh next --json",
+  "result": "pass",
+  "artifacts": [
+    "command='git diff --check'; exit_code=0; duration_seconds=0.096; stdout=''; stderr=\"warning: in the working copy of '.abh/plans/plan-054-multi-repo-sharing.json', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of '.abh/roadmap.json', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working copy of 'docs/context/codebase-map.md', LF will be replaced by CRLF the next time Git touches it\\\\nwarning: in the working cop\"",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m unittest tests.test_command_contracts.CommandContractTests.test_readme_exposes_zero_python_skill_onboarding -v'; exit_code=0; duration_seconds=0.338; stdout=''; stderr='test_readme_exposes_zero_python_skill_onboarding (tests.test_command_contracts.CommandContractTests.test_readme_exposes_zero_python_skill_onboarding) ... ok\\\\n\\\\n----------------------------------------------------------------------\\\\nRan 1 test in 0.006s\\\\n\\\\nOK'",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m unittest discover -v'; exit_code=0; duration_seconds=18.960; stdout=''; stderr='test_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command (tests.test_cli.CliTests.test_agent_setup_targets_share_shape_and_mcp_includes_server_command) ... ok\\\\ntest_attractor_create_active_show_list_and_supersede_json_flow (tests.test_cli.CliTests.test_attractor_create_active_show_list_and_supersede_json_flow) ... ok\\\\ntest_attractor_create_does_not'",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m abh doctor --json'; exit_code=0; duration_seconds=0.353; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"doctor\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m abh roadmap check --json'; exit_code=0; duration_seconds=0.364; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='.venv\\\\\\\\Scripts\\\\\\\\python.exe -m abh next --json'; exit_code=0; duration_seconds=0.292; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"next\", \"data\": {\"next\": {\"next_action\": \"run_verification\", \"recommended_command\": \"abh verify run plan-056-readme-zero-python-skill-onboarding --json\", \"requires_confirmation\": false, \"rationale\": \"open ready plan plan-056-readme-zero-python-skill-onboarding should gather fresh local verification evidence\", \"source\": {\"plan_id\": \"plan-056-readme-zero-python-skill-onboarding\", \"plan_status\": \"ready\"}, \"alternatives\": [\"abh plan status plan-056-read'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "D:\\work\\ai\\harness-before",
+    "git": {
+      "commit": "6bd4d59ea5fb64c845a2eb4ae6b68d8398c3dbe8",
+      "dirty": true,
+      "status_hash": "24d1e5ebdf1a4082c70d03d99afc61285f1caab3a8ab2a294e8cbf6fc873e516",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.15.0a7 (tags/v3.15.0a7:6024d3c, Mar 10 2026, 13:09:10) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "D:\\work\\ai\\harness-before\\.venv\\Scripts\\python.exe"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 6,
+      "execution_policy": "trusted_local_shell",
+      "trust_level": "local_shell",
+      "command_source": "plan_validation_checklist",
+      "isolation": "none"
+    },
+    "commands": [
+      {
+        "command": "git diff --check",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m unittest tests.test_command_contracts.CommandContractTests.test_readme_exposes_zero_python_skill_onboarding -v",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "unittest",
+          "tests.test_command_contracts.CommandContractTests.test_readme_exposes_zero_python_skill_onboarding",
+          "-v"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m unittest discover -v",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "unittest",
+          "discover",
+          "-v"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m abh doctor --json",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "abh",
+          "doctor",
+          "--json"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m abh roadmap check --json",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      },
+      {
+        "command": ".venv\\\\Scripts\\\\python.exe -m abh next --json",
+        "argv": [
+          ".venv\\Scripts\\python.exe",
+          "-m",
+          "abh",
+          "next",
+          "--json"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-06-08T07:39:29.392520+00:00",
+      "content_hash": "37fd5b03d02fae82a1a23575c5fadded6e7eb218073e36bba01cb183a56c191e",
+      "payload": {
+        "title": "README Zero Python Skill Onboarding",
+        "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+        "baseline": "README currently documents uvx installation but the beginner path and abh-workflow skill usage are not prominent enough for users without Python.",
+        "goals": [
+          "Add a prominent README quickstart for zero-Python users that starts with installing uv, running or installing abh, and using the abh-workflow skill from Codex.",
+          "Provide copy/paste commands for Windows PowerShell, macOS, and Linux users without requiring prior Python knowledge.",
+          "Document the simplest Codex prompt that points to skills/abh-workflow and explains what the skill will do."
+        ],
+        "non_goals": [
+          "Do not change ABH CLI runtime behavior, package publishing, PyPI status, or multi-repo sharing.",
+          "Do not claim uvx abh works as a bare package name before package publication."
+        ],
+        "exit_criteria": [
+          "README top section contains a zero-Python beginner path before the detailed feature list.",
+          "README includes copy/paste uv install, uvx run, uv tool install, and Codex abh-workflow usage prompts.",
+          "Tests assert the README keeps the beginner install and skill usage entry visible."
+        ],
+        "validation_checklist": [
+          "git diff --check",
+          ".venv\\\\Scripts\\\\python.exe -m unittest tests.test_command_contracts.CommandContractTests.test_readme_exposes_zero_python_skill_onboarding -v",
+          ".venv\\\\Scripts\\\\python.exe -m unittest discover -v",
+          ".venv\\\\Scripts\\\\python.exe -m abh doctor --json",
+          ".venv\\\\Scripts\\\\python.exe -m abh roadmap check --json",
+          ".venv\\\\Scripts\\\\python.exe -m abh next --json"
+        ],
+        "closure_evidence": [
+          "README.md",
+          "tests/test_command_contracts.py"
+        ]
+      },
+      "validation_checklist": [
+        "git diff --check",
+        ".venv\\\\Scripts\\\\python.exe -m unittest tests.test_command_contracts.CommandContractTests.test_readme_exposes_zero_python_skill_onboarding -v",
+        ".venv\\\\Scripts\\\\python.exe -m unittest discover -v",
+        ".venv\\\\Scripts\\\\python.exe -m abh doctor --json",
+        ".venv\\\\Scripts\\\\python.exe -m abh roadmap check --json",
+        ".venv\\\\Scripts\\\\python.exe -m abh next --json"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-06-08T07:42:10.120796+00:00"
+}

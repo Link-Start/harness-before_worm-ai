@@ -104,6 +104,64 @@ class CommandContractTests(WorkspaceCliTestCase):
         self.assertNotIn("def test_route_recommends_reading_order_for_close_question", cli_tests)
         self.assertNotIn("def test_report_health_json_empty_workspace", cli_tests)
 
+    def test_ci_workflow_runs_full_abh_pull_request_checks(self) -> None:
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "ci.yml").read_text(
+            encoding="utf-8"
+        )
+
+        for command in (
+            "python3 -m pip install -e .",
+            "python3 -m unittest discover -v",
+            "python3 -m abh doctor --json",
+            "python3 -m abh roadmap check --json",
+            "git diff --check",
+            "python3 -m abh report health --json",
+        ):
+            self.assertIn(command, workflow)
+        self.assertNotIn("python3 -m unittest tests/test_cli.py -v", workflow)
+
+    def test_ci_docs_define_gating_and_informational_boundary(self) -> None:
+        repo = Path(__file__).resolve().parents[1]
+        readme = (repo / "README.md").read_text(encoding="utf-8")
+        recipe = (repo / "docs" / "recipes" / "ci.md").read_text(encoding="utf-8")
+
+        for text in (readme, recipe):
+            self.assertIn("Gating checks", text)
+            self.assertIn("Informational checks", text)
+            self.assertIn("`python3 -m abh report health --json` is informational", text)
+            self.assertIn("does not fail solely because historical semantic pressure exists", text)
+
+    def test_readme_exposes_zero_python_skill_onboarding(self) -> None:
+        readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("## 零基础使用：不装 Python", readme)
+        self.assertIn("powershell -c \"irm https://astral.sh/uv/install.ps1 | iex\"", readme)
+        self.assertIn("curl -LsSf https://astral.sh/uv/install.sh | sh", readme)
+        self.assertIn("uvx --from git+https://github.com/worm-ai/harness-before.git abh --help", readme)
+        self.assertIn("uv tool install --from git+https://github.com/worm-ai/harness-before.git abh", readme)
+        self.assertIn("Use the skill at `skills/abh-workflow`", readme)
+        self.assertIn("不需要自己写 plan、verification、audit 命令", readme)
+
+    def test_stage7_docs_reconcile_ci_boundary_blocked_sharing_and_skill_slice(self) -> None:
+        repo = Path(__file__).resolve().parents[1]
+        roadmap = (repo / "docs" / "development-roadmap.md").read_text(encoding="utf-8")
+        task_board = (repo / "docs" / "task-board.md").read_text(encoding="utf-8")
+        codebase_map = (repo / "docs" / "context" / "codebase-map.md").read_text(encoding="utf-8")
+        skill = (repo / "skills" / "abh-workflow" / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("Stage 7 CI drift boundary", roadmap)
+        self.assertIn("roadmap consistency, whitespace drift, and read-only health posture", roadmap)
+        self.assertIn("does not run standalone `abh drift analyze`", roadmap)
+        self.assertIn("Current focus: none; next queue: `stage7.team-policy-and-release-automation`", task_board)
+        self.assertIn("`stage7.multi-repo-sharing` -> `plan-054-multi-repo-sharing`（blocked/deferred）", task_board)
+        self.assertIn("`adoption.abh-workflow-skill` -> `plan-055-abh-workflow-skill`（closed）", task_board)
+        self.assertIn("Stage 7 completed slice: `plan-053-ci-templates`", codebase_map)
+        self.assertIn("`plan-054-multi-repo-sharing` is blocked/deferred", codebase_map)
+        self.assertIn("`plan-055-abh-workflow-skill` is closed", codebase_map)
+        self.assertIn("name: abh-workflow", skill)
+        self.assertIn("Use when the user asks to manage a task with ABH", skill)
+        self.assertIn("must not self-sign independent audit", skill)
+
     def test_core_reexports_plan_audit_and_verification_module_functions(self) -> None:
         self.assertIs(create_plan, plans.create_plan)
         self.assertIs(update_plan_record, plans.update_plan_record)
