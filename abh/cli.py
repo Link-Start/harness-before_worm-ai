@@ -5,6 +5,7 @@ import sys
 from typing import Any
 
 from .agent_setup import agent_setup_bundle
+from .codex_setup import codex_off, codex_on, codex_status
 from .audit_bundle import audit_bundle
 from .commands import abh_error_payload, dumps_envelope, make_envelope
 from .hooks import hook_profile, install_hooks
@@ -61,6 +62,7 @@ def command_name(args: argparse.Namespace) -> str:
         "agent_command",
         "agent_setup_command",
         "hooks_command",
+        "codex_command",
         "onboarding_command",
         "report_command",
     ):
@@ -156,6 +158,25 @@ def build_parser() -> argparse.ArgumentParser:
     hooks_install_parser.add_argument("--confirm", action="store_true", help="confirm hook writes")
     add_json_argument(hooks_install_parser)
     hooks_install_parser.set_defaults(handler=handle_hooks_install)
+
+    codex_parser = subparsers.add_parser("codex", help="manage repository-local Codex ABH guidance")
+    codex_sub = codex_parser.add_subparsers(dest="codex_command", required=True)
+
+    codex_status_parser = codex_sub.add_parser("status", help="show Codex ABH status for this repository")
+    add_json_argument(codex_status_parser)
+    codex_status_parser.set_defaults(handler=handle_codex_status)
+
+    codex_on_parser = codex_sub.add_parser("on", help="preview or write managed Codex ABH config")
+    codex_on_parser.add_argument("--write", action="store_true", help="write the managed Codex config")
+    codex_on_parser.add_argument("--confirm", action="store_true", help="confirm Codex config writes")
+    add_json_argument(codex_on_parser)
+    codex_on_parser.set_defaults(handler=handle_codex_on)
+
+    codex_off_parser = codex_sub.add_parser("off", help="preview or remove managed Codex ABH config")
+    codex_off_parser.add_argument("--write", action="store_true", help="remove the managed Codex config")
+    codex_off_parser.add_argument("--confirm", action="store_true", help="confirm Codex config removal")
+    add_json_argument(codex_off_parser)
+    codex_off_parser.set_defaults(handler=handle_codex_off)
 
     next_parser = subparsers.add_parser("next", help="recommend the next ABH action")
     add_json_argument(next_parser)
@@ -427,6 +448,36 @@ def handle_hooks_install(args: argparse.Namespace) -> int:
         return 0
     mode = "wrote" if args.write else "preview"
     print(f"hooks install {mode}: {len(result['writes'])} write(s), {len(result['blockers'])} blocker(s)")
+    return 0
+
+
+def handle_codex_status(args: argparse.Namespace) -> int:
+    result = codex_status()
+    if args.json:
+        print_json_envelope(ok=True, command=command_name(args), data={"codex": result})
+        return 0
+    status = "enabled" if result["enabled"] else "disabled"
+    print(f"codex status: {status} ({result['path']})")
+    return 0
+
+
+def handle_codex_on(args: argparse.Namespace) -> int:
+    result = codex_on(write=args.write, confirmed=args.confirm)
+    if args.json:
+        print_json_envelope(ok=True, command=command_name(args), data={"codex": result})
+        return 0
+    mode = "wrote" if args.write else "preview"
+    print(f"codex on {mode}: {len(result['writes'])} write(s), {len(result['blockers'])} blocker(s)")
+    return 0
+
+
+def handle_codex_off(args: argparse.Namespace) -> int:
+    result = codex_off(write=args.write, confirmed=args.confirm)
+    if args.json:
+        print_json_envelope(ok=True, command=command_name(args), data={"codex": result})
+        return 0
+    mode = "wrote" if args.write else "preview"
+    print(f"codex off {mode}: {len(result['writes'])} write(s), {len(result['blockers'])} blocker(s)")
     return 0
 
 

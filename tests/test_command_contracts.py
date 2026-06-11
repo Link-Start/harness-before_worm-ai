@@ -142,6 +142,21 @@ class CommandContractTests(WorkspaceCliTestCase):
         self.assertIn("Use the skill at `skills/abh-workflow`", readme)
         self.assertIn("不需要自己写 plan、verification、audit 命令", readme)
 
+    def test_readme_documents_codex_toggle_commands(self) -> None:
+        readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("abh codex on --write --confirm --json", readme)
+        self.assertIn("abh codex off --write --confirm --json", readme)
+        self.assertIn("abh codex status --json", readme)
+
+    def test_codex_recipe_mentions_managed_repo_config_toggle(self) -> None:
+        recipe = (Path(__file__).resolve().parents[1] / "docs" / "recipes" / "codex.md").read_text(encoding="utf-8")
+
+        self.assertIn(".codex/config.toml", recipe)
+        self.assertIn("abh codex on --write --confirm --json", recipe)
+        self.assertIn("abh codex off --write --confirm --json", recipe)
+        self.assertIn("ABH-managed", recipe)
+
     def test_stage7_docs_reconcile_ci_boundary_blocked_sharing_and_skill_slice(self) -> None:
         repo = Path(__file__).resolve().parents[1]
         roadmap = (repo / "docs" / "development-roadmap.md").read_text(encoding="utf-8")
@@ -152,12 +167,13 @@ class CommandContractTests(WorkspaceCliTestCase):
         self.assertIn("Stage 7 CI drift boundary", roadmap)
         self.assertIn("roadmap consistency, whitespace drift, and read-only health posture", roadmap)
         self.assertIn("does not run standalone `abh drift analyze`", roadmap)
-        self.assertIn("Current focus: none; next queue: `stage7.team-policy-and-release-automation`", task_board)
+        self.assertIn("Current focus: `plan-057-codex-repo-toggle`; next queue: `stage7.team-policy-and-release-automation`", task_board)
         self.assertIn("`stage7.multi-repo-sharing` -> `plan-054-multi-repo-sharing`（blocked/deferred）", task_board)
         self.assertIn("`adoption.abh-workflow-skill` -> `plan-055-abh-workflow-skill`（closed）", task_board)
         self.assertIn("Stage 7 completed slice: `plan-053-ci-templates`", codebase_map)
         self.assertIn("`plan-054-multi-repo-sharing` is blocked/deferred", codebase_map)
         self.assertIn("`plan-055-abh-workflow-skill` is closed", codebase_map)
+        self.assertIn("`plan-057-codex-repo-toggle` is the current open plan", codebase_map)
         self.assertIn("name: abh-workflow", skill)
         self.assertIn("Use when the user asks to manage a task with ABH", skill)
         self.assertIn("must not self-sign independent audit", skill)
@@ -211,6 +227,29 @@ class CommandContractTests(WorkspaceCliTestCase):
         self.assertIn("write", hooks_install.input_schema["properties"])
         self.assertIn("confirm", hooks_install.input_schema["properties"])
         self.assertTrue(any(".git/hooks/pre-commit" in effect for effect in hooks_install.side_effects))
+
+        codex_status = command_contract("codex.status")
+        self.assertEqual(codex_status.cli_command, "codex status")
+        self.assertTrue(codex_status.read_only)
+        self.assertEqual(codex_status.confirmation, "none")
+        self.assertEqual(codex_status.side_effects, [])
+        self.assertEqual(codex_status.output_keys, ["codex"])
+
+        codex_on = command_contract("codex.on")
+        self.assertEqual(codex_on.cli_command, "codex on")
+        self.assertFalse(codex_on.read_only)
+        self.assertEqual(codex_on.confirmation, "--write --confirm")
+        self.assertIn("write", codex_on.input_schema["properties"])
+        self.assertIn("confirm", codex_on.input_schema["properties"])
+        self.assertIn("write .codex/config.toml", codex_on.side_effects)
+
+        codex_off = command_contract("codex.off")
+        self.assertEqual(codex_off.cli_command, "codex off")
+        self.assertFalse(codex_off.read_only)
+        self.assertEqual(codex_off.confirmation, "--write --confirm")
+        self.assertIn("write", codex_off.input_schema["properties"])
+        self.assertIn("confirm", codex_off.input_schema["properties"])
+        self.assertIn("write .codex/config.toml", codex_off.side_effects)
 
         plan_status = command_contract("plan.status")
         self.assertEqual(plan_status.cli_command, "plan status")

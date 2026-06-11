@@ -57,6 +57,16 @@ Use the skill at `skills/abh-workflow` to manage this repository task through AB
 
 这个 skill 会引导 Codex 调用 `abh onboarding check --json`、`abh next --json`、`abh doctor --json`、`abh roadmap check --json`，再按需要创建或补齐 plan、运行 verification、生成独立审计提示词、记录审计结果并关闭 plan。你不需要自己写 plan、verification、audit 命令；但独立审计仍必须在单独上下文或由独立 reviewer 完成，不能由同一个实现会话自签。
 
+如果你想让当前仓库默认以 ABH 方式在 Codex 中工作，可以写入仓库级的受管 `.codex/config.toml`：
+
+```bash
+abh codex status --json
+abh codex on --write --confirm --json
+abh codex off --write --confirm --json
+```
+
+`abh codex on` 只管理 ABH 写入的 `.codex/config.toml`，不会合并或覆盖用户自写的 unmanaged Codex 配置。
+
 ## 项目来源
 [Attractor Before Harness: AI 大规模开发的方法论](https://mp.weixin.qq.com/s/TwMkUDLNo2-bIrXrfvPqIw)
 
@@ -82,6 +92,7 @@ Use the skill at `skills/abh-workflow` to manage this repository task through AB
 - `attractor`：管理 active attractor，并在 plan ready 前校验吸引子绑定
 - `roadmap`：维护稳定 roadmap queue，并在 materialize 时分配真实 plan 编号
 - `agent setup`：导出 Codex、Claude Code 和通用 MCP 客户端可读取的只读 setup bundle
+- `codex`：预览、启用、停用当前仓库的受管 Codex ABH 配置
 - `hooks`：预览或安装本地 ABH pre-commit guardrail hook
 - `next`：根据本地 ABH 状态推荐下一条安全动作
 - `onboarding check`：检查仓库是否具备 Agent-First ABH readiness 基线
@@ -451,6 +462,18 @@ abh agent setup mcp --json
 python3 -m abh.mcp_server
 ```
 
+### 14.1 Codex Repository Toggle
+
+如果你希望当前仓库在 Codex 桌面版中默认以 ABH 流程工作，可以写入仓库级受管配置：
+
+```bash
+abh codex status --json
+abh codex on --write --confirm --json
+abh codex off --write --confirm --json
+```
+
+`abh codex on --write --confirm --json` 会创建受管 `.codex/config.toml`，把 `skills/abh-workflow`、`abh onboarding check --json`、`abh next --json`、`abh doctor --json` 和 `abh roadmap check --json` 注入 Codex 的 `developer_instructions`。该命令默认是 preview-only；只有同时传入 `--write --confirm` 才会写文件。若当前仓库已有 unmanaged `.codex/config.toml`，命令会返回 blocker，不会覆盖用户配置。
+
 ### 15. Git Hook Guardrails
 
 阶段 4 的 hook guardrails 提供本地 pre-commit 保护层。默认 profile 是一个轻量 `pre-commit` hook，会运行：
@@ -566,6 +589,7 @@ python3 -m abh.mcp_server
 - 阶段 6 已启动：`plan-039-quality-signal-model` 定义 product-quality-first / agent-navigation-second 的质量信号模型；`plan-040-drift-quality` 已把 drift finding 提升为带 severity、matched span、source excerpt 和 confidence 的质量信号；`plan-041-memory-index` 已把 memory 提升为带 tags、status、关系索引和 supersession 的可复用质量知识；`plan-042-project-health-report` 正在把 health report 收敛为语义压力报告，优先暴露 unbound commitment pressure、stale proof、semantic leakage、J-flow-only evidence、orphaned memory 和 repeated leakage
 - Stage 6 后续 queue 已固化 Plan Reference Set、Commitment Phase State、Audit Semantic Conservation 和 Owner Doc Stable Commitments，避免后续实现遗忘 AGE/PHS 文章提出的语义承诺守恒方向
 - Stage 7 已启动：`plan-053-ci-templates` 正在把 GitHub Actions workflow 升级为可复用 ABH CI 模板，覆盖完整 unittest、doctor、roadmap、diff 和 health posture 检查，同时不实现发布自动化或团队策略
+- `plan-057-codex-repo-toggle` 正在进行中：为 Codex 桌面版补齐仓库级 ABH toggle，受管写入 `.codex/config.toml`，不实现 CLI profile 模式或多 agent toggle
 - 未来路线图不再为未创建计划预写 `plan-033` 这类具体编号；未 materialize 的事项使用 `.abh/roadmap.json` 中的稳定 key，真实 plan id 只在 `abh roadmap materialize <key>` 时分配
 - 阶段 4 的目标不是普通 onboarding，而是让 Codex、Claude Code 和 MCP 客户端默认通过 JSON/非交互命令进入 active attractor -> plan -> verification -> audit -> memory 的轨迹控制回路；人类主要负责定义吸引子、批准写入和执行独立审计
 - 后续提升漂移分析精度：从关键词匹配升级到更高质量的证据提取

@@ -1,0 +1,115 @@
+{
+  "schema_version": "1",
+  "id": "ver-a844733aa3be",
+  "plan_id": "plan-057-codex-repo-toggle",
+  "command": "python -m unittest tests.test_cli tests.test_command_contracts -v && python -m abh doctor --json && python -m abh roadmap check --json",
+  "result": "pass",
+  "artifacts": [
+    "command='python -m unittest tests.test_cli tests.test_command_contracts -v'; exit_code=0; duration_seconds=2.112; stdout=''; stderr='test_agent_setup_codex_json_returns_readonly_bundle (tests.test_cli.CliTests.test_agent_setup_codex_json_returns_readonly_bundle) ... ok\\\\ntest_agent_setup_targets_share_shape_and_mcp_includes_server_command (tests.test_cli.CliTests.test_agent_setup_targets_share_shape_and_mcp_includes_server_command) ... ok\\\\ntest_attractor_create_active_show_list_and_supersede_json_flow (tests.test_cli.CliTests.test_attractor_create_active_show_list_and_supersede_json_flow) ... ok\\\\ntest_attractor_create_does_not'",
+    "command='python -m abh doctor --json'; exit_code=0; duration_seconds=0.285; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"doctor\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''",
+    "command='python -m abh roadmap check --json'; exit_code=0; duration_seconds=0.226; stdout='{\"schema_version\": \"1\", \"ok\": true, \"command\": \"roadmap check\", \"data\": {\"issues\": []}, \"errors\": [], \"warnings\": []}'; stderr=''"
+  ],
+  "failed_checks": [],
+  "failure_classifications": [],
+  "environment": {
+    "cwd": "D:\\work\\ai\\harness-before",
+    "git": {
+      "commit": "6c49c9f469fb4fce3a6bd58290a5de0c5cad50a8",
+      "dirty": true,
+      "status_hash": "5d17e83451c2c237cabfbf2427e440a45bbc00a1bc9a24b42dfc9603f4c7bbd7",
+      "available": true
+    },
+    "abh": {
+      "version": "0.3.0"
+    },
+    "python": {
+      "version": "3.14.3 (main, Mar  3 2026, 15:00:44) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "C:\\Users\\1003584\\AppData\\Roaming\\uv\\tools\\abh\\Scripts\\python.exe"
+    },
+    "runner": {
+      "timeout_seconds": 120,
+      "shell": true,
+      "check_count": 3,
+      "execution_policy": "trusted_local_shell",
+      "trust_level": "local_shell",
+      "command_source": "plan_validation_checklist",
+      "isolation": "none"
+    },
+    "commands": [
+      {
+        "command": "python -m unittest tests.test_cli tests.test_command_contracts -v",
+        "argv": [
+          "python",
+          "-m",
+          "unittest",
+          "tests.test_cli",
+          "tests.test_command_contracts",
+          "-v"
+        ]
+      },
+      {
+        "command": "python -m abh doctor --json",
+        "argv": [
+          "python",
+          "-m",
+          "abh",
+          "doctor",
+          "--json"
+        ]
+      },
+      {
+        "command": "python -m abh roadmap check --json",
+        "argv": [
+          "python",
+          "-m",
+          "abh",
+          "roadmap",
+          "check",
+          "--json"
+        ]
+      }
+    ],
+    "environment_variables": {},
+    "plan": {
+      "updated_at": "2026-06-11T03:31:48.273817+00:00",
+      "content_hash": "889921a41c3f10301384b5fa8384f47e4a008600ffa737c7d9cf48b4405a35a6",
+      "payload": {
+        "title": "Codex Repository ABH Toggle",
+        "attractor": "docs/architecture/attractors/abh-core-attractor.md",
+        "baseline": "docs/development-roadmap.md",
+        "goals": [
+          "Add abh codex on/off/status for repository-local Codex ABH mode.",
+          "Write and remove a managed .codex/config.toml with ABH Codex developer instructions.",
+          "Keep the feature preview-first and confirmed-write-only, matching existing ABH write boundaries."
+        ],
+        "non_goals": [
+          "Do not implement temporary Codex CLI profile switching.",
+          "Do not implement Claude Code or generic MCP toggles.",
+          "Do not merge into unmanaged .codex/config.toml files."
+        ],
+        "exit_criteria": [
+          "abh codex status --json reports disabled when no managed config exists and enabled after a managed write.",
+          "abh codex on --write requires --confirm and does not overwrite unmanaged .codex/config.toml.",
+          "abh codex off removes only ABH-managed Codex config.",
+          "README and Codex recipe document the managed toggle workflow."
+        ],
+        "validation_checklist": [
+          "python -m unittest tests.test_cli tests.test_command_contracts -v",
+          "python -m abh doctor --json",
+          "python -m abh roadmap check --json"
+        ],
+        "closure_evidence": [
+          "docs/superpowers/specs/2026-06-11-codex-abh-toggle-design.md",
+          "docs/superpowers/plans/2026-06-11-codex-abh-toggle.md"
+        ]
+      },
+      "validation_checklist": [
+        "python -m unittest tests.test_cli tests.test_command_contracts -v",
+        "python -m abh doctor --json",
+        "python -m abh roadmap check --json"
+      ]
+    }
+  },
+  "trust_level": "local_shell",
+  "created_at": "2026-06-11T03:38:58.055010+00:00"
+}

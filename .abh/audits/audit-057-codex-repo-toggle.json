@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "id": "audit-057-codex-repo-toggle",
+  "plan_id": "plan-057-codex-repo-toggle",
+  "auditor": "human-independent-review",
+  "scope": "Validate Codex repository ABH toggle behavior, managed .codex/config.toml ownership, docs, and verification evidence.",
+  "auditor_context": "independent Codex review in separate window; result relayed by user",
+  "independence": "independent",
+  "verification_id": "ver-2a08c7c59afa",
+  "status": "complete",
+  "result": "pass",
+  "rationale": "Authoritative commitments in the plan are conserved in code and owner-facing docs; executable and user-facing evidence now directly proves disabled status with no config, enabled status after managed write, confirm boundaries, unmanaged overwrite refusal, managed removal, and unmanaged non-removal. Fresh verification ver-2a08c7c59afa passes the full checklist and covers all stated exit criteria. No evidence shows implementation of the stated non-goals.",
+  "evidence": [
+    "docs/plans/plan-057-codex-repo-toggle.md",
+    "docs/superpowers/specs/2026-06-11-codex-abh-toggle-design.md",
+    "docs/superpowers/plans/2026-06-11-codex-abh-toggle.md"
+  ],
+  "findings": [],
+  "follow_ups": [],
+  "created_at": "2026-06-11T03:39:17.503088+00:00",
+  "updated_at": "2026-06-11T05:49:48.163417+00:00",
+  "doc_path": "D:\\work\\ai\\harness-before\\docs\\audits\\audit-057-codex-repo-toggle.md"
+}

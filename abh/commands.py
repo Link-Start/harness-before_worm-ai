@@ -189,6 +189,52 @@ COMMANDS: tuple[CommandContract, ...] = (
         failure_categories=COMMON_FAILURES,
     ),
     CommandContract(
+        id="codex.status",
+        cli_command="codex status",
+        mcp_tool=None,
+        read_only=True,
+        confirmation="none",
+        side_effects=[],
+        description="Report whether repository-local Codex ABH config is enabled for this repository.",
+        input_schema=input_schema({}),
+        output_keys=["codex"],
+        failure_categories=["system"],
+    ),
+    CommandContract(
+        id="codex.on",
+        cli_command="codex on",
+        mcp_tool=None,
+        read_only=False,
+        confirmation="--write --confirm",
+        side_effects=["write .codex/config.toml"],
+        description="Preview or write managed repository-local Codex ABH config.",
+        input_schema=input_schema(
+            {
+                "write": bool_property("Write the managed Codex config file."),
+                "confirm": bool_property("Must be present with --write to permit repository writes."),
+            }
+        ),
+        output_keys=["codex"],
+        failure_categories=COMMON_FAILURES,
+    ),
+    CommandContract(
+        id="codex.off",
+        cli_command="codex off",
+        mcp_tool=None,
+        read_only=False,
+        confirmation="--write --confirm",
+        side_effects=["write .codex/config.toml"],
+        description="Preview or remove managed repository-local Codex ABH config.",
+        input_schema=input_schema(
+            {
+                "write": bool_property("Remove the managed Codex config file."),
+                "confirm": bool_property("Must be present with --write to permit repository writes."),
+            }
+        ),
+        output_keys=["codex"],
+        failure_categories=COMMON_FAILURES,
+    ),
+    CommandContract(
         id="next",
         cli_command="next",
         mcp_tool=None,

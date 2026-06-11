@@ -277,6 +277,151 @@ class CliTests(TestCase):
         self.assertIn("existing unmanaged hook", payload["errors"][0]["message"])
         self.assertEqual(hook_path.read_text(encoding="utf-8"), "#!/bin/sh\necho custom\n")
 
+    def test_codex_status_json_reports_disabled_when_no_config_exists(self) -> None:
+        code, out, err = self.run_cli("codex", "status", "--json")
+
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["command"], "codex status")
+        codex = payload["data"]["codex"]
+        self.assertFalse(codex["enabled"])
+        self.assertEqual(codex["path"], ".codex/config.toml")
+        self.assertEqual(codex["mode"], "status")
+        self.assertFalse((self.root / ".codex" / "config.toml").exists())
+
+    def test_codex_on_json_previews_managed_write_without_creating_files(self) -> None:
+        code, out, err = self.run_cli("codex", "on", "--json")
+
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["command"], "codex on")
+        codex = payload["data"]["codex"]
+        self.assertEqual(codex["mode"], "preview")
+        self.assertFalse(codex["write"])
+        self.assertFalse(codex["confirmed"])
+        self.assertEqual(codex["path"], ".codex/config.toml")
+        self.assertEqual(codex["writes"][0]["path"], ".codex/config.toml")
+        self.assertEqual(codex["blockers"], [])
+        self.assertFalse((self.root / ".codex" / "config.toml").exists())
+
+    def test_codex_on_write_requires_confirm(self) -> None:
+        code, out, err = self.run_cli("codex", "on", "--write", "--json")
+
+        self.assertEqual(code, 2)
+        payload = json.loads(out)
+        self.assertFalse(payload["ok"])
+        self.assertIn("--confirm", payload["errors"][0]["message"])
+        self.assertFalse((self.root / ".codex" / "config.toml").exists())
+
+    def test_codex_on_write_confirm_creates_managed_config(self) -> None:
+        code, out, err = self.run_cli("codex", "on", "--write", "--confirm", "--json")
+
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["command"], "codex on")
+        codex = payload["data"]["codex"]
+        self.assertEqual(codex["mode"], "write")
+        self.assertTrue(codex["write"])
+        self.assertTrue(codex["confirmed"])
+        config_path = self.root / ".codex" / "config.toml"
+        self.assertTrue(config_path.exists())
+        content = config_path.read_text(encoding="utf-8")
+        self.assertIn("ABH MANAGED CODEX CONFIG", content)
+        self.assertIn("developer_instructions", content)
+        self.assertIn("abh onboarding check --json", content)
+        self.assertIn("abh next --json", content)
+        self.assertIn("abh doctor --json", content)
+        self.assertIn("abh roadmap check --json", content)
+
+    def test_codex_status_json_reports_enabled_after_managed_write(self) -> None:
+        code, out, err = self.run_cli("codex", "on", "--write", "--confirm", "--json")
+        self.assertEqual(code, 0, err)
+
+        code, out, err = self.run_cli("codex", "status", "--json")
+
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["command"], "codex status")
+        codex = payload["data"]["codex"]
+        self.assertTrue(codex["enabled"])
+        self.assertTrue(codex["managed"])
+        self.assertEqual(codex["state"], "managed")
+        self.assertEqual(codex["path"], ".codex/config.toml")
+        self.assertEqual(codex["mode"], "status")
+
+    def test_codex_on_does_not_overwrite_unmanaged_config(self) -> None:
+        config_path = self.root / ".codex" / "config.toml"
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        config_path.write_text("model = \"gpt-5\"\n", encoding="utf-8")
+
+        code, out, err = self.run_cli("codex", "on", "--write", "--confirm", "--json")
+
+        self.assertEqual(code, 2)
+        payload = json.loads(out)
+        self.assertFalse(payload["ok"])
+        self.assertIn("existing unmanaged Codex config", payload["errors"][0]["message"])
+        self.assertEqual(config_path.read_text(encoding="utf-8"), "model = \"gpt-5\"\n")
+
+    def test_codex_off_json_previews_removal_when_managed_config_exists(self) -> None:
+        self.run_cli("codex", "on", "--write", "--confirm", "--json")
+
+        code, out, err = self.run_cli("codex", "off", "--json")
+
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["command"], "codex off")
+        codex = payload["data"]["codex"]
+        self.assertEqual(codex["mode"], "preview")
+        self.assertEqual(codex["writes"][0]["path"], ".codex/config.toml")
+        self.assertTrue((self.root / ".codex" / "config.toml").exists())
+
+    def test_codex_off_write_requires_confirm(self) -> None:
+        self.run_cli("codex", "on", "--write", "--confirm", "--json")
+
+        code, out, err = self.run_cli("codex", "off", "--write", "--json")
+
+        self.assertEqual(code, 2)
+        payload = json.loads(out)
+        self.assertFalse(payload["ok"])
+        self.assertIn("--confirm", payload["errors"][0]["message"])
+        self.assertTrue((self.root / ".codex" / "config.toml").exists())
+
+    def test_codex_off_write_confirm_removes_managed_config(self) -> None:
+        self.run_cli("codex", "on", "--write", "--confirm", "--json")
+
+        code, out, err = self.run_cli("codex", "off", "--write", "--confirm", "--json")
+
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["command"], "codex off")
+        codex = payload["data"]["codex"]
+        self.assertEqual(codex["mode"], "write")
+        self.assertTrue(codex["write"])
+        self.assertTrue(codex["confirmed"])
+        self.assertFalse((self.root / ".codex" / "config.toml").exists())
+
+    def test_codex_off_does_not_remove_unmanaged_config(self) -> None:
+        config_path = self.root / ".codex" / "config.toml"
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        config_path.write_text("model = \"gpt-5\"\n", encoding="utf-8")
+
+        code, out, err = self.run_cli("codex", "off", "--write", "--confirm", "--json")
+
+        self.assertEqual(code, 0, err)
+        payload = json.loads(out)
+        self.assertTrue(payload["ok"])
+        codex = payload["data"]["codex"]
+        self.assertFalse(codex["enabled"])
+        self.assertEqual(codex["blockers"][0]["reason"], "existing unmanaged Codex config; will not remove")
+        self.assertTrue(config_path.exists())
+        self.assertEqual(config_path.read_text(encoding="utf-8"), "model = \"gpt-5\"\n")
+
     def test_attractor_create_active_show_list_and_supersede_json_flow(self) -> None:
         code, out, err = self.run_cli(
             "attractor",

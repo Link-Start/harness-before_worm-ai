@@ -2,9 +2,9 @@
 
 ## 当前阶段
 
-阶段 7：团队可用与生态集成（Doing）；当前焦点：无 open plan；下一队列：`stage7.team-policy-and-release-automation`
+阶段 7：团队可用与生态集成（Doing）；当前焦点：`plan-057-codex-repo-toggle`；下一队列：`stage7.team-policy-and-release-automation`
 
-Current focus: none; next queue: `stage7.team-policy-and-release-automation`
+Current focus: `plan-057-codex-repo-toggle`; next queue: `stage7.team-policy-and-release-automation`
 
 ## 状态说明
 
